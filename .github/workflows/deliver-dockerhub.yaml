@@ -1,0 +1,106 @@
+name: Deliver to DockerHub
+on:
+  push:
+  pull_request:
+  release:
+    types: [published]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get version
+        run: |
+          echo "THEBLOCKCHAINKILLER_BUILD_VERSION=$(python get_app_version.py)" >> $GITHUB_ENV
+      - name: Check version
+        run: |
+          echo THEBLOCKCHAINKILLER_BUILD_VERSION
+          echo ${{ env.THEBLOCKCHAINKILLER_BUILD_VERSION }}
+
+# TODO build image, run linting, run tests and valgrind, push to dockerhub (if release)
+
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v2
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@v2
+#      - name: Build image, online
+#        uses: docker/build-push-action@v3
+#        with:
+#          tags: kostaleonard/populare:latest,kostaleonard/populare:${{ env.POPULARE_BUILD_VERSION }}
+#          outputs: type=docker,dest=/tmp/populare.tar
+#          cache-from: type=gha
+#          cache-to: type=gha
+#      - name: Upload artifact
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: populare-image
+#          path: /tmp/populare.tar
+#  test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Set up Flutter
+#        uses: subosito/flutter-action@v2
+#      - name: Install dependencies
+#        run: flutter pub get
+#      - name: Format
+#        run: flutter format --set-exit-if-changed .
+#      - name: Generate mocks
+#        run: flutter pub run build_runner build
+#      - name: Lint
+#        run: flutter analyze
+#      - name: Test
+#        run: flutter test
+#  trivy-scan:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Download artifact
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: populare-image
+#          path: .
+#      - name: Run Trivy vulnerability scanner
+#        uses: aquasecurity/trivy-action@master
+#        with:
+#          input: '/github/workspace/populare.tar'
+#          format: 'table'
+#          exit-code: '0'
+#          ignore-unfixed: true
+#          vuln-type: 'os,library'
+#          severity: 'CRITICAL,HIGH'
+#  deliver:
+#    runs-on: ubuntu-latest
+#    if: github.event_name == 'release'
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Get version
+#        run: |
+#          echo "POPULARE_BUILD_VERSION=$(python get_app_version.py)" >> $GITHUB_ENV
+#      - name: Check version
+#        run: |
+#          echo POPULARE_BUILD_VERSION
+#          echo ${{ env.POPULARE_BUILD_VERSION }}
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v2
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@v2
+#      - name: Login to DockerHub
+#        uses: docker/login-action@v2
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#      # These build steps use the cached images according to docker/build-push-action docs.
+#      # We want to use the cached images so that we don't build twice.
+#      - name: Build and push, online
+#        uses: docker/build-push-action@v3
+#        with:
+#          push: true
+#          tags: kostaleonard/populare:latest,kostaleonard/populare:${{ env.POPULARE_BUILD_VERSION }}
+#          cache-from: type=gha
+#          cache-to: type=gha
+#      - name: Build and push, offline
+#        uses: docker/build-push-action@v3
+#        with:
+#          push: true
+#          build-args: APP_TARGET=lib/local_main.dart
+#          tags: kostaleonard/populare-offline:latest,kostaleonard/populare-offline:${{ env.POPULARE_BUILD_VERSION }}
