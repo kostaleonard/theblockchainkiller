@@ -16,22 +16,22 @@ jobs:
         run: |
           echo THEBLOCKCHAINKILLER_BUILD_VERSION
           echo ${{ env.THEBLOCKCHAINKILLER_BUILD_VERSION }}
-     - name: Set up QEMU
-       uses: docker/setup-qemu-action@v2
-     - name: Set up Docker Buildx
-       uses: docker/setup-buildx-action@v2
-     - name: Build image
-       uses: docker/build-push-action@v3
-       with:
-         tags: kostaleonard/theblockchainkiller:latest,kostaleonard/theblockchainkiller:${{ env.THEBLOCKCHAINKILLER_BUILD_VERSION }}
-         outputs: type=docker,dest=/tmp/theblockchainkiller.tar
-         cache-from: type=gha
-         cache-to: type=gha
-     - name: Upload artifact
-       uses: actions/upload-artifact@v2
-       with:
-         name: theblockchainkiller-image
-         path: /tmp/theblockchainkiller.tar
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build image
+        uses: docker/build-push-action@v3
+        with:
+          tags: kostaleonard/theblockchainkiller:latest,kostaleonard/theblockchainkiller:${{ env.THEBLOCKCHAINKILLER_BUILD_VERSION }}
+          outputs: type=docker,dest=/tmp/theblockchainkiller.tar
+          cache-from: type=gha
+          cache-to: type=gha
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: theblockchainkiller-image
+          path: /tmp/theblockchainkiller.tar
 
 
 # TODO build image, run linting, run tests and valgrind, scan, push to dockerhub (if release)
