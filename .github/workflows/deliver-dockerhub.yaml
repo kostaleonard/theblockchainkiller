@@ -93,16 +93,10 @@ jobs:
 #          password: ${{ secrets.DOCKERHUB_TOKEN }}
 #      # These build steps use the cached images according to docker/build-push-action docs.
 #      # We want to use the cached images so that we don't build twice.
-#      - name: Build and push, online
+#      - name: Build and push
 #        uses: docker/build-push-action@v3
 #        with:
 #          push: true
 #          tags: kostaleonard/populare:latest,kostaleonard/populare:${{ env.POPULARE_BUILD_VERSION }}
 #          cache-from: type=gha
 #          cache-to: type=gha
-#      - name: Build and push, offline
-#        uses: docker/build-push-action@v3
-#        with:
-#          push: true
-#          build-args: APP_TARGET=lib/local_main.dart
-#          tags: kostaleonard/populare-offline:latest,kostaleonard/populare-offline:${{ env.POPULARE_BUILD_VERSION }}

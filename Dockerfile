@@ -1,9 +1,9 @@
-FROM ubuntu:latest
+FROM alpine:latest
 RUN mkdir /app
 COPY . /app
 WORKDIR /app
-RUN apt update && \
-    apt install -y clang gdb cmake valgrind
+RUN apk update && \
+    apk add build-base cmake clang gdb valgrind
 RUN mkdir build
 WORKDIR /app/build
 RUN cmake .. && \
