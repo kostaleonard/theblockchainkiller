@@ -34,7 +34,7 @@ jobs:
           path: /tmp/theblockchainkiller.tar
 
 
-# TODO build image, run linting, run tests and valgrind, scan, push to dockerhub (if release)
+# TODO run linting, run tests and valgrind, scan, push to dockerhub (if release)
 
 
 #  test:
