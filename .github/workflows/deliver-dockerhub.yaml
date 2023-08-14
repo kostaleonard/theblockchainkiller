@@ -33,7 +33,7 @@ jobs:
           name: theblockchainkiller-image
           path: /tmp/theblockchainkiller.tar
 
-
+# TODO check for 80 character line length
 # TODO run linting, run tests and valgrind, scan, push to dockerhub (if release)
 
 
