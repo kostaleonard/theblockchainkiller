@@ -33,6 +33,7 @@ jobs:
           name: theblockchainkiller-image
           path: /tmp/theblockchainkiller.tar
   test:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Download Docker image artifact
