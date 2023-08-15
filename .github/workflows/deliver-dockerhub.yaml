@@ -65,7 +65,7 @@ jobs:
 
 
 # TODO check for 80 character line length
-# TODO run linting, run tests and valgrind, scan, push to dockerhub (if release)
+# TODO run linting, scan, push to dockerhub (if release)
 
 #  trivy-scan:
 #    runs-on: ubuntu-latest
