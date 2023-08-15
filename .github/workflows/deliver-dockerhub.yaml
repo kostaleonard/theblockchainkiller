@@ -63,6 +63,7 @@ jobs:
         run: |
           docker run --rm kostaleonard/theblockchainkiller:latest valgrind --leak-check=full --error-exitcode=1 ./build/tests
   trivy-scan:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Download Docker image artifact
