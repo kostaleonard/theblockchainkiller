@@ -47,6 +47,21 @@ jobs:
       - name: Run tests
         run: |
           docker run --rm kostaleonard/theblockchainkiller:latest ./build/tests
+  valgrind:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: theblockchainkiller-image
+          path: .
+      - name: Load Docker image
+        run: |
+          docker load -i theblockchainkiller.tar
+      - name: Run valgrind on tests
+        run: |
+          docker run --rm kostaleonard/theblockchainkiller:latest valgrind --leak-check=full --error-exitcode=1 ./build/tests
 
 
 # TODO check for 80 character line length
