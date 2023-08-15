@@ -27,32 +27,30 @@ jobs:
           outputs: type=docker,dest=/tmp/theblockchainkiller.tar
           cache-from: type=gha
           cache-to: type=gha
-      - name: Upload artifact
+      - name: Upload Docker image artifact
         uses: actions/upload-artifact@v2
         with:
           name: theblockchainkiller-image
           path: /tmp/theblockchainkiller.tar
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: theblockchainkiller-image
+          path: .
+      - name: Load Docker image
+        run: |
+          docker load -i theblockchainkiller.tar
+      - name: Run tests
+        run: |
+          docker run --rm kostaleonard/theblockchainkiller:latest ./build/tests
+
 
 # TODO check for 80 character line length
 # TODO run linting, run tests and valgrind, scan, push to dockerhub (if release)
 
-
-#  test:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: Set up Flutter
-#        uses: subosito/flutter-action@v2
-#      - name: Install dependencies
-#        run: flutter pub get
-#      - name: Format
-#        run: flutter format --set-exit-if-changed .
-#      - name: Generate mocks
-#        run: flutter pub run build_runner build
-#      - name: Lint
-#        run: flutter analyze
-#      - name: Test
-#        run: flutter test
 #  trivy-scan:
 #    runs-on: ubuntu-latest
 #    steps:
