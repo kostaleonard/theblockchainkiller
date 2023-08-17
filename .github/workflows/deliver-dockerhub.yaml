@@ -19,8 +19,9 @@ jobs:
           pip install cpplint
       - name: Lint with cpplint
         run: |
-          cpplint --recursive --exclude=build --filter=-legal/copyright .
+          make lint
   build:
+    needs: [lint]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -121,6 +122,3 @@ jobs:
           tags: kostaleonard/theblockchainkiller:latest,kostaleonard/theblockchainkiller:${{ needs.build.outputs.THEBLOCKCHAINKILLER_BUILD_VERSION }}
           cache-from: type=gha
           cache-to: type=gha
-
-# TODO check for 80 character line length
-# TODO run linting
