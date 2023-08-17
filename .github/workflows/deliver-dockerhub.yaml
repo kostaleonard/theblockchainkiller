@@ -8,17 +8,18 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v2
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
         with:
-          name: theblockchainkiller-image
-          path: .
-      - name: Load Docker image
+          python-version: 3.12
+      - name: Install dependencies
         run: |
-          docker load -i theblockchainkiller.tar
-      - name: Run tests
+          python -m pip install --upgrade pip
+          pip install cpplint
+      - name: Lint with cpplint
         run: |
-          docker run --rm kostaleonard/theblockchainkiller:latest ./build/tests
+          cpplint --recursive --exclude=build --filter=-legal/copyright .
   build:
     runs-on: ubuntu-latest
     steps:
