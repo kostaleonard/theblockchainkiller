@@ -2,8 +2,8 @@
  * @brief Tests example.c.
  */
 
-#ifndef TEST_EXAMPLE_H
-#define TEST_EXAMPLE_H
+#ifndef TESTS_TEST_EXAMPLE_H_
+#define TESTS_TEST_EXAMPLE_H_
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
@@ -13,4 +13,4 @@ void test_square_returns_perfect_square();
 
 void test_square_returns_positive_value_on_negative_input();
 
-#endif
+#endif  // TESTS_TEST_EXAMPLE_H_

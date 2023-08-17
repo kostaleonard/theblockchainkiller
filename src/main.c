@@ -1,8 +1,11 @@
-#include <stdio.h>
-#include "example.h"
+/**
+ * @brief Runs the app.
+ */
 
-int main(int argc, char **argv)
-{
+#include <stdio.h>
+#include "include/example.h"
+
+int main(int argc, char **argv) {
     printf("Hello, world!\n");
     printf("The square of 3 is %d\n", square(3));
     return 0;

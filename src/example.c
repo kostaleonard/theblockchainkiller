@@ -1,6 +1,5 @@
-#include "example.h"
+#include "include/example.h"
 
-int square(int x)
-{
+int square(int x) {
     return x * x;
 }

@@ -5,7 +5,23 @@ on:
   release:
     types: [published]
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install cpplint
+      - name: Lint with cpplint
+        run: |
+          make lint
   build:
+    needs: [lint]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -84,7 +100,7 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
   deliver:
-    needs: [build, test, valgrind, trivy-scan]
+    needs: [lint, build, test, valgrind, trivy-scan]
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
     steps:
@@ -106,6 +122,3 @@ jobs:
           tags: kostaleonard/theblockchainkiller:latest,kostaleonard/theblockchainkiller:${{ needs.build.outputs.THEBLOCKCHAINKILLER_BUILD_VERSION }}
           cache-from: type=gha
           cache-to: type=gha
-
-# TODO check for 80 character line length
-# TODO run linting
