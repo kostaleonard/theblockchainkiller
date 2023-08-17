@@ -1,4 +1,4 @@
-#include "example.h"
+#include "include/example.h"
 
 int square(int x)
 {

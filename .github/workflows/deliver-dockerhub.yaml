@@ -5,6 +5,20 @@ on:
   release:
     types: [published]
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: theblockchainkiller-image
+          path: .
+      - name: Load Docker image
+        run: |
+          docker load -i theblockchainkiller.tar
+      - name: Run tests
+        run: |
+          docker run --rm kostaleonard/theblockchainkiller:latest ./build/tests
   build:
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +98,7 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
   deliver:
-    needs: [build, test, valgrind, trivy-scan]
+    needs: [lint, build, test, valgrind, trivy-scan]
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
     steps:

@@ -1,5 +1,5 @@
-#include "example.h"
-#include "test_example.h"
+#include "include/example.h"
+#include "tests/test_example.h"
 
 void test_square_returns_perfect_square()
 {

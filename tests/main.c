@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
-#include "test_example.h"
+#include "tests/test_example.h"
 
 int main(int argc, char **argv)
 {
