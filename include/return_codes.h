@@ -7,7 +7,8 @@
 
 typedef enum return_code_t {
     SUCCESS,
-    FAILURE_COULD_NOT_MALLOC
+    FAILURE_COULD_NOT_MALLOC,
+    FAILURE_INVALID_INPUT
 } return_code_t;
 
 #endif

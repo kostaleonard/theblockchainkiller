@@ -11,6 +11,8 @@
 
 void test_linked_list_create_returns_linked_list();
 
+void test_linked_list_create_fails_on_invalid_input();
+
 void test_linked_list_destroy_returns_success();
 
 #endif  // TESTS_TEST_LINKED_LIST_H_

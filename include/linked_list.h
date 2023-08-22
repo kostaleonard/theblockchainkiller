@@ -27,7 +27,8 @@ typedef struct linked_list_t {
 } linked_list_t;
 
 //TODO docstring
-linked_list_t *linked_list_create(
+return_code_t linked_list_create(
+    linked_list_t **linked_list,
     free_function_t free_function,
     compare_function_t compare_function
 );
