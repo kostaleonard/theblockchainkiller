@@ -6,12 +6,12 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
-#include "tests/test_example.h"
+#include "tests/test_linked_list.h"
 
 int main(int argc, char **argv) {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_square_returns_perfect_square),
-        cmocka_unit_test(test_square_returns_positive_value_on_negative_input),
+        cmocka_unit_test(test_linked_list_create_returns_linked_list),
+        cmocka_unit_test(test_linked_list_destroy_returns_success),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
