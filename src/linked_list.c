@@ -26,10 +26,25 @@ end:
 
 return_code_t linked_list_destroy(linked_list_t *linked_list) {
     //TODO
-    return SUCCESS;
+    return FAILURE_INVALID_INPUT;
 }
 
-return_code_t linked_list_append(void *data) {
+return_code_t linked_list_prepend(linked_list_t *linked_list, void *data) {
     //TODO
-    return SUCCESS;
+    return FAILURE_INVALID_INPUT;
+}
+
+return_code_t linked_list_get_first(linked_list_t *linked_list, node_t **node) {
+    //TODO
+    return FAILURE_INVALID_INPUT;
+}
+
+return_code_t linked_list_remove_first(linked_list_t *linked_list) {
+    //TODO
+    return FAILURE_INVALID_INPUT;
+}
+
+return_code_t linked_list_is_empty(linked_list_t *linked_list, bool *is_empty) {
+    //TODO
+    return FAILURE_INVALID_INPUT;
 }

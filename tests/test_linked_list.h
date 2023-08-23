@@ -13,6 +13,32 @@ void test_linked_list_create_returns_linked_list();
 
 void test_linked_list_create_fails_on_invalid_input();
 
-void test_linked_list_destroy_returns_success();
+void test_linked_list_destroy_empty_list_returns_success();
+
+void test_linked_list_destroy_nonempty_list_returns_success();
+
+void test_linked_list_destroy_fails_on_invalid_input();
+
+void test_linked_list_prepend_adds_node_to_front();
+
+void test_linked_list_prepend_fails_on_invalid_input();
+
+void test_linked_list_get_first_gives_null_and_fails_on_empty_list();
+
+void test_linked_list_get_first_gives_head_of_list();
+
+void test_linked_list_get_first_fails_on_invalid_input();
+
+void test_linked_list_remove_first_fails_on_empty_list();
+
+void test_linked_list_remove_first_removes_head();
+
+void test_linked_list_remove_first_fails_on_invalid_input();
+
+void test_linked_list_is_empty_gives_true_if_no_elements();
+
+void test_linked_list_is_empty_gives_false_if_list_has_elements();
+
+void test_linked_list_is_empty_fails_on_invalid_input();
 
 #endif  // TESTS_TEST_LINKED_LIST_H_

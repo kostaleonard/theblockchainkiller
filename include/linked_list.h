@@ -5,6 +5,7 @@
 #ifndef INCLUDE_LINKED_LIST_H_
 #define INCLUDE_LINKED_LIST_H_
 
+#include <stdbool.h>
 #include "include/return_codes.h"
 
 //TODO docstring
@@ -37,6 +38,15 @@ return_code_t linked_list_create(
 return_code_t linked_list_destroy(linked_list_t *linked_list);
 
 //TODO docstring
-return_code_t linked_list_append(void *data);
+return_code_t linked_list_prepend(linked_list_t *linked_list, void *data);
+
+//TODO docstring
+return_code_t linked_list_get_first(linked_list_t *linked_list, node_t **node);
+
+//TODO docstring
+return_code_t linked_list_remove_first(linked_list_t *linked_list);
+
+//TODO docstring
+return_code_t linked_list_is_empty(linked_list_t *linked_list, bool *is_empty);
 
 #endif  // INCLUDE_LINKED_LIST_H_
