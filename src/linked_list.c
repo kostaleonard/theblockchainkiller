@@ -7,7 +7,9 @@ return_code_t linked_list_create(
     compare_function_t compare_function
 ) {
     return_code_t return_code = SUCCESS;
-    if (NULL == linked_list || NULL == free_function || NULL == compare_function) {
+    if (NULL == linked_list ||
+        NULL == free_function ||
+        NULL == compare_function) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }

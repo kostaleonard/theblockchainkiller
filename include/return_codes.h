@@ -12,4 +12,4 @@ typedef enum return_code_t {
     FAILURE_LINKED_LIST_EMPTY
 } return_code_t;
 
-#endif
+#endif  // INCLUDE_RETURN_CODES_H_
