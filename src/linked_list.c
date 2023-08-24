@@ -117,3 +117,25 @@ return_code_t linked_list_is_empty(linked_list_t *linked_list, bool *is_empty) {
 end:
     return return_code;
 }
+
+return_code_t linked_list_find(
+    linked_list_t *linked_list,
+    void *data,
+    node_t **node
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == linked_list || NULL == data || NULL == node) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    node_t *ptr = linked_list->head;
+    while (NULL != ptr) {
+        if (0 == linked_list->compare_function(data, ptr->data)) {
+            *node = ptr;
+            goto end;
+        }
+        ptr = ptr->next;
+    }
+end:
+    return return_code;
+}

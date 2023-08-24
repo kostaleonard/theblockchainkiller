@@ -29,6 +29,12 @@ int main(int argc, char **argv) {
         cmocka_unit_test(
             test_linked_list_is_empty_gives_false_if_list_has_elements),
         cmocka_unit_test(test_linked_list_is_empty_fails_on_invalid_input),
+        cmocka_unit_test(
+            test_linked_list_find_succeeds_and_gives_null_if_list_empty),
+        cmocka_unit_test(
+            test_linked_list_find_succeeds_and_gives_null_if_no_match),
+        cmocka_unit_test(test_linked_list_find_gives_first_matching_element),
+        cmocka_unit_test(test_linked_list_find_fails_on_invalid_input),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -4,7 +4,6 @@
 #include "include/return_codes.h"
 #include "tests/test_linked_list.h"
 
-//TODO implement a function that uses the compare function
 int compare_ints(int *num1, int *num2) {
     if (NULL == num1 || NULL == num2) {
         return 0;
@@ -258,6 +257,85 @@ void test_linked_list_is_empty_fails_on_invalid_input() {
     return_code = linked_list_is_empty(NULL, &is_empty);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = linked_list_is_empty(list, NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = linked_list_destroy(list);
+}
+
+void test_linked_list_find_succeeds_and_gives_null_if_list_empty() {
+    linked_list_t *list = NULL;
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
+    node_t *node = NULL;
+    int data = 5;
+    return_code = linked_list_find(list, &data, &node);
+    assert_true(SUCCESS == return_code);
+    assert_true(NULL == node);
+    return_code = linked_list_destroy(list);
+}
+
+void test_linked_list_find_succeeds_and_gives_null_if_no_match() {
+    linked_list_t *list = NULL;
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
+    for (int idx = 0; idx < 10; idx++) {
+        int *data = malloc(sizeof(int));
+        if (NULL == data) {
+            assert_true(false);
+            goto end;
+        }
+        *data = idx;
+        return_code = linked_list_prepend(list, data);
+    }
+    node_t *node = NULL;
+    int data = 20;
+    return_code = linked_list_find(list, &data, &node);
+    assert_true(SUCCESS == return_code);
+    assert_true(NULL == node);
+end:
+    return_code = linked_list_destroy(list);
+}
+
+void test_linked_list_find_gives_first_matching_element() {
+    linked_list_t *list = NULL;
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
+    for (int idx = 0; idx < 10; idx++) {
+        int *data = malloc(sizeof(int));
+        if (NULL == data) {
+            assert_true(false);
+            goto end;
+        }
+        *data = idx;
+        return_code = linked_list_prepend(list, data);
+    }
+    node_t *node = NULL;
+    int data = 7;
+    return_code = linked_list_find(list, &data, &node);
+    assert_true(SUCCESS == return_code);
+    assert_true(list->head->next->next == node);
+end:
+    return_code = linked_list_destroy(list);
+}
+
+void test_linked_list_find_fails_on_invalid_input() {
+    linked_list_t *list = NULL;
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
+    node_t *node = NULL;
+    int data = 5;
+    return_code = linked_list_find(NULL, &data, &node);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = linked_list_find(list, NULL, &node);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = linked_list_find(list, &data, NULL);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = linked_list_destroy(list);
 }

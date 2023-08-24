@@ -41,4 +41,12 @@ void test_linked_list_is_empty_gives_false_if_list_has_elements();
 
 void test_linked_list_is_empty_fails_on_invalid_input();
 
+void test_linked_list_find_succeeds_and_gives_null_if_list_empty();
+
+void test_linked_list_find_succeeds_and_gives_null_if_no_match();
+
+void test_linked_list_find_gives_first_matching_element();
+
+void test_linked_list_find_fails_on_invalid_input();
+
 #endif  // TESTS_TEST_LINKED_LIST_H_

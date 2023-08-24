@@ -49,4 +49,11 @@ return_code_t linked_list_remove_first(linked_list_t *linked_list);
 //TODO docstring
 return_code_t linked_list_is_empty(linked_list_t *linked_list, bool *is_empty);
 
+//TODO docstring
+return_code_t linked_list_find(
+    linked_list_t *linked_list,
+    void *data,
+    node_t **node
+);
+
 #endif  // INCLUDE_LINKED_LIST_H_
