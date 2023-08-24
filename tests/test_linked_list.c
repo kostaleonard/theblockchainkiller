@@ -4,16 +4,20 @@
 #include "include/return_codes.h"
 #include "tests/test_linked_list.h"
 
+//TODO implement a function that uses the compare function
 int compare_ints(int *num1, int *num2) {
     if (NULL == num1 || NULL == num2) {
         return 0;
     }
-    return *num2 - *num1;
+    return *num1 - *num2;
 }
 
 void test_linked_list_create_returns_linked_list() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     assert_true(NULL != list);
     assert_true(SUCCESS == return_code);
     linked_list_destroy(list);
@@ -21,9 +25,15 @@ void test_linked_list_create_returns_linked_list() {
 
 void test_linked_list_create_fails_on_invalid_input() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(NULL, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        NULL,
+        free,
+        (compare_function_t *)compare_ints);
     assert_true(FAILURE_INVALID_INPUT == return_code);
-    return_code = linked_list_create(&list, NULL, (compare_function_t *)compare_ints);
+    return_code = linked_list_create(
+        &list,
+        NULL,
+        (compare_function_t *)compare_ints);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = linked_list_create(&list, free, NULL);
     assert_true(FAILURE_INVALID_INPUT == return_code);
@@ -31,14 +41,20 @@ void test_linked_list_create_fails_on_invalid_input() {
 
 void test_linked_list_destroy_empty_list_returns_success() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     return_code = linked_list_destroy(list);
     assert_true(SUCCESS == return_code);
 }
 
 void test_linked_list_destroy_nonempty_list_returns_success() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     for (int idx = 0; idx < 10; idx++) {
         int *data = malloc(sizeof(int));
         if (NULL == data) {
@@ -60,7 +76,10 @@ void test_linked_list_destroy_fails_on_invalid_input() {
 
 void test_linked_list_prepend_adds_node_to_front() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     for (int idx = 0; idx < 10; idx++) {
         int *data = malloc(sizeof(int));
         if (NULL == data) {
@@ -82,7 +101,10 @@ end:
 
 void test_linked_list_prepend_fails_on_invalid_input() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     int *data = malloc(sizeof(int));
     if (NULL == data) {
         assert_true(false);
@@ -100,7 +122,10 @@ end:
 
 void test_linked_list_get_first_gives_null_and_fails_on_empty_list() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     node_t *node = NULL;
     return_code = linked_list_get_first(list, &node);
     assert_true(FAILURE_LINKED_LIST_EMPTY == return_code);
@@ -110,7 +135,10 @@ void test_linked_list_get_first_gives_null_and_fails_on_empty_list() {
 
 void test_linked_list_get_first_gives_head_of_list() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     int *data = malloc(sizeof(int));
     if (NULL == data) {
         assert_true(false);
@@ -129,7 +157,10 @@ end:
 
 void test_linked_list_get_first_fails_on_invalid_input() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     node_t *node = NULL;
     return_code = linked_list_get_first(NULL, &node);
     assert_true(FAILURE_INVALID_INPUT == return_code);
@@ -140,7 +171,10 @@ void test_linked_list_get_first_fails_on_invalid_input() {
 
 void test_linked_list_remove_first_fails_on_empty_list() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     return_code = linked_list_remove_first(list);
     assert_true(FAILURE_LINKED_LIST_EMPTY == return_code);
     return_code = linked_list_destroy(list);
@@ -148,7 +182,10 @@ void test_linked_list_remove_first_fails_on_empty_list() {
 
 void test_linked_list_remove_first_removes_head() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     for (int idx = 0; idx < 10; idx++) {
         int *data = malloc(sizeof(int));
         if (NULL == data) {
@@ -176,7 +213,10 @@ void test_linked_list_remove_first_fails_on_invalid_input() {
 
 void test_linked_list_is_empty_gives_true_if_no_elements() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     bool is_empty = false;
     return_code = linked_list_is_empty(list, &is_empty);
     assert_true(SUCCESS == return_code);
@@ -186,7 +226,10 @@ void test_linked_list_is_empty_gives_true_if_no_elements() {
 
 void test_linked_list_is_empty_gives_false_if_list_has_elements() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     for (int idx = 0; idx < 10; idx++) {
         int *data = malloc(sizeof(int));
         if (NULL == data) {
@@ -207,7 +250,10 @@ end:
 
 void test_linked_list_is_empty_fails_on_invalid_input() {
     linked_list_t *list = NULL;
-    return_code_t return_code = linked_list_create(&list, free, (compare_function_t *)compare_ints);
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
     bool is_empty = false;
     return_code = linked_list_is_empty(NULL, &is_empty);
     assert_true(FAILURE_INVALID_INPUT == return_code);
