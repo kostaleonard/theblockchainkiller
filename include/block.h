@@ -11,23 +11,45 @@
 #include "include/hash.h"
 #include "include/return_codes.h"
 
+/**
+ * @brief Represents a block in the blockchain.
+ * 
+ * @param created_at The datetime at which the user created this block.
+ * @param transaction_list A list of the transactions this block contains.
+ * @param proof_of_work A number p' such that hash(pp') contains some number of
+ * leading zeros, where p is the previous block's proof of work.
+ * @param previous_block_hash The hash of the previous block.
+ */
 typedef struct block_t {
-    uint32_t index;
-    struct timespec created_at; //TODO add timezone aware datetimes
+    struct timespec created_at;
     linked_list_t *transaction_list;
     uint32_t proof_of_work;
     sha_256_t previous_block_hash;
 } block_t;
 
-//TODO docstring
-block_t *block_create(
-    uint32_t index,
+/**
+ * @brief Fills block with a pointer to the newly allocated block.
+ * 
+ * @param block The pointer to fill with the new block.
+ * @param transaction_list A list of the transactions this block contains.
+ * @param proof_of_work A number p' such that hash(pp') contains some number of
+ * leading zeros, where p is the previous block's proof of work.
+ * @param previous_block_hash The hash of the previous block.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t block_create(
+    block_t **block,
     linked_list_t *transaction_list,
     uint32_t proof_of_work,
     sha_256_t previous_block_hash
 );
 
-//TODO docstring
+/**
+ * @brief Frees all memory associated with the block.
+ * 
+ * @param block The block to destroy.
+ * @return return_code_t A return code indicating success or failure.
+ */
 return_code_t block_destroy(block_t *block);
 
 #endif  // INCLUDE_BLOCK_H_

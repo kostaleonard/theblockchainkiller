@@ -18,8 +18,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_linked_list_destroy_fails_on_invalid_input),
         cmocka_unit_test(test_linked_list_prepend_adds_node_to_front),
         cmocka_unit_test(test_linked_list_prepend_fails_on_invalid_input),
-        cmocka_unit_test(
-            test_linked_list_get_first_gives_null_and_fails_on_empty_list),
+        cmocka_unit_test(test_linked_list_get_first_fails_on_empty_list),
         cmocka_unit_test(test_linked_list_get_first_gives_head_of_list),
         cmocka_unit_test(test_linked_list_get_first_fails_on_invalid_input),
         cmocka_unit_test(test_linked_list_remove_first_fails_on_empty_list),

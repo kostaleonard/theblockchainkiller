@@ -119,7 +119,7 @@ end:
     return_code = linked_list_destroy(list);
 }
 
-void test_linked_list_get_first_gives_null_and_fails_on_empty_list() {
+void test_linked_list_get_first_fails_on_empty_list() {
     linked_list_t *list = NULL;
     return_code_t return_code = linked_list_create(
         &list,

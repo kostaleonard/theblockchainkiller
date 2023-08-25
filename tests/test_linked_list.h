@@ -23,7 +23,7 @@ void test_linked_list_prepend_adds_node_to_front();
 
 void test_linked_list_prepend_fails_on_invalid_input();
 
-void test_linked_list_get_first_gives_null_and_fails_on_empty_list();
+void test_linked_list_get_first_fails_on_empty_list();
 
 void test_linked_list_get_first_gives_head_of_list();
 
