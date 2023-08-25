@@ -47,6 +47,7 @@ return_code_t linked_list_destroy(linked_list_t *linked_list) {
             goto end;
         }
     }
+    free(linked_list);
 end:
     return return_code;
 }

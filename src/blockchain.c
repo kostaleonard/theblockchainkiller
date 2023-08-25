@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "include/blockchain.h"
 #include "include/return_codes.h"
 

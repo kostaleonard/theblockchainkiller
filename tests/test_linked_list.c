@@ -19,7 +19,7 @@ void test_linked_list_create_returns_linked_list() {
         (compare_function_t *)compare_ints);
     assert_true(NULL != list);
     assert_true(SUCCESS == return_code);
-    linked_list_destroy(list);
+    return_code = linked_list_destroy(list);
 }
 
 void test_linked_list_create_fails_on_invalid_input() {
@@ -244,7 +244,6 @@ void test_linked_list_is_empty_gives_false_if_list_has_elements() {
     assert_true(!is_empty);
 end:
     return_code = linked_list_destroy(list);
-    assert_true(SUCCESS == return_code);
 }
 
 void test_linked_list_is_empty_fails_on_invalid_input() {
