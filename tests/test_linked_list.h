@@ -49,4 +49,14 @@ void test_linked_list_find_gives_first_matching_element();
 
 void test_linked_list_find_fails_on_invalid_input();
 
+void test_linked_list_append_adds_node_to_back();
+
+void test_linked_list_append_fails_on_invalid_input();
+
+void test_linked_list_get_last_fails_on_empty_list();
+
+void test_linked_list_get_last_gives_last_element();
+
+void test_linked_list_get_last_fails_on_invalid_input();
+
 #endif  // TESTS_TEST_LINKED_LIST_H_

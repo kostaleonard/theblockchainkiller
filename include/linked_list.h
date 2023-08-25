@@ -123,4 +123,25 @@ return_code_t linked_list_find(
     node_t **node
 );
 
+/**
+ * @brief Appends a node containing the given data to the linked list.
+ * 
+ * @param linked_list The linked list.
+ * @param data The data to place in the new node. The user should already have
+ * allocated this memory.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t linked_list_append(linked_list_t *linked_list, void *data);
+
+/**
+ * @brief Fills node with the last node of the linked list.
+ * 
+ * If the list is empty, this function will return FAILURE_LINKED_LIST_EMPTY.
+ * 
+ * @param linked_list The linked list.
+ * @param node A pointer to fill with the last node's address.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t linked_list_get_last(linked_list_t *linked_list, node_t **node);
+
 #endif  // INCLUDE_LINKED_LIST_H_

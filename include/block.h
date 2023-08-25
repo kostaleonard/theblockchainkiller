@@ -45,6 +45,18 @@ return_code_t block_create(
 );
 
 /**
+ * @brief Fills block with a pointer to the newly allocated genesis block.
+ * 
+ * The genesis block is the first block in the blockchain. Since there is no
+ * previous block, the genesis block contains special values for the previous
+ * block hash and proof of work.
+ * 
+ * @param block The pointer to fill with the new genesis block.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t block_create_genesis_block(block_t **block);
+
+/**
  * @brief Frees all memory associated with the block.
  * 
  * @param block The block to destroy.

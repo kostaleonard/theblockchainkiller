@@ -140,3 +140,59 @@ return_code_t linked_list_find(
 end:
     return return_code;
 }
+
+return_code_t linked_list_append(linked_list_t *linked_list, void *data) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == linked_list || NULL == data) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    bool is_empty = false;
+    return_code = linked_list_is_empty(linked_list, &is_empty);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    if (is_empty) {
+        return_code = linked_list_prepend(linked_list, data);
+        goto end;
+    }
+    node_t *last = NULL;
+    return_code = linked_list_get_last(linked_list, &last);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    node_t *node = malloc(sizeof(node_t));
+    if (NULL == node) {
+        return_code = FAILURE_COULD_NOT_MALLOC;
+        goto end;
+    }
+    node->data = data;
+    node->next = NULL;
+    last->next = node;
+end:
+    return return_code;
+}
+
+return_code_t linked_list_get_last(linked_list_t *linked_list, node_t **node) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == linked_list || NULL == node) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    bool is_empty = false;
+    return_code = linked_list_is_empty(linked_list, &is_empty);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    if (is_empty) {
+        return_code = FAILURE_LINKED_LIST_EMPTY;
+        goto end;
+    }
+    node_t *ptr = linked_list->head;
+    while (NULL != ptr->next) {
+        ptr = ptr->next;
+    }
+    *node = ptr;
+end:
+    return return_code;
+}

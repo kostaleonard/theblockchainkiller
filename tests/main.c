@@ -34,6 +34,11 @@ int main(int argc, char **argv) {
             test_linked_list_find_succeeds_and_gives_null_if_no_match),
         cmocka_unit_test(test_linked_list_find_gives_first_matching_element),
         cmocka_unit_test(test_linked_list_find_fails_on_invalid_input),
+        cmocka_unit_test(test_linked_list_append_adds_node_to_back),
+        cmocka_unit_test(test_linked_list_append_fails_on_invalid_input),
+        cmocka_unit_test(test_linked_list_get_last_fails_on_empty_list),
+        cmocka_unit_test(test_linked_list_get_last_gives_last_element),
+        cmocka_unit_test(test_linked_list_get_last_fails_on_invalid_input),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

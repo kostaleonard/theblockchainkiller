@@ -338,3 +338,100 @@ void test_linked_list_find_fails_on_invalid_input() {
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = linked_list_destroy(list);
 }
+
+void test_linked_list_append_adds_node_to_back() {
+    linked_list_t *list = NULL;
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
+    for (int idx = 0; idx < 10; idx++) {
+        int *data = malloc(sizeof(int));
+        if (NULL == data) {
+            assert_true(false);
+            goto end;
+        }
+        *data = idx;
+        return_code = linked_list_append(list, data);
+        node_t *node = NULL;
+        return_code = linked_list_get_last(list, &node);
+        assert_true(SUCCESS == return_code);
+        assert_true(NULL != node);
+        assert_true(idx == *((int *)node->data));
+    }
+end:
+    return_code = linked_list_destroy(list);
+    assert_true(SUCCESS == return_code);
+}
+
+void test_linked_list_append_fails_on_invalid_input() {
+    linked_list_t *list = NULL;
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
+    int *data = malloc(sizeof(int));
+    if (NULL == data) {
+        assert_true(false);
+        goto end;
+    }
+    *data = 17;
+    return_code = linked_list_append(NULL, data);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = linked_list_append(list, NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    free(data);
+end:
+    return_code = linked_list_destroy(list);
+}
+
+void test_linked_list_get_last_fails_on_empty_list() {
+    linked_list_t *list = NULL;
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
+    node_t *node = NULL;
+    return_code = linked_list_get_last(list, &node);
+    assert_true(FAILURE_LINKED_LIST_EMPTY == return_code);
+    assert_true(NULL == node);
+    return_code = linked_list_destroy(list);
+}
+
+void test_linked_list_get_last_gives_last_element() {
+    linked_list_t *list = NULL;
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
+    for (int idx = 0; idx < 10; idx++) {
+        int *data = malloc(sizeof(int));
+        if (NULL == data) {
+            assert_true(false);
+            goto end;
+        }
+        *data = idx;
+        return_code = linked_list_prepend(list, data);
+        node_t *node = NULL;
+        return_code = linked_list_get_last(list, &node);
+        assert_true(SUCCESS == return_code);
+        assert_true(NULL != node);
+        assert_true(0 == *((int *)node->data));
+    }
+end:
+    return_code = linked_list_destroy(list);
+}
+
+void test_linked_list_get_last_fails_on_invalid_input() {
+    linked_list_t *list = NULL;
+    return_code_t return_code = linked_list_create(
+        &list,
+        free,
+        (compare_function_t *)compare_ints);
+    node_t *node = NULL;
+    return_code = linked_list_get_last(NULL, &node);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = linked_list_get_last(list, NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = linked_list_destroy(list);
+}
