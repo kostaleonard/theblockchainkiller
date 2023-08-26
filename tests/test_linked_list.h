@@ -9,7 +9,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-void test_linked_list_create_returns_linked_list();
+void test_linked_list_create_gives_linked_list();
 
 void test_linked_list_create_fails_on_invalid_input();
 

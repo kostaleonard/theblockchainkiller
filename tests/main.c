@@ -7,10 +7,12 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include "tests/test_linked_list.h"
+#include "tests/test_block.h"
 
 int main(int argc, char **argv) {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_linked_list_create_returns_linked_list),
+        // test_linked_list.h
+        cmocka_unit_test(test_linked_list_create_gives_linked_list),
         cmocka_unit_test(test_linked_list_create_fails_on_invalid_input),
         cmocka_unit_test(test_linked_list_destroy_empty_list_returns_success),
         cmocka_unit_test(
@@ -39,6 +41,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_linked_list_get_last_fails_on_empty_list),
         cmocka_unit_test(test_linked_list_get_last_gives_last_element),
         cmocka_unit_test(test_linked_list_get_last_fails_on_invalid_input),
+        // test_block.h
+        cmocka_unit_test(test_block_create_gives_block),
+        cmocka_unit_test(test_block_create_fails_on_invalid_input),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

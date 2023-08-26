@@ -11,7 +11,7 @@ int compare_ints(int *num1, int *num2) {
     return *num1 - *num2;
 }
 
-void test_linked_list_create_returns_linked_list() {
+void test_linked_list_create_gives_linked_list() {
     linked_list_t *list = NULL;
     return_code_t return_code = linked_list_create(
         &list,
