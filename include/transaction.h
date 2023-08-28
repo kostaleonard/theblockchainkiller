@@ -18,7 +18,7 @@
  * @param amount The amount transferred from sender to recipient.
  */
 typedef struct transaction_t {
-    struct timespec created_at;
+    time_t created_at;
     uint32_t sender_id;
     uint32_t recipient_id;
     uint32_t amount;

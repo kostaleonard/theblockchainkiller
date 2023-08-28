@@ -21,7 +21,7 @@
  * @param previous_block_hash The hash of the previous block.
  */
 typedef struct block_t {
-    struct timespec created_at;
+    time_t created_at;
     linked_list_t *transaction_list;
     uint32_t proof_of_work;
     sha_256_t previous_block_hash;
