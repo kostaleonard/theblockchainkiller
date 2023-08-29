@@ -7,9 +7,7 @@ return_code_t linked_list_create(
     compare_function_t compare_function
 ) {
     return_code_t return_code = SUCCESS;
-    if (NULL == linked_list ||
-        NULL == free_function ||
-        NULL == compare_function) {
+    if (NULL == linked_list || NULL == free_function) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
@@ -127,6 +125,10 @@ return_code_t linked_list_find(
     return_code_t return_code = SUCCESS;
     if (NULL == linked_list || NULL == data || NULL == node) {
         return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    if (NULL == linked_list->compare_function) {
+        return_code = FAILURE_LINKED_LIST_NO_COMPARE_FUNCTION;
         goto end;
     }
     node_t *ptr = linked_list->head;

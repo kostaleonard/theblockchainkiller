@@ -13,6 +13,8 @@ void test_linked_list_create_gives_linked_list();
 
 void test_linked_list_create_fails_on_invalid_input();
 
+void test_linked_list_create_compare_function_may_be_null();
+
 void test_linked_list_destroy_empty_list_returns_success();
 
 void test_linked_list_destroy_nonempty_list_returns_success();
@@ -48,6 +50,8 @@ void test_linked_list_find_succeeds_and_gives_null_if_no_match();
 void test_linked_list_find_gives_first_matching_element();
 
 void test_linked_list_find_fails_on_invalid_input();
+
+void test_linked_list_find_fails_on_null_compare_function();
 
 void test_linked_list_append_adds_node_to_back();
 
