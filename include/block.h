@@ -4,6 +4,7 @@
 
 #ifndef INCLUDE_BLOCK_H_
 #define INCLUDE_BLOCK_H_
+#define GENESIS_BLOCK_PROOF_OF_WORK 2017
 
 #include <stdint.h>
 #include <sys/time.h>

@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #include "include/block.h"
 #include "include/hash.h"
 #include "include/transaction.h"
@@ -62,10 +63,28 @@ end:
 void test_create_genesis_block_gives_block_with_genesis_values() {
     block_t *block = NULL;
     return_code_t return_code = block_create_genesis_block(&block);
-    assert_true(SUCCESS == return_code);
+    if (SUCCESS != return_code) {
+        assert_true(false);
+        goto end;
+    }
     assert_true(NULL != block);
+    bool is_empty = false;
+    return_code = linked_list_is_empty(block->transaction_list, &is_empty);
+    assert_true(SUCCESS == return_code);
+    assert_true(is_empty);
+    assert_true(GENESIS_BLOCK_PROOF_OF_WORK == block->proof_of_work);
+    sha_256_t expected_previous_block_hash = {0};
+    assert_true(0 == memcmp(
+        &block->previous_block_hash,
+        &expected_previous_block_hash,
+        sizeof(sha_256_t)));
     block_destroy(block);
 end:
+}
+
+void test_create_genesis_block_fails_on_invalid_input() {
+    return_code_t return_code = block_create_genesis_block(NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
 }
 
 void test_block_destroy_returns_success() {

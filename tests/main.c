@@ -44,6 +44,9 @@ int main(int argc, char **argv) {
         // test_block.h
         cmocka_unit_test(test_block_create_gives_block),
         cmocka_unit_test(test_block_create_fails_on_invalid_input),
+        cmocka_unit_test(
+            test_create_genesis_block_gives_block_with_genesis_values),
+        cmocka_unit_test(test_create_genesis_block_fails_on_invalid_input),
         cmocka_unit_test(test_block_destroy_returns_success),
         cmocka_unit_test(test_block_destroy_fails_on_invalid_input),
     };
