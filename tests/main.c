@@ -55,6 +55,8 @@ int main(int argc, char **argv) {
         // test_blockchain.h
         cmocka_unit_test(test_blockchain_create_gives_blockchain),
         cmocka_unit_test(test_blockchain_create_fails_on_invalid_input),
+        cmocka_unit_test(test_blockchain_destroy_returns_success),
+        cmocka_unit_test(test_blockchain_destroy_fails_on_invalid_input),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

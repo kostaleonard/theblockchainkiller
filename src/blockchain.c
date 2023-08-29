@@ -31,7 +31,15 @@ end:
 }
 
 return_code_t blockchain_destroy(blockchain_t *blockchain) {
-    return FAILURE_INVALID_INPUT;
+    return_code_t return_code = SUCCESS;
+    if (NULL == blockchain) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    return_code = linked_list_destroy(blockchain->block_list);
+    free(blockchain);
+end:
+    return return_code;
 }
 
 return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block) {
