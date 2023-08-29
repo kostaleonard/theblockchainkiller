@@ -4,7 +4,7 @@ int transaction_compare(
     transaction_t *transaction1,
     transaction_t *transaction2
 ) {
-    // TODO test
+    // TODO test this function
     if (NULL == transaction1 || NULL == transaction2) {
         return 0;
     }
