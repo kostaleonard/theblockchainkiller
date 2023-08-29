@@ -4,6 +4,7 @@
 
 #ifndef INCLUDE_BLOCK_H_
 #define INCLUDE_BLOCK_H_
+#define GENESIS_BLOCK_PROOF_OF_WORK 2017
 
 #include <stdint.h>
 #include <sys/time.h>
@@ -21,7 +22,7 @@
  * @param previous_block_hash The hash of the previous block.
  */
 typedef struct block_t {
-    struct timespec created_at;
+    time_t created_at;
     linked_list_t *transaction_list;
     uint32_t proof_of_work;
     sha_256_t previous_block_hash;
@@ -43,6 +44,18 @@ return_code_t block_create(
     uint32_t proof_of_work,
     sha_256_t previous_block_hash
 );
+
+/**
+ * @brief Fills block with a pointer to the newly allocated genesis block.
+ * 
+ * The genesis block is the first block in the blockchain. Since there is no
+ * previous block, the genesis block contains special values for the previous
+ * block hash and proof of work.
+ * 
+ * @param block The pointer to fill with the new genesis block.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t block_create_genesis_block(block_t **block);
 
 /**
  * @brief Frees all memory associated with the block.

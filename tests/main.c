@@ -7,11 +7,15 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include "tests/test_linked_list.h"
+#include "tests/test_block.h"
+#include "tests/test_blockchain.h"
 
 int main(int argc, char **argv) {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_linked_list_create_returns_linked_list),
+        // test_linked_list.h
+        cmocka_unit_test(test_linked_list_create_gives_linked_list),
         cmocka_unit_test(test_linked_list_create_fails_on_invalid_input),
+        cmocka_unit_test(test_linked_list_create_compare_function_may_be_null),
         cmocka_unit_test(test_linked_list_destroy_empty_list_returns_success),
         cmocka_unit_test(
             test_linked_list_destroy_nonempty_list_returns_success),
@@ -34,6 +38,27 @@ int main(int argc, char **argv) {
             test_linked_list_find_succeeds_and_gives_null_if_no_match),
         cmocka_unit_test(test_linked_list_find_gives_first_matching_element),
         cmocka_unit_test(test_linked_list_find_fails_on_invalid_input),
+        cmocka_unit_test(test_linked_list_find_fails_on_null_compare_function),
+        cmocka_unit_test(test_linked_list_append_adds_node_to_back),
+        cmocka_unit_test(test_linked_list_append_fails_on_invalid_input),
+        cmocka_unit_test(test_linked_list_get_last_fails_on_empty_list),
+        cmocka_unit_test(test_linked_list_get_last_gives_last_element),
+        cmocka_unit_test(test_linked_list_get_last_fails_on_invalid_input),
+        // test_block.h
+        cmocka_unit_test(test_block_create_gives_block),
+        cmocka_unit_test(test_block_create_fails_on_invalid_input),
+        cmocka_unit_test(
+            test_create_genesis_block_gives_block_with_genesis_values),
+        cmocka_unit_test(test_create_genesis_block_fails_on_invalid_input),
+        cmocka_unit_test(test_block_destroy_returns_success),
+        cmocka_unit_test(test_block_destroy_fails_on_invalid_input),
+        // test_blockchain.h
+        cmocka_unit_test(test_blockchain_create_gives_blockchain),
+        cmocka_unit_test(test_blockchain_create_fails_on_invalid_input),
+        cmocka_unit_test(test_blockchain_destroy_returns_success),
+        cmocka_unit_test(test_blockchain_destroy_fails_on_invalid_input),
+        cmocka_unit_test(test_blockchain_add_block_appends_block),
+        cmocka_unit_test(test_blockchain_add_block_fails_on_invalid_input),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -40,6 +40,7 @@ typedef int (compare_function_t(void *data1, void *data2));
  * 
  * @param free_function A user-defined function that will free node data.
  * @param compare_function A user-defined function that will compare node data.
+ * May be NULL.
  * @param head The first node in the linked list. If the list is empty, head
  * will be NULL.
  */
@@ -55,6 +56,7 @@ typedef struct linked_list_t {
  * @param linked_list A pointer to fill with the linked list's address.
  * @param free_function A user-defined function that will free node data.
  * @param compare_function A user-defined function that will compare node data.
+ * May be NULL.
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t linked_list_create(
@@ -115,12 +117,35 @@ return_code_t linked_list_is_empty(linked_list_t *linked_list, bool *is_empty);
  * @param linked_list The linked list.
  * @param data The data for which to search.
  * @param node A pointer to fill with the matching node.
- * @return return_code_t A return code indicating success or failure.
+ * @return return_code_t A return code indicating success or failure. If
+ * linked_list's compare_function is NULL, this function will return an error
+ * code.
  */
 return_code_t linked_list_find(
     linked_list_t *linked_list,
     void *data,
     node_t **node
 );
+
+/**
+ * @brief Appends a node containing the given data to the linked list.
+ * 
+ * @param linked_list The linked list.
+ * @param data The data to place in the new node. The user should already have
+ * allocated this memory.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t linked_list_append(linked_list_t *linked_list, void *data);
+
+/**
+ * @brief Fills node with the last node of the linked list.
+ * 
+ * If the list is empty, this function will return FAILURE_LINKED_LIST_EMPTY.
+ * 
+ * @param linked_list The linked list.
+ * @param node A pointer to fill with the last node's address.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t linked_list_get_last(linked_list_t *linked_list, node_t **node);
 
 #endif  // INCLUDE_LINKED_LIST_H_
