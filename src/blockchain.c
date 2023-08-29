@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "include/block.h"
 #include "include/blockchain.h"
@@ -42,8 +43,27 @@ end:
     return return_code;
 }
 
+//TODO note that there's no validation on the block, that needs to be a separate function
 return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block) {
-    return FAILURE_INVALID_INPUT;
+    return_code_t return_code = SUCCESS;
+    if (NULL == blockchain || NULL == block) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    return_code = linked_list_append(blockchain->block_list, block);
+end:
+    return return_code;
 }
 
-void blockchain_print(blockchain_t *blockchain) {}
+void blockchain_print(blockchain_t *blockchain) {
+    if (NULL == blockchain) {
+        return;
+    }
+    for (node_t *node = blockchain->block_list->head;
+        NULL != node;
+        node = node->next) {
+        block_t *block = (block_t *)node->data;
+        printf("%d->", block->proof_of_work);
+    }
+    printf("\n");
+}

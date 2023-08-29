@@ -17,4 +17,8 @@ void test_blockchain_destroy_returns_success();
 
 void test_blockchain_destroy_fails_on_invalid_input();
 
+void test_blockchain_add_block_appends_block();
+
+void test_blockchain_add_block_fails_on_invalid_input();
+
 #endif  // TESTS_TEST_BLOCKCHAIN_H_
