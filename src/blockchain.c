@@ -43,7 +43,6 @@ end:
     return return_code;
 }
 
-//TODO note that there's no validation on the block, that needs to be a separate function
 return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block) {
     return_code_t return_code = SUCCESS;
     if (NULL == blockchain || NULL == block) {

@@ -12,7 +12,7 @@ void test_block_create_gives_block() {
     return_code_t return_code = linked_list_create(
         &transaction_list,
         (free_function_t *)transaction_destroy,
-        (compare_function_t *)transaction_compare);
+        NULL);
     if (SUCCESS != return_code) {
         assert_true(false);
         goto end;
@@ -36,7 +36,7 @@ void test_block_create_fails_on_invalid_input() {
     return_code_t return_code = linked_list_create(
         &transaction_list,
         (free_function_t *)transaction_destroy,
-        (compare_function_t *)transaction_compare);
+        NULL);
     if (SUCCESS != return_code) {
         assert_true(false);
         goto end;
@@ -92,7 +92,7 @@ void test_block_destroy_returns_success() {
     return_code_t return_code = linked_list_create(
         &transaction_list,
         (free_function_t *)transaction_destroy,
-        (compare_function_t *)transaction_compare);
+        NULL);
     if (SUCCESS != return_code) {
         assert_true(false);
         goto end;

@@ -40,7 +40,7 @@ return_code_t block_create_genesis_block(block_t **block) {
     return_code = linked_list_create(
         &transaction_list,
         (free_function_t *)transaction_destroy,
-        (compare_function_t *)transaction_compare);
+        NULL);
     if (SUCCESS != return_code) {
         goto end;
     }

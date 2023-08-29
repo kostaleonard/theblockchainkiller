@@ -25,19 +25,6 @@ typedef struct transaction_t {
 } transaction_t;
 
 /**
- * @brief Returns 0 if the transactions are equal, otherwise a date comparison.
- * 
- * @return int Zero if the transactions have identical values for all members,
- * otherwise returns a number representing which transaction occurred first. The
- * number will be negative if transaction1 occurred before transaction2, and
- * positive otherwise.
- */
-int transaction_compare(
-    transaction_t *transaction1,
-    transaction_t *transaction2
-);
-
-/**
  * @brief Fills transaction with a newly allocated transaction.
  * 
  * @param transaction The pointer to fill with the new transaction.
