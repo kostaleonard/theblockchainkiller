@@ -57,6 +57,8 @@ return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block);
 //return_code_t blockchain_mine_block(blockchain_t *blockchain, block_t *block);
 // TODO add blockchain_mine_block
 
+//TODO add blockchain_is_valid_proof(blockchain_t *, block_t *)
+
 /**
  * @brief Prints the blockchain.
  */

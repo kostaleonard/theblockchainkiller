@@ -52,6 +52,13 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_create_genesis_block_fails_on_invalid_input),
         cmocka_unit_test(test_block_destroy_returns_success),
         cmocka_unit_test(test_block_destroy_fails_on_invalid_input),
+        cmocka_unit_test(test_block_hash_gives_nonempty_hash),
+        cmocka_unit_test(test_block_hash_same_fields_gives_same_hash),
+        cmocka_unit_test(test_block_hash_created_at_included_in_hash),
+        cmocka_unit_test(test_block_hash_transactions_included_in_hash),
+        cmocka_unit_test(test_block_hash_proof_of_work_included_in_hash),
+        cmocka_unit_test(test_block_hash_previous_block_hash_included_in_hash),
+        cmocka_unit_test(test_block_hash_fails_on_invalid_input),
         // test_blockchain.h
         cmocka_unit_test(test_blockchain_create_gives_blockchain),
         cmocka_unit_test(test_blockchain_create_fails_on_invalid_input),

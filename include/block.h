@@ -72,7 +72,6 @@ return_code_t block_destroy(block_t *block);
  * @param hash A pointer to fill with the block's hash.
  * @return return_code_t A return code indicating success or failure.
  */
-//return_code_t block_hash(block_t *block, sha_256_t *hash);
-//TODO add block_hash
+return_code_t block_hash(block_t *block, sha_256_t *hash);
 
 #endif  // INCLUDE_BLOCK_H_

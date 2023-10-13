@@ -65,3 +65,14 @@ return_code_t block_destroy(block_t *block) {
 end:
     return return_code;
 }
+
+return_code_t block_hash(block_t *block, sha_256_t *hash) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == block || NULL == hash) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    //TODO
+end:
+    return return_code;
+}
