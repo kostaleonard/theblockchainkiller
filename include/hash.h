@@ -9,7 +9,7 @@
 #include <openssl/sha.h>
 
 typedef struct sha_256_t {
-    char digest[SHA256_DIGEST_LENGTH];
+    unsigned char digest[SHA256_DIGEST_LENGTH];
 } sha_256_t;
 
 /**

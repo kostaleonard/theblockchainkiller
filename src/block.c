@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <time.h>
+#include <openssl/evp.h>
 #include "include/block.h"
 #include "include/linked_list.h"
 #include "include/transaction.h"
@@ -72,7 +73,21 @@ return_code_t block_hash(block_t *block, sha_256_t *hash) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    //TODO
+    EVP_MD_CTX *mdctx;
+    const EVP_MD *md = EVP_sha256();
+    mdctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(mdctx, md, NULL);
+    EVP_DigestUpdate(
+        mdctx, (void *)&block->created_at, sizeof(block->created_at));
+    EVP_DigestUpdate(
+        mdctx, (void *)&block->proof_of_work, sizeof(block->proof_of_work));
+    EVP_DigestUpdate(
+        mdctx,
+        (void *)&block->previous_block_hash,
+        sizeof(block->previous_block_hash));
+    // TODO hash transaction list.
+    EVP_DigestFinal_ex(mdctx, hash->digest, NULL);
+    EVP_MD_CTX_free(mdctx);
 end:
     return return_code;
 }

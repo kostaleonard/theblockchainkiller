@@ -203,8 +203,6 @@ void test_block_hash_created_at_included_in_hash() {
         previous_block_hash);
     assert_true(SUCCESS == return_code);
     // Block 2.
-    // All of block 2's fields are the same, except created_at, which
-    // block_create fills in.
     linked_list_t *transaction_list2 = NULL;
     return_code = linked_list_create(
         &transaction_list2,
@@ -218,6 +216,11 @@ void test_block_hash_created_at_included_in_hash() {
         proof_of_work,
         previous_block_hash);
     assert_true(SUCCESS == return_code);
+    // block_create fills in created_at with the current time. However, the time
+    // granularity is not very fine and sometimes block1 and block2 get the same
+    // created_at value. We manually increment block2->created_at to make sure
+    // they differ.
+    block2->created_at = block1->created_at + 1;
     sha_256_t hash1 = {0};
     return_code = block_hash(block1, &hash1);
     assert_true(SUCCESS == return_code);
