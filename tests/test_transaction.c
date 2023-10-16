@@ -13,8 +13,7 @@ void test_transaction_create_gives_transaction() {
         &transaction,
         user_id1,
         user_id2,
-        amount
-    );
+        amount);
     assert_true(SUCCESS == return_code);
     assert_true(transaction->sender_id == user_id1);
     assert_true(transaction->recipient_id == user_id2);
@@ -31,8 +30,7 @@ void test_transaction_create_fails_on_invalid_input() {
         NULL,
         user_id1,
         user_id2,
-        amount
-    );
+        amount);
     assert_true(FAILURE_INVALID_INPUT == return_code);
 }
 
@@ -45,8 +43,7 @@ void test_transaction_destroy_returns_success() {
         &transaction,
         user_id1,
         user_id2,
-        amount
-    );
+        amount);
     assert_true(SUCCESS == return_code);
     return_code = transaction_destroy(transaction);
     assert_true(SUCCESS == return_code);

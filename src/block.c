@@ -77,8 +77,6 @@ return_code_t block_hash(block_t *block, sha_256_t *hash) {
     const EVP_MD *md = EVP_sha256();
     mdctx = EVP_MD_CTX_new();
     EVP_DigestInit_ex(mdctx, md, NULL);
-    
-    //TODO put this in helper function with same interface as transaction?
     EVP_DigestUpdate(
         mdctx, (void *)&block->created_at, sizeof(block->created_at));
     EVP_DigestUpdate(
@@ -87,8 +85,12 @@ return_code_t block_hash(block_t *block, sha_256_t *hash) {
         mdctx,
         (void *)&block->previous_block_hash,
         sizeof(block->previous_block_hash));
-    // TODO hash transaction list.
-    
+    for (node_t *node = block->transaction_list->head;
+        NULL != node;
+        node = node->next) {
+        transaction_t *transaction = (transaction_t *)node->data;
+        EVP_DigestUpdate(mdctx, (void *)transaction, sizeof(*transaction));
+    }
     EVP_DigestFinal_ex(mdctx, hash->digest, NULL);
     EVP_MD_CTX_free(mdctx);
 end:

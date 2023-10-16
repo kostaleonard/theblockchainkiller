@@ -1,2 +1,2 @@
 lint:
-	cpplint --recursive --exclude=build --filter=-legal/copyright,-readability/casting .
+	cpplint --recursive --exclude=build --exclude=scrap --filter=-legal/copyright,-readability/casting .

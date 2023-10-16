@@ -48,18 +48,6 @@ return_code_t blockchain_destroy(blockchain_t *blockchain);
 return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block);
 
 /**
- * @brief Fills block's proof_of_work with a number that produces a valid hash.
- * 
- * @param blockchain The blockchain.
- * @param block The block for which to calculate a proof of work.
- * @return return_code_t A return code indicating success or failure.
- */
-//return_code_t blockchain_mine_block(blockchain_t *blockchain, block_t *block);
-// TODO add blockchain_mine_block
-
-//TODO add blockchain_is_valid_proof(blockchain_t *, block_t *)
-
-/**
  * @brief Prints the blockchain.
  */
 void blockchain_print(blockchain_t *blockchain);

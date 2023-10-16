@@ -248,8 +248,7 @@ void test_block_hash_transactions_included_in_hash() {
         &transaction1,
         user_id1,
         user_id2,
-        amount1
-    );
+        amount1);
     assert_true(SUCCESS == return_code);
     return_code = linked_list_prepend(transaction_list1, transaction1);
     assert_true(SUCCESS == return_code);
@@ -305,8 +304,7 @@ void test_block_hash_multiple_transactions_included_in_hash() {
         &transaction1,
         user_id1,
         user_id2,
-        amount1
-    );
+        amount1);
     assert_true(SUCCESS == return_code);
     return_code = linked_list_prepend(transaction_list1, transaction1);
     assert_true(SUCCESS == return_code);
@@ -316,8 +314,7 @@ void test_block_hash_multiple_transactions_included_in_hash() {
         &transaction2,
         user_id2,
         user_id1,
-        amount2
-    );
+        amount2);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;
     uint32_t proof_of_work = 123;
