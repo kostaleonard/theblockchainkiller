@@ -29,6 +29,8 @@ void test_block_hash_created_at_included_in_hash();
 
 void test_block_hash_transactions_included_in_hash();
 
+void test_block_hash_multiple_transactions_included_in_hash();
+
 void test_block_hash_proof_of_work_included_in_hash();
 
 void test_block_hash_previous_block_hash_included_in_hash();

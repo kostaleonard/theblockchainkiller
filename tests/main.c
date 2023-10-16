@@ -56,6 +56,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_block_hash_same_fields_gives_same_hash),
         cmocka_unit_test(test_block_hash_created_at_included_in_hash),
         cmocka_unit_test(test_block_hash_transactions_included_in_hash),
+        cmocka_unit_test(
+            test_block_hash_multiple_transactions_included_in_hash),
         cmocka_unit_test(test_block_hash_proof_of_work_included_in_hash),
         cmocka_unit_test(test_block_hash_previous_block_hash_included_in_hash),
         cmocka_unit_test(test_block_hash_fails_on_invalid_input),
