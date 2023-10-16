@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 #include "include/transaction.h"
 
 return_code_t transaction_create(
