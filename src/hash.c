@@ -6,7 +6,7 @@ void hash_print(sha_256_t *hash) {
         return;
     }
     for (size_t idx = 0; idx < sizeof(hash->digest); idx++) {
-        printf("%c", hash->digest[idx]);
+        printf("%02x", hash->digest[idx]);
     }
     printf("\n");
 }

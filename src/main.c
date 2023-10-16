@@ -25,10 +25,10 @@ int main(int argc, char **argv) {
     }
     blockchain_print(blockchain);
     sha_256_t genesis_block_hash = {0};
-    // return_code = block_hash(genesis_block, &genesis_block_hash);
-    // if (SUCCESS != return_code) {
-    //     goto end;
-    // }
+    return_code = block_hash(genesis_block, &genesis_block_hash);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
     hash_print(&genesis_block_hash);
 end:
     blockchain_destroy(blockchain);
