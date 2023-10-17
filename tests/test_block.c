@@ -306,12 +306,21 @@ void test_block_hash_multiple_transactions_included_in_hash() {
         user_id2,
         amount1);
     assert_true(SUCCESS == return_code);
-    return_code = linked_list_prepend(transaction_list1, transaction1);
-    assert_true(SUCCESS == return_code);
+    // transaction2 is a copy of transaction1. We need to use a different memory
+    // location to protect against race conditions when destroying both blocks.
     transaction_t *transaction2 = NULL;
-    uint32_t amount2 = 17;
     return_code = transaction_create(
         &transaction2,
+        user_id1,
+        user_id2,
+        amount1);
+    assert_true(SUCCESS == return_code);
+    return_code = linked_list_prepend(transaction_list1, transaction1);
+    assert_true(SUCCESS == return_code);
+    transaction_t *transaction3 = NULL;
+    uint32_t amount2 = 17;
+    return_code = transaction_create(
+        &transaction3,
         user_id2,
         user_id1,
         amount2);
@@ -341,7 +350,7 @@ void test_block_hash_multiple_transactions_included_in_hash() {
     assert_true(SUCCESS == return_code);
     // Manually set created_at to match so that it doesn't affect hashing.
     block2->created_at = block1->created_at;
-    return_code = linked_list_prepend(transaction_list2, transaction1);
+    return_code = linked_list_prepend(transaction_list2, transaction2);
     assert_true(SUCCESS == return_code);
     sha_256_t hash1 = {0};
     return_code = block_hash(block1, &hash1);
@@ -351,7 +360,7 @@ void test_block_hash_multiple_transactions_included_in_hash() {
     assert_true(SUCCESS == return_code);
     assert_true(0 == memcmp(&hash1, &hash2, sizeof(sha_256_t)));
     // Now add a second transaction to block 1 and make sure the hash changes.
-    return_code = linked_list_prepend(transaction_list1, transaction2);
+    return_code = linked_list_prepend(transaction_list1, transaction3);
     assert_true(SUCCESS == return_code);
     return_code = block_hash(block1, &hash1);
     assert_true(SUCCESS == return_code);
