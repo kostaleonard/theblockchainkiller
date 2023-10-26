@@ -65,4 +65,13 @@ return_code_t block_create_genesis_block(block_t **block);
  */
 return_code_t block_destroy(block_t *block);
 
+/**
+ * @brief Fills hash with the block's hash.
+ * 
+ * @param block The block.
+ * @param hash A pointer to fill with the block's hash.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t block_hash(block_t *block, sha_256_t *hash);
+
 #endif  // INCLUDE_BLOCK_H_
