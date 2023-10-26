@@ -73,9 +73,8 @@ return_code_t block_hash(block_t *block, sha_256_t *hash) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    EVP_MD_CTX *mdctx;
     const EVP_MD *md = EVP_sha256();
-    mdctx = EVP_MD_CTX_new();
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     EVP_DigestInit_ex(mdctx, md, NULL);
     EVP_DigestUpdate(
         mdctx, (void *)&block->created_at, sizeof(block->created_at));

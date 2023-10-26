@@ -13,7 +13,7 @@ return_code_t transaction_create(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    transaction_t *new_transaction = malloc(sizeof(transaction_t));
+    transaction_t *new_transaction = calloc(1, sizeof(transaction_t));
     if (NULL == new_transaction) {
         return_code = FAILURE_COULD_NOT_MALLOC;
         goto end;
