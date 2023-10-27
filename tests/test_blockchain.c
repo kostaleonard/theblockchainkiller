@@ -6,8 +6,8 @@
 #include "include/linked_list.h"
 #include "tests/test_blockchain.h"
 
-// TODO set this to 1 for CI/CD?
-#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3
+#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 2
+#define EXPERIMENTALLY_FOUND_PROOF_OF_WORK 90797
 
 void test_blockchain_create_gives_blockchain() {
     blockchain_t *blockchain = NULL;
@@ -220,6 +220,7 @@ void test_blockchain_mine_block_produces_block_with_valid_hash() {
     return_code = blockchain_mine_block(blockchain, block1, false);
     assert_true(SUCCESS == return_code);
     assert_true(0 != block1->proof_of_work);
+    assert_true(EXPERIMENTALLY_FOUND_PROOF_OF_WORK == block1->proof_of_work);
     sha_256_t hash = {0};
     return_code = block_hash(block1, &hash);
     assert_true(SUCCESS == return_code);

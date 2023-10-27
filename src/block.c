@@ -8,7 +8,7 @@
 return_code_t block_create(
     block_t **block,
     linked_list_t *transaction_list,
-    uint32_t proof_of_work,
+    uint64_t proof_of_work,
     sha_256_t previous_block_hash
 ) {
     return_code_t return_code = SUCCESS;

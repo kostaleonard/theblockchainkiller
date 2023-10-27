@@ -95,7 +95,7 @@ return_code_t blockchain_mine_block(
     }
     sha_256_t hash = {0};
     bool is_valid_block_hash = false;
-    for (uint32_t new_proof = 0; new_proof < UINT32_MAX; new_proof++) {
+    for (uint64_t new_proof = 0; new_proof < UINT32_MAX; new_proof++) {
         block->proof_of_work = new_proof;
         return_code = block_hash(block, &hash);
         if (SUCCESS != return_code) {
@@ -124,7 +124,7 @@ void blockchain_print(blockchain_t *blockchain) {
         NULL != node;
         node = node->next) {
         block_t *block = (block_t *)node->data;
-        printf("%d->", block->proof_of_work);
+        printf("%lld->", block->proof_of_work);
     }
     printf("\n");
 }
