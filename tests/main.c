@@ -69,6 +69,12 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_blockchain_destroy_fails_on_invalid_input),
         cmocka_unit_test(test_blockchain_add_block_appends_block),
         cmocka_unit_test(test_blockchain_add_block_fails_on_invalid_input),
+        cmocka_unit_test(
+            test_blockchain_is_valid_proof_of_work_true_on_valid_block),
+        cmocka_unit_test(
+            test_blockchain_is_valid_proof_of_work_false_on_invalid_block),
+        cmocka_unit_test(
+            test_blockchain_is_valid_proof_of_work_fails_on_invalid_input),
         // test_transaction.h
         cmocka_unit_test(test_transaction_create_gives_transaction),
         cmocka_unit_test(test_transaction_create_fails_on_invalid_input),

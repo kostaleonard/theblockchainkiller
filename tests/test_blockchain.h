@@ -21,4 +21,10 @@ void test_blockchain_add_block_appends_block();
 
 void test_blockchain_add_block_fails_on_invalid_input();
 
+void test_blockchain_is_valid_proof_of_work_true_on_valid_block();
+
+void test_blockchain_is_valid_proof_of_work_false_on_invalid_block();
+
+void test_blockchain_is_valid_proof_of_work_fails_on_invalid_input();
+
 #endif  // TESTS_TEST_BLOCKCHAIN_H_

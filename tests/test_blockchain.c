@@ -139,3 +139,87 @@ void test_blockchain_add_block_fails_on_invalid_input() {
 end:
     blockchain_destroy(blockchain);
 }
+
+void test_blockchain_is_valid_proof_of_work_true_on_valid_block() {
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    linked_list_t *transaction_list1 = NULL;
+    return_code = linked_list_create(&transaction_list1, free, NULL);
+    assert_true(SUCCESS == return_code);
+    block_t *block1 = NULL;
+    sha_256_t previous_block_hash = {0};
+    // This block's proof of work leads to a correct hash.
+    // We found the proof of work by mining.
+    return_code = block_create(
+        &block1,
+        transaction_list1,
+        123, //TODO determine this experimentally by mining
+        previous_block_hash);
+    // Manually set created_at to get a consistent hash.
+    block1->created_at = 0;
+    bool is_valid_proof_of_work = false;
+    return_code = blockchain_is_valid_proof_of_work(
+        blockchain, block1, &is_valid_proof_of_work);
+    assert_true(SUCCESS == return_code);
+    assert_true(is_valid_proof_of_work);
+    block_destroy(block1);
+    blockchain_destroy(blockchain);
+}
+
+void test_blockchain_is_valid_proof_of_work_false_on_invalid_block() {
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    linked_list_t *transaction_list1 = NULL;
+    return_code = linked_list_create(&transaction_list1, free, NULL);
+    assert_true(SUCCESS == return_code);
+    block_t *block1 = NULL;
+    sha_256_t previous_block_hash = {0};
+    // This block's proof of work does not lead to a correct hash.
+    return_code = block_create(
+        &block1,
+        transaction_list1,
+        123,
+        previous_block_hash);
+    // Manually set created_at to get a consistent hash.
+    block1->created_at = 0;
+    bool is_valid_proof_of_work = false;
+    return_code = blockchain_is_valid_proof_of_work(
+        blockchain, block1, &is_valid_proof_of_work);
+    assert_true(SUCCESS == return_code);
+    assert_true(!is_valid_proof_of_work);
+    block_destroy(block1);
+    blockchain_destroy(blockchain);
+}
+
+void test_blockchain_is_valid_proof_of_work_fails_on_invalid_input() {
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    linked_list_t *transaction_list1 = NULL;
+    return_code = linked_list_create(&transaction_list1, free, NULL);
+    assert_true(SUCCESS == return_code);
+    block_t *block1 = NULL;
+    sha_256_t previous_block_hash = {0};
+    return_code = block_create(
+        &block1,
+        transaction_list1,
+        123,
+        previous_block_hash);
+    bool is_valid_proof_of_work = false;
+    return_code = blockchain_is_valid_proof_of_work(
+        NULL, block1, &is_valid_proof_of_work);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = blockchain_is_valid_proof_of_work(
+        blockchain, NULL, &is_valid_proof_of_work);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = blockchain_is_valid_proof_of_work(
+        blockchain, block1, NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    block_destroy(block1);
+    blockchain_destroy(blockchain);
+}

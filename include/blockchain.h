@@ -53,22 +53,6 @@ return_code_t blockchain_destroy(blockchain_t *blockchain);
  */
 return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block);
 
-// TODO this function should return an error code when there's no proof of work that produces a valid hash.
-// TODO can we have the function display in green text when it gets a valid hash?
-/**
- * @brief Fills block's proof_of_work with a number that produces a valid hash.
- * 
- * @param blockchain The blockchain.
- * @param block The block for which to calculate a proof of work.
- * @param print_progress If true, display progress on the screen.
- * @return return_code_t A return code indicating success or failure.
- */
-return_code_t blockchain_mine_block(
-    blockchain_t *blockchain,
-    block_t *block,
-    bool print_progress
-);
-
 /**
  * @brief Fills is_valid_proof_of_work with true or false.
  * 
@@ -84,6 +68,22 @@ return_code_t blockchain_is_valid_proof_of_work(
     blockchain_t *blockchain,
     block_t *block,
     bool *is_valid_proof_of_work
+);
+
+// TODO this function should return an error code when there's no proof of work that produces a valid hash.
+// TODO can we have the function display in green text when it gets a valid hash?
+/**
+ * @brief Fills block's proof_of_work with a number that produces a valid hash.
+ * 
+ * @param blockchain The blockchain.
+ * @param block The block for which to calculate a proof of work.
+ * @param print_progress If true, display progress on the screen.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_mine_block(
+    blockchain_t *blockchain,
+    block_t *block,
+    bool print_progress
 );
 
 /**

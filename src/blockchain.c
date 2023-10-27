@@ -59,6 +59,35 @@ end:
     return return_code;
 }
 
+return_code_t blockchain_is_valid_proof_of_work(
+    blockchain_t *blockchain,
+    block_t *block,
+    bool *is_valid_proof_of_work
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == blockchain || NULL == block || NULL == is_valid_proof_of_work) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    sha_256_t hash = {0};
+    return_code = block_hash(block, &hash);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    bool is_valid = true;
+    for (size_t idx = 0;
+        idx < blockchain->num_leading_zero_bytes_required_in_block_hash;
+        idx++) {
+        if (hash.digest[idx] != 0) {
+            is_valid = false;
+            break;
+        }
+    }
+    *is_valid_proof_of_work = is_valid;
+end:
+    return return_code;
+}
+
 void blockchain_print(blockchain_t *blockchain) {
     if (NULL == blockchain) {
         return;
