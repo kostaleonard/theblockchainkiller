@@ -18,7 +18,7 @@ void test_block_create_gives_block() {
         goto end;
     }
     block_t *block = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash = {0};
     return_code = block_create(
         &block,
@@ -42,7 +42,7 @@ void test_block_create_fails_on_invalid_input() {
         goto end;
     }
     block_t *block = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash = {0};
     return_code = block_create(
         NULL,
@@ -98,7 +98,7 @@ void test_block_destroy_returns_success() {
         goto end;
     }
     block_t *block = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash = {0};
     return_code = block_create(
         &block,
@@ -125,7 +125,7 @@ void test_block_hash_gives_nonempty_hash() {
         NULL);
     assert_true(SUCCESS == return_code);
     block_t *block = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash = {0};
     return_code = block_create(
         &block,
@@ -150,7 +150,7 @@ void test_block_hash_same_fields_gives_same_hash() {
         NULL);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash = {0};
     return_code = block_create(
         &block1,
@@ -194,7 +194,7 @@ void test_block_hash_created_at_included_in_hash() {
         NULL);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash = {0};
     return_code = block_create(
         &block1,
@@ -253,7 +253,7 @@ void test_block_hash_transactions_included_in_hash() {
     return_code = linked_list_prepend(transaction_list1, transaction1);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash = {0};
     return_code = block_create(
         &block1,
@@ -326,7 +326,7 @@ void test_block_hash_multiple_transactions_included_in_hash() {
         amount2);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash = {0};
     return_code = block_create(
         &block1,
@@ -378,7 +378,7 @@ void test_block_hash_proof_of_work_included_in_hash() {
         NULL);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash = {0};
     return_code = block_create(
         &block1,
@@ -422,7 +422,7 @@ void test_block_hash_previous_block_hash_included_in_hash() {
         NULL);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash1 = {0};
     return_code = block_create(
         &block1,
@@ -467,7 +467,7 @@ void test_block_hash_fails_on_invalid_input() {
         NULL);
     assert_true(SUCCESS == return_code);
     block_t *block = NULL;
-    uint32_t proof_of_work = 123;
+    uint64_t proof_of_work = 123;
     sha_256_t previous_block_hash = {0};
     return_code = block_create(
         &block,
