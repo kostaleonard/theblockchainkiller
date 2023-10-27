@@ -20,15 +20,21 @@
  */
 typedef struct blockchain_t {
     linked_list_t *block_list;
+    size_t num_leading_zero_bytes_required_in_block_hash;
 } blockchain_t;
 
 /**
  * @brief Fills blockchain with a pointer to the newly allocated blockchain.
  * 
  * @param blockchain A pointer to fill with the blockchain's address.
+ * @param num_leading_zero_bytes_required_in_block_hash The number of leading
+ * zero bytes to make a block hash a valid proof of work.
  * @return return_code_t A return code indicating success or failure.
  */
-return_code_t blockchain_create(blockchain_t **blockchain);
+return_code_t blockchain_create(
+    blockchain_t **blockchain,
+    size_t num_leading_zero_bytes_required_in_block_hash
+);
 
 /**
  * @brief Frees all memory associated with a blockchain.
@@ -46,6 +52,39 @@ return_code_t blockchain_destroy(blockchain_t *blockchain);
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block);
+
+// TODO this function should return an error code when there's no proof of work that produces a valid hash.
+// TODO can we have the function display in green text when it gets a valid hash?
+/**
+ * @brief Fills block's proof_of_work with a number that produces a valid hash.
+ * 
+ * @param blockchain The blockchain.
+ * @param block The block for which to calculate a proof of work.
+ * @param print_progress If true, display progress on the screen.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_mine_block(
+    blockchain_t *blockchain,
+    block_t *block,
+    bool print_progress
+);
+
+/**
+ * @brief Fills is_valid_proof_of_work with true or false.
+ * 
+ * A valid proof of work is one that produces a block hash that begins with the
+ * number of leading zeroes specified in the blockchain struct.
+ * 
+ * @param blockchain The blockchain.
+ * @param block The block whose proof of work should be checked.
+ * @param is_valid_proof_of_work A pointer to fill with the result.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_is_valid_proof_of_work(
+    blockchain_t *blockchain,
+    block_t *block,
+    bool *is_valid_proof_of_work
+);
 
 /**
  * @brief Prints the blockchain.

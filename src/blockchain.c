@@ -5,7 +5,10 @@
 #include "include/linked_list.h"
 #include "include/return_codes.h"
 
-return_code_t blockchain_create(blockchain_t **blockchain) {
+return_code_t blockchain_create(
+    blockchain_t **blockchain,
+    size_t num_leading_zero_bytes_required_in_block_hash
+) {
     return_code_t return_code = SUCCESS;
     if (NULL == blockchain) {
         return_code = FAILURE_INVALID_INPUT;
@@ -26,6 +29,8 @@ return_code_t blockchain_create(blockchain_t **blockchain) {
         goto end;
     }
     new_blockchain->block_list = block_list;
+    new_blockchain->num_leading_zero_bytes_required_in_block_hash =
+        num_leading_zero_bytes_required_in_block_hash;
     *blockchain = new_blockchain;
 end:
     return return_code;

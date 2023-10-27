@@ -6,11 +6,14 @@
 #include "include/blockchain.h"
 #include "include/block.h"
 
+#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 4
+
 int main(int argc, char **argv) {
     return_code_t return_code = SUCCESS;
     blockchain_t *blockchain = NULL;
     block_t *genesis_block = NULL;
-    return_code = blockchain_create(&blockchain);
+    return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
     if (SUCCESS != return_code) {
         goto end;
     }
