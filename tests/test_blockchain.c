@@ -7,7 +7,7 @@
 #include "tests/test_blockchain.h"
 
 // TODO set this to 1 for CI/CD?
-#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 2
+#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3
 
 void test_blockchain_create_gives_blockchain() {
     blockchain_t *blockchain = NULL;
@@ -200,54 +200,57 @@ void test_blockchain_is_valid_block_hash_fails_on_invalid_input() {
     blockchain_destroy(blockchain);
 }
 
-// void test_blockchain_mine_block_produces_block_with_valid_proof() {
-//     blockchain_t *blockchain = NULL;
-//     return_code_t return_code = blockchain_create(
-//         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
-//     assert_true(SUCCESS == return_code);
-//     linked_list_t *transaction_list1 = NULL;
-//     return_code = linked_list_create(&transaction_list1, free, NULL);
-//     assert_true(SUCCESS == return_code);
-//     block_t *block1 = NULL;
-//     sha_256_t previous_block_hash = {0};
-//     return_code = block_create(
-//         &block1,
-//         transaction_list1,
-//         0,
-//         previous_block_hash);
-//     // Manually set created_at to get a consistent hash.
-//     block1->created_at = 0;
-//     return_code = blockchain_mine_block(blockchain, block1, false);
-//     assert_true(SUCCESS == return_code);
-//     assert_true(0 != block1->proof_of_work);
-//     bool is_valid_proof_of_work = false;
-//     return_code = blockchain_is_valid_proof_of_work(
-//         blockchain, block1, &is_valid_proof_of_work);
-//     assert_true(SUCCESS == return_code);
-//     assert_true(is_valid_proof_of_work);
-//     block_destroy(block1);
-//     blockchain_destroy(blockchain);
-// }
+void test_blockchain_mine_block_produces_block_with_valid_hash() {
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    linked_list_t *transaction_list1 = NULL;
+    return_code = linked_list_create(&transaction_list1, free, NULL);
+    assert_true(SUCCESS == return_code);
+    block_t *block1 = NULL;
+    sha_256_t previous_block_hash = {0};
+    return_code = block_create(
+        &block1,
+        transaction_list1,
+        0,
+        previous_block_hash);
+    // Manually set created_at to get a consistent hash.
+    block1->created_at = 0;
+    return_code = blockchain_mine_block(blockchain, block1, false);
+    assert_true(SUCCESS == return_code);
+    assert_true(0 != block1->proof_of_work);
+    sha_256_t hash = {0};
+    return_code = block_hash(block1, &hash);
+    assert_true(SUCCESS == return_code);
+    bool is_valid_block_hash = false;
+    return_code = blockchain_is_valid_block_hash(
+        blockchain, hash, &is_valid_block_hash);
+    assert_true(SUCCESS == return_code);
+    assert_true(is_valid_block_hash);
+    block_destroy(block1);
+    blockchain_destroy(blockchain);
+}
 
-// void test_blockchain_mine_block_fails_on_invalid_input() {
-//     blockchain_t *blockchain = NULL;
-//     return_code_t return_code = blockchain_create(
-//         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
-//     assert_true(SUCCESS == return_code);
-//     linked_list_t *transaction_list1 = NULL;
-//     return_code = linked_list_create(&transaction_list1, free, NULL);
-//     assert_true(SUCCESS == return_code);
-//     block_t *block1 = NULL;
-//     sha_256_t previous_block_hash = {0};
-//     return_code = block_create(
-//         &block1,
-//         transaction_list1,
-//         0,
-//         previous_block_hash);
-//     return_code = blockchain_mine_block(NULL, block1, false);
-//     assert_true(FAILURE_INVALID_INPUT == return_code);
-//     return_code = blockchain_mine_block(blockchain, NULL, false);
-//     assert_true(FAILURE_INVALID_INPUT == return_code);
-//     block_destroy(block1);
-//     blockchain_destroy(blockchain);
-// }
+void test_blockchain_mine_block_fails_on_invalid_input() {
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    linked_list_t *transaction_list1 = NULL;
+    return_code = linked_list_create(&transaction_list1, free, NULL);
+    assert_true(SUCCESS == return_code);
+    block_t *block1 = NULL;
+    sha_256_t previous_block_hash = {0};
+    return_code = block_create(
+        &block1,
+        transaction_list1,
+        0,
+        previous_block_hash);
+    return_code = blockchain_mine_block(NULL, block1, false);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = blockchain_mine_block(blockchain, NULL, false);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    block_destroy(block1);
+    blockchain_destroy(blockchain);
+}

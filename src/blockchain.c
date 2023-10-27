@@ -94,14 +94,24 @@ return_code_t blockchain_mine_block(
         goto end;
     }
     sha_256_t hash = {0};
+    bool is_valid_block_hash = false;
     for (uint32_t new_proof = 0; new_proof < UINT32_MAX; new_proof++) {
         block->proof_of_work = new_proof;
         return_code = block_hash(block, &hash);
         if (SUCCESS != return_code) {
             goto end;
         }
-        // TODO
+        return_code = blockchain_is_valid_block_hash(
+            blockchain, hash, &is_valid_block_hash);
+        if (SUCCESS != return_code) {
+            goto end;
+        }
+        // TODO display hash
+        if (is_valid_block_hash) {
+            goto end;
+        }
     }
+    return_code = FAILURE_COULD_NOT_FIND_VALID_PROOF_OF_WORK;
 end:
     return return_code;
 }

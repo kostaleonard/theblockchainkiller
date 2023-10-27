@@ -75,9 +75,9 @@ int main(int argc, char **argv) {
             test_blockchain_is_valid_block_hash_false_on_invalid_hash),
         cmocka_unit_test(
             test_blockchain_is_valid_block_hash_fails_on_invalid_input),
-        //TODO
-        //cmocka_unit_test(test_blockchain_mine_block_produces_block_with_valid_proof),
-        //cmocka_unit_test(test_blockchain_mine_block_fails_on_invalid_input),
+        cmocka_unit_test(
+            test_blockchain_mine_block_produces_block_with_valid_hash),
+        cmocka_unit_test(test_blockchain_mine_block_fails_on_invalid_input),
         // test_transaction.h
         cmocka_unit_test(test_transaction_create_gives_transaction),
         cmocka_unit_test(test_transaction_create_fails_on_invalid_input),

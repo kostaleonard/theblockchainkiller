@@ -61,7 +61,7 @@ return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block);
  * 
  * @param blockchain The blockchain.
  * @param block_hash The block hash to check.
- * @param is_valid_proof_of_work A pointer to fill with the result.
+ * @param is_valid_block_hash A pointer to fill with the result.
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t blockchain_is_valid_block_hash(

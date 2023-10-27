@@ -27,8 +27,8 @@ void test_blockchain_is_valid_block_hash_false_on_invalid_hash();
 
 void test_blockchain_is_valid_block_hash_fails_on_invalid_input();
 
-//void test_blockchain_mine_block_produces_block_with_valid_proof();
+void test_blockchain_mine_block_produces_block_with_valid_hash();
 
-//void test_blockchain_mine_block_fails_on_invalid_input();
+void test_blockchain_mine_block_fails_on_invalid_input();
 
 #endif  // TESTS_TEST_BLOCKCHAIN_H_
