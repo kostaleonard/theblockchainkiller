@@ -175,7 +175,7 @@ void blockchain_print(blockchain_t *blockchain) {
         NULL != node;
         node = node->next) {
         block_t *block = (block_t *)node->data;
-        printf("%lld->", block->proof_of_work);
+        printf("%"PRIu64"->", block->proof_of_work);
     }
     printf("\n");
 }
