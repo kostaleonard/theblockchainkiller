@@ -59,31 +59,49 @@ end:
     return return_code;
 }
 
-return_code_t blockchain_is_valid_proof_of_work(
+return_code_t blockchain_is_valid_block_hash(
     blockchain_t *blockchain,
-    block_t *block,
-    bool *is_valid_proof_of_work
+    sha_256_t block_hash,
+    bool *is_valid_block_hash
 ) {
     return_code_t return_code = SUCCESS;
-    if (NULL == blockchain || NULL == block || NULL == is_valid_proof_of_work) {
+    if (NULL == blockchain || NULL == is_valid_block_hash) {
         return_code = FAILURE_INVALID_INPUT;
-        goto end;
-    }
-    sha_256_t hash = {0};
-    return_code = block_hash(block, &hash);
-    if (SUCCESS != return_code) {
         goto end;
     }
     bool is_valid = true;
     for (size_t idx = 0;
         idx < blockchain->num_leading_zero_bytes_required_in_block_hash;
         idx++) {
-        if (hash.digest[idx] != 0) {
+        if (block_hash.digest[idx] != 0) {
             is_valid = false;
             break;
         }
     }
-    *is_valid_proof_of_work = is_valid;
+    *is_valid_block_hash = is_valid;
+end:
+    return return_code;
+}
+
+return_code_t blockchain_mine_block(
+    blockchain_t *blockchain,
+    block_t *block,
+    bool print_progress
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == blockchain || NULL == block) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    sha_256_t hash = {0};
+    for (uint32_t new_proof = 0; new_proof < UINT32_MAX; new_proof++) {
+        block->proof_of_work = new_proof;
+        return_code = block_hash(block, &hash);
+        if (SUCCESS != return_code) {
+            goto end;
+        }
+        // TODO
+    }
 end:
     return return_code;
 }

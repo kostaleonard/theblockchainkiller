@@ -54,20 +54,20 @@ return_code_t blockchain_destroy(blockchain_t *blockchain);
 return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block);
 
 /**
- * @brief Fills is_valid_proof_of_work with true or false.
+ * @brief Fills is_valid_block_hash with true or false.
  * 
- * A valid proof of work is one that produces a block hash that begins with the
- * number of leading zeroes specified in the blockchain struct.
+ * A valid block hash begins with the number of leading zeroes specified in the
+ * blockchain struct.
  * 
  * @param blockchain The blockchain.
- * @param block The block whose proof of work should be checked.
+ * @param block_hash The block hash to check.
  * @param is_valid_proof_of_work A pointer to fill with the result.
  * @return return_code_t A return code indicating success or failure.
  */
-return_code_t blockchain_is_valid_proof_of_work(
+return_code_t blockchain_is_valid_block_hash(
     blockchain_t *blockchain,
-    block_t *block,
-    bool *is_valid_proof_of_work
+    sha_256_t block_hash,
+    bool *is_valid_block_hash
 );
 
 // TODO this function should return an error code when there's no proof of work that produces a valid hash.
