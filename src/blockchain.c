@@ -5,6 +5,9 @@
 #include "include/linked_list.h"
 #include "include/return_codes.h"
 
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
 return_code_t blockchain_create(
     blockchain_t **blockchain,
     size_t num_leading_zero_bytes_required_in_block_hash
@@ -93,6 +96,8 @@ return_code_t blockchain_mine_block(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
+    size_t best_leading_zeroes = 0;
+    size_t print_frequency = 100000;
     sha_256_t hash = {0};
     bool is_valid_block_hash = false;
     for (uint64_t new_proof = 0; new_proof < UINT32_MAX; new_proof++) {
@@ -101,13 +106,48 @@ return_code_t blockchain_mine_block(
         if (SUCCESS != return_code) {
             goto end;
         }
+        if (print_progress) {
+            size_t num_zeroes = 0;
+            for (size_t idx = 0; idx < sizeof(hash.digest); idx++) {
+                // TODO could do bitwise arithmetic here to check nybbles
+                if (hash.digest[idx] != 0) {
+                    break;
+                }
+                num_zeroes++;
+            }
+            if (num_zeroes >= best_leading_zeroes) {
+                best_leading_zeroes = num_zeroes;
+            }
+            if (new_proof % print_frequency == 0) {
+                // Remove the previous block hash from output.
+                printf("\rMining LeoCoin block: ");
+                // Print the best number of leading zeroes.
+                for (size_t idx = 0; idx < best_leading_zeroes; idx++) {
+                    printf("00");
+                }
+                // Add the part of the new hash following the best number of
+                // leading zeroes. It's not the accurate hash, but it does give
+                // an idea of progress.
+                for (size_t idx = best_leading_zeroes;
+                    idx < sizeof(hash.digest);
+                    idx++) {
+                    printf("%02x", hash.digest[idx]);
+                }
+            }
+        }
         return_code = blockchain_is_valid_block_hash(
             blockchain, hash, &is_valid_block_hash);
         if (SUCCESS != return_code) {
             goto end;
         }
-        // TODO display hash
         if (is_valid_block_hash) {
+            if (print_progress) {
+                printf("\rMining LeoCoin block: %s", ANSI_COLOR_GREEN);
+                for (size_t idx = 0; idx < sizeof(hash.digest); idx++) {
+                    printf("%02x", hash.digest[idx]);
+                }
+                printf("%s\n", ANSI_COLOR_RESET);
+            }
             goto end;
         }
     }
