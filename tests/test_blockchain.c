@@ -146,9 +146,6 @@ void test_blockchain_is_valid_block_hash_true_on_valid_hash() {
     return_code_t return_code = blockchain_create(
         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
     assert_true(SUCCESS == return_code);
-    linked_list_t *transaction_list1 = NULL;
-    return_code = linked_list_create(&transaction_list1, free, NULL);
-    assert_true(SUCCESS == return_code);
     sha_256_t hash = {0};
     bool is_valid_block_hash = false;
     return_code = blockchain_is_valid_block_hash(
@@ -169,9 +166,6 @@ void test_blockchain_is_valid_block_hash_false_on_invalid_hash() {
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_create(
         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
-    assert_true(SUCCESS == return_code);
-    linked_list_t *transaction_list1 = NULL;
-    return_code = linked_list_create(&transaction_list1, free, NULL);
     assert_true(SUCCESS == return_code);
     sha_256_t hash = {0};
     // Set a leading zero to a nonzero value.

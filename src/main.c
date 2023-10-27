@@ -7,7 +7,7 @@
 #include "include/blockchain.h"
 #include "include/block.h"
 
-#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3
+#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 4
 
 return_code_t mine_blocks(blockchain_t *blockchain) {
     return_code_t return_code = SUCCESS;
