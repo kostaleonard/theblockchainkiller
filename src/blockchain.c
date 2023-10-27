@@ -109,7 +109,11 @@ return_code_t blockchain_mine_block(
         if (print_progress) {
             size_t num_zeroes = 0;
             for (size_t idx = 0; idx < sizeof(hash.digest); idx++) {
-                // TODO could do bitwise arithmetic here to check nybbles
+                char upper_nybble = hash.digest[idx] >> 4;
+                if (upper_nybble != 0) {
+                    break;
+                }
+                num_zeroes++;
                 if (hash.digest[idx] != 0) {
                     break;
                 }
@@ -123,15 +127,22 @@ return_code_t blockchain_mine_block(
                 printf("\rMining LeoCoin block: ");
                 // Print the best number of leading zeroes.
                 for (size_t idx = 0; idx < best_leading_zeroes; idx++) {
-                    printf("00");
+                    printf("0");
                 }
                 // Add the part of the new hash following the best number of
                 // leading zeroes. It's not the accurate hash, but it does give
                 // an idea of progress.
                 for (size_t idx = best_leading_zeroes;
-                    idx < sizeof(hash.digest);
+                    idx < 2 * sizeof(hash.digest);
                     idx++) {
-                    printf("%02x", hash.digest[idx]);
+                    size_t hash_idx = idx / 2;
+                    if (idx % 2 == 0) {
+                        char upper_nybble = hash.digest[hash_idx] >> 4;
+                        printf("%01x", upper_nybble);
+                    } else {
+                        char lower_nybble = hash.digest[hash_idx] & 0x0f;
+                        printf("%01x", lower_nybble);
+                    }
                 }
             }
         }

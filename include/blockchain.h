@@ -70,7 +70,6 @@ return_code_t blockchain_is_valid_block_hash(
     bool *is_valid_block_hash
 );
 
-// TODO can we have the function display in green text when it gets a valid hash?
 /**
  * @brief Fills block's proof_of_work with a number that produces a valid hash.
  * 
