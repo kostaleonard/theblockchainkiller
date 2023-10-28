@@ -11,3 +11,5 @@ LeoCoin is ~~worthless~~ priceless.
 ```sh
 docker run kostaleonard/theblockchainkiller
 ```
+
+![LeoCoin mining](media/theblockchainkiller_mining.gif)
