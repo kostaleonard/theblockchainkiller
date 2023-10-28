@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "include/blockchain.h"
 #include "include/block.h"
+#include "include/transaction.h"
 
 #define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3
 
@@ -29,7 +30,25 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
         if (SUCCESS != return_code) {
             goto end;
         }
-        // TODO add transaction to mint coins for miner.
+        transaction_t *mint_coin_transaction = NULL;
+        // TODO the recipient should be the miner's ID--could take from the command line to start
+        uint32_t recipient_id = 1;
+        return_code = transaction_create(
+            &mint_coin_transaction,
+            SENDER_ID_FOR_MINTING,
+            recipient_id,
+            AMOUNT_GENERATED_DURING_MINTING);
+        if (SUCCESS != return_code) {
+            linked_list_destroy(transaction_list);
+            goto end;
+        }
+        return_code = linked_list_prepend(
+            transaction_list, mint_coin_transaction);
+        if (SUCCESS != return_code) {
+            transaction_destroy(mint_coin_transaction);
+            linked_list_destroy(transaction_list);
+            goto end;
+        }
         block_t *next_block = NULL;
         return_code = block_create(
             &next_block, transaction_list, 0, previous_block_hash);
@@ -53,6 +72,14 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
                 goto end;
             }
             blockchain_print(blockchain);
+            // TODO remove printing below
+            for (node_t *node = blockchain->block_list->head; NULL != node; node = node->next) {
+                block_t *block = (block_t *)node->data;
+                for (node_t *transaction_node = block->transaction_list->head; NULL != transaction_node; transaction_node = transaction_node->next) {
+                    transaction_t *transaction = (transaction_t *)transaction_node->data;
+                    printf("Transaction: %d->%d: %d\n", transaction->sender_id, transaction->recipient_id, transaction->amount);
+                }
+            }
         }
     }
 end:
