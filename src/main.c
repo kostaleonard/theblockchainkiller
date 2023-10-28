@@ -10,7 +10,6 @@
 
 #define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3
 
-// TODO test
 return_code_t mine_blocks(blockchain_t *blockchain) {
     return_code_t return_code = SUCCESS;
     while (true) {
@@ -31,7 +30,6 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
             goto end;
         }
         transaction_t *mint_coin_transaction = NULL;
-        // TODO the recipient should be the miner's ID--could take from the command line to start
         uint32_t recipient_id = 1;
         return_code = transaction_create(
             &mint_coin_transaction,
