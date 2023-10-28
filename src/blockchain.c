@@ -152,6 +152,7 @@ return_code_t blockchain_mine_block(
                     }
                     printf("%01x", nybble);
                 }
+                fflush(stdout);
             }
         }
         return_code = blockchain_is_valid_block_hash(
