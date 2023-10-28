@@ -100,7 +100,7 @@ return_code_t blockchain_mine_block(
     size_t print_frequency = 100000;
     sha_256_t hash = {0};
     bool is_valid_block_hash = false;
-    for (uint64_t new_proof = 0; new_proof < UINT32_MAX; new_proof++) {
+    for (uint64_t new_proof = 0; new_proof < UINT64_MAX; new_proof++) {
         block->proof_of_work = new_proof;
         return_code = block_hash(block, &hash);
         if (SUCCESS != return_code) {
@@ -109,7 +109,7 @@ return_code_t blockchain_mine_block(
         if (print_progress) {
             size_t num_zeroes = 0;
             for (size_t idx = 0; idx < sizeof(hash.digest); idx++) {
-                char upper_nybble = hash.digest[idx] >> 4;
+                unsigned char upper_nybble = hash.digest[idx] >> 4;
                 if (upper_nybble != 0) {
                     break;
                 }
@@ -119,10 +119,12 @@ return_code_t blockchain_mine_block(
                 }
                 num_zeroes++;
             }
-            if (num_zeroes >= best_leading_zeroes) {
+            bool print_this_iteration = new_proof % print_frequency == 0;
+            if (num_zeroes > best_leading_zeroes) {
                 best_leading_zeroes = num_zeroes;
+                print_this_iteration = true;
             }
-            if (new_proof % print_frequency == 0) {
+            if (print_this_iteration) {
                 // Remove the previous block hash from output.
                 printf("\rMining LeoCoin block: ");
                 // Print the best number of leading zeroes.
@@ -136,14 +138,21 @@ return_code_t blockchain_mine_block(
                     idx < 2 * sizeof(hash.digest);
                     idx++) {
                     size_t hash_idx = idx / 2;
+                    unsigned char nybble = 0;
                     if (idx % 2 == 0) {
-                        char upper_nybble = hash.digest[hash_idx] >> 4;
-                        printf("%01x", upper_nybble);
+                        nybble = hash.digest[hash_idx] >> 4;
                     } else {
-                        char lower_nybble = hash.digest[hash_idx] & 0x0f;
-                        printf("%01x", lower_nybble);
+                        nybble = hash.digest[hash_idx] & 0x0f;
                     }
+                    // To give a better sense of progress, don't allow a
+                    // non-leading zero to follow the best number of leading
+                    // zeroes.
+                    if (idx == best_leading_zeroes && 0 == nybble) {
+                        nybble += 1;
+                    }
+                    printf("%01x", nybble);
                 }
+                fflush(stdout);
             }
         }
         return_code = blockchain_is_valid_block_hash(

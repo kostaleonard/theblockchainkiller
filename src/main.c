@@ -6,8 +6,9 @@
 #include <stdlib.h>
 #include "include/blockchain.h"
 #include "include/block.h"
+#include "include/transaction.h"
 
-#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 4
+#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3
 
 return_code_t mine_blocks(blockchain_t *blockchain) {
     return_code_t return_code = SUCCESS;
@@ -28,6 +29,24 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
         if (SUCCESS != return_code) {
             goto end;
         }
+        transaction_t *mint_coin_transaction = NULL;
+        uint32_t recipient_id = 1;
+        return_code = transaction_create(
+            &mint_coin_transaction,
+            SENDER_ID_FOR_MINTING,
+            recipient_id,
+            AMOUNT_GENERATED_DURING_MINTING);
+        if (SUCCESS != return_code) {
+            linked_list_destroy(transaction_list);
+            goto end;
+        }
+        return_code = linked_list_prepend(
+            transaction_list, mint_coin_transaction);
+        if (SUCCESS != return_code) {
+            transaction_destroy(mint_coin_transaction);
+            linked_list_destroy(transaction_list);
+            goto end;
+        }
         block_t *next_block = NULL;
         return_code = block_create(
             &next_block, transaction_list, 0, previous_block_hash);
@@ -38,14 +57,20 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
         return_code = blockchain_mine_block(blockchain, next_block, true);
         if (SUCCESS != return_code) {
             block_destroy(next_block);
-            goto end;
+            if (FAILURE_COULD_NOT_FIND_VALID_PROOF_OF_WORK == return_code) {
+                printf("\nCouldn't find valid proof of work for block; "
+                       "generating new block\n");
+            } else {
+                goto end;
+            }
+        } else {
+            return_code = blockchain_add_block(blockchain, next_block);
+            if (SUCCESS != return_code) {
+                block_destroy(next_block);
+                goto end;
+            }
+            blockchain_print(blockchain);
         }
-        return_code = blockchain_add_block(blockchain, next_block);
-        if (SUCCESS != return_code) {
-            block_destroy(next_block);
-            goto end;
-        }
-        blockchain_print(blockchain);
     }
 end:
     return return_code;

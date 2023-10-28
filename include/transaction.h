@@ -9,6 +9,9 @@
 #include <sys/time.h>
 #include "include/return_codes.h"
 
+#define SENDER_ID_FOR_MINTING 0
+#define AMOUNT_GENERATED_DURING_MINTING 1
+
 /**
  * @brief Represents a transaction.
  * 
