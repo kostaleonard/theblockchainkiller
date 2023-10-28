@@ -72,14 +72,6 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
                 goto end;
             }
             blockchain_print(blockchain);
-            // TODO remove printing below
-            for (node_t *node = blockchain->block_list->head; NULL != node; node = node->next) {
-                block_t *block = (block_t *)node->data;
-                for (node_t *transaction_node = block->transaction_list->head; NULL != transaction_node; transaction_node = transaction_node->next) {
-                    transaction_t *transaction = (transaction_t *)transaction_node->data;
-                    printf("Transaction: %d->%d: %d\n", transaction->sender_id, transaction->recipient_id, transaction->amount);
-                }
-            }
         }
     }
 end:
