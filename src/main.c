@@ -7,8 +7,9 @@
 #include "include/blockchain.h"
 #include "include/block.h"
 
-#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 4
+#define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3
 
+// TODO test
 return_code_t mine_blocks(blockchain_t *blockchain) {
     return_code_t return_code = SUCCESS;
     while (true) {
@@ -28,6 +29,7 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
         if (SUCCESS != return_code) {
             goto end;
         }
+        // TODO add transaction to mint coins for miner.
         block_t *next_block = NULL;
         return_code = block_create(
             &next_block, transaction_list, 0, previous_block_hash);
@@ -38,19 +40,26 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
         return_code = blockchain_mine_block(blockchain, next_block, true);
         if (SUCCESS != return_code) {
             block_destroy(next_block);
-            goto end;
+            if (FAILURE_COULD_NOT_FIND_VALID_PROOF_OF_WORK == return_code) {
+                printf("\nCouldn't find valid proof of work for block; "
+                       "generating new block\n");
+            } else {
+                goto end;
+            }
+        } else {
+            return_code = blockchain_add_block(blockchain, next_block);
+            if (SUCCESS != return_code) {
+                block_destroy(next_block);
+                goto end;
+            }
+            blockchain_print(blockchain);
         }
-        return_code = blockchain_add_block(blockchain, next_block);
-        if (SUCCESS != return_code) {
-            block_destroy(next_block);
-            goto end;
-        }
-        blockchain_print(blockchain);
     }
 end:
     return return_code;
 }
 
+// TODO add command/entrypoint to dockerfile to make it execute this by default
 int main(int argc, char **argv) {
     return_code_t return_code = SUCCESS;
     blockchain_t *blockchain = NULL;
