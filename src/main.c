@@ -78,7 +78,6 @@ end:
     return return_code;
 }
 
-// TODO add command/entrypoint to dockerfile to make it execute this by default
 int main(int argc, char **argv) {
     return_code_t return_code = SUCCESS;
     blockchain_t *blockchain = NULL;
