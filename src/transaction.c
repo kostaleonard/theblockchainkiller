@@ -1,15 +1,18 @@
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "include/transaction.h"
 
 return_code_t transaction_create(
     transaction_t **transaction,
-    uint32_t sender_id,
-    uint32_t recipient_id,
+    ssh_key_t *sender_public_key,
+    ssh_key_t *recipient_public_key,
     uint32_t amount
 ) {
     return_code_t return_code = SUCCESS;
-    if (NULL == transaction) {
+    if (NULL == transaction ||
+        NULL == sender_public_key ||
+        NULL == recipient_public_key) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
@@ -19,8 +22,14 @@ return_code_t transaction_create(
         goto end;
     }
     new_transaction->created_at = time(NULL);
-    new_transaction->sender_id = sender_id;
-    new_transaction->recipient_id = recipient_id;
+    memcpy(
+        &new_transaction->sender_public_key,
+        sender_public_key,
+        MAX_SSH_KEY_LENGTH);
+    memcpy(
+        &new_transaction->recipient_public_key,
+        recipient_public_key,
+        MAX_SSH_KEY_LENGTH);
     new_transaction->amount = amount;
     *transaction = new_transaction;
 end:

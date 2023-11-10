@@ -241,13 +241,15 @@ void test_block_hash_transactions_included_in_hash() {
         NULL);
     assert_true(SUCCESS == return_code);
     transaction_t *transaction1 = NULL;
-    uint32_t user_id1 = 1;
-    uint32_t user_id2 = 2;
+    ssh_key_t user_1_key = {0};
+    user_1_key.bytes[0] = '1';
+    ssh_key_t user_2_key = {0};
+    user_2_key.bytes[0] = '2';
     uint32_t amount1 = 5;
     return_code = transaction_create(
         &transaction1,
-        user_id1,
-        user_id2,
+        &user_1_key,
+        &user_2_key,
         amount1);
     assert_true(SUCCESS == return_code);
     return_code = linked_list_prepend(transaction_list1, transaction1);
@@ -297,13 +299,15 @@ void test_block_hash_multiple_transactions_included_in_hash() {
         NULL);
     assert_true(SUCCESS == return_code);
     transaction_t *transaction1 = NULL;
-    uint32_t user_id1 = 1;
-    uint32_t user_id2 = 2;
+    ssh_key_t user_1_key = {0};
+    user_1_key.bytes[0] = '1';
+    ssh_key_t user_2_key = {0};
+    user_2_key.bytes[0] = '2';
     uint32_t amount1 = 5;
     return_code = transaction_create(
         &transaction1,
-        user_id1,
-        user_id2,
+        &user_1_key,
+        &user_2_key,
         amount1);
     assert_true(SUCCESS == return_code);
     // transaction2 is a copy of transaction1. We need to use a different memory
@@ -311,8 +315,8 @@ void test_block_hash_multiple_transactions_included_in_hash() {
     transaction_t *transaction2 = NULL;
     return_code = transaction_create(
         &transaction2,
-        user_id1,
-        user_id2,
+        &user_1_key,
+        &user_2_key,
         amount1);
     assert_true(SUCCESS == return_code);
     return_code = linked_list_prepend(transaction_list1, transaction1);
@@ -321,8 +325,8 @@ void test_block_hash_multiple_transactions_included_in_hash() {
     uint32_t amount2 = 17;
     return_code = transaction_create(
         &transaction3,
-        user_id2,
-        user_id1,
+        &user_2_key,
+        &user_1_key,
         amount2);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;

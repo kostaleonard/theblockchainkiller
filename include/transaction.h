@@ -8,38 +8,41 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include "include/return_codes.h"
+#include "include/cryptography.h"
 
-#define SENDER_ID_FOR_MINTING 0
 #define AMOUNT_GENERATED_DURING_MINTING 1
 
 /**
  * @brief Represents a transaction.
  * 
  * @param created_at The datetime at which the user created this block.
- * @param sender_id The sender's ID.
- * @param recipient_id The recipient's ID.
+ * @param sender_public_key The sender's public key. Set to zero to represent
+ * coins generated during the mining process.
+ * @param recipient_public_key The recipient's public key.
  * @param amount The amount transferred from sender to recipient.
  */
 typedef struct transaction_t {
     time_t created_at;
-    uint32_t sender_id;
-    uint32_t recipient_id;
+    ssh_key_t sender_public_key;
+    ssh_key_t recipient_public_key;
     uint32_t amount;
+    // TODO need sender's signature here to provide authentication, integrity, and non-repudiation
 } transaction_t;
 
 /**
  * @brief Fills transaction with a newly allocated transaction.
  * 
  * @param transaction The pointer to fill with the new transaction.
- * @param sender_id The sender's ID.
- * @param recipient_id The recipient's ID.
+ * @param sender_public_key The sender's public key. Set to zero to represent
+ * coins generated during the mining process.
+ * @param recipient_public_key The recipient's public key.
  * @param amount The amount transferred from sender to recipient.
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t transaction_create(
     transaction_t **transaction,
-    uint32_t sender_id,
-    uint32_t recipient_id,
+    ssh_key_t *sender_public_key,
+    ssh_key_t *recipient_public_key,
     uint32_t amount
 );
 

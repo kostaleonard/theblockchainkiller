@@ -30,11 +30,13 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
             goto end;
         }
         transaction_t *mint_coin_transaction = NULL;
-        uint32_t recipient_id = 1;
+        ssh_key_t sender_public_key_for_minting = {0};
+        // TODO use the SSH key supplied at startup
+        ssh_key_t miner_public_key = {0};
         return_code = transaction_create(
             &mint_coin_transaction,
-            SENDER_ID_FOR_MINTING,
-            recipient_id,
+            &sender_public_key_for_minting,
+            &miner_public_key,
             AMOUNT_GENERATED_DURING_MINTING);
         if (SUCCESS != return_code) {
             linked_list_destroy(transaction_list);
@@ -77,6 +79,7 @@ end:
 }
 
 int main(int argc, char **argv) {
+    // TODO get miner's SSH key pair as command line arguments
     return_code_t return_code = SUCCESS;
     blockchain_t *blockchain = NULL;
     block_t *genesis_block = NULL;
