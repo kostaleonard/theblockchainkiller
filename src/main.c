@@ -4,11 +4,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "include/blockchain.h"
 #include "include/block.h"
 #include "include/transaction.h"
 
 #define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3
+#define PRIVATE_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_PRIVATE_KEY"
+#define PUBLIC_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_PUBLIC_KEY"
 
 return_code_t mine_blocks(blockchain_t *blockchain) {
     return_code_t return_code = SUCCESS;
@@ -78,11 +81,50 @@ end:
     return return_code;
 }
 
+void print_usage_statement(char *program_name) {
+    fprintf(
+        stderr,
+        "Usage: %s "
+        "-p <private_key_file_contents> "
+        "-k <public_key_file_contents>\n",
+        program_name);
+    fprintf(
+        stderr,
+        "Or supply keys as environment variables %s and %s\n",
+        PRIVATE_KEY_ENVIRONMENT_VARIABLE,
+        PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+}
+
 int main(int argc, char **argv) {
     // TODO get miner's SSH key pair as command line arguments
+    // TODO detect when the user accidentally reversed their keys and gave a private key instead of a public key
     return_code_t return_code = SUCCESS;
     blockchain_t *blockchain = NULL;
     block_t *genesis_block = NULL;
+    char *ssh_private_key_contents = NULL;
+    char *ssh_public_key_contents = NULL;
+    int opt;
+    while ((opt = getopt(argc, argv, "p:k:")) != -1) {
+        switch (opt) {
+            case 'p':
+                ssh_private_key_contents = optarg;
+                break;
+            case 'k':
+                ssh_public_key_contents = optarg;
+                break;
+            default:
+                print_usage_statement(argv[0]);
+                return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+                goto end;
+        }
+    }
+    if (NULL == ssh_private_key_contents || NULL == ssh_public_key_contents) {
+        print_usage_statement(argv[0]);
+        return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+        goto end;
+    }
+    // TODO check if keys exceed maximum key length
+    printf("Using public key: %s\n", ssh_public_key_contents);
     return_code = blockchain_create(
         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
     if (SUCCESS != return_code) {
@@ -106,5 +148,5 @@ int main(int argc, char **argv) {
     return_code = mine_blocks(blockchain);
 end:
     blockchain_destroy(blockchain);
-    return return_code;
+    exit(return_code);
 }
