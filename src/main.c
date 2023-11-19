@@ -96,7 +96,8 @@ void print_usage_statement(char *program_name) {
 }
 
 int main(int argc, char **argv) {
-    // TODO get miner's SSH key pair as command line arguments
+    // TODO redo gif on README to show passing environment variables for keys
+    // TODO update README to show running instructions
     // TODO detect when the user accidentally reversed their keys and gave a private key instead of a public key
     return_code_t return_code = SUCCESS;
     blockchain_t *blockchain = NULL;
@@ -107,9 +108,11 @@ int main(int argc, char **argv) {
     while ((opt = getopt(argc, argv, "p:k:")) != -1) {
         switch (opt) {
             case 'p':
+                printf("Using private key from argv\n");
                 ssh_private_key_contents = optarg;
                 break;
             case 'k':
+                printf("Using public key from argv\n");
                 ssh_public_key_contents = optarg;
                 break;
             default:
@@ -117,6 +120,18 @@ int main(int argc, char **argv) {
                 return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
                 goto end;
         }
+    }
+    if (NULL == ssh_private_key_contents) {
+        printf(
+            "No private key found in argv, searching env for %s\n",
+            PRIVATE_KEY_ENVIRONMENT_VARIABLE);
+        ssh_private_key_contents = getenv(PRIVATE_KEY_ENVIRONMENT_VARIABLE);
+    }
+    if (NULL == ssh_public_key_contents) {
+        printf(
+            "No public key found in argv, searching env for %s\n",
+            PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+        ssh_public_key_contents = getenv(PUBLIC_KEY_ENVIRONMENT_VARIABLE);
     }
     if (NULL == ssh_private_key_contents || NULL == ssh_public_key_contents) {
         print_usage_statement(argv[0]);
