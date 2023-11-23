@@ -97,7 +97,7 @@ void print_usage_statement(char *program_name) {
 
 int main(int argc, char **argv) {
     // TODO redo gif on README to show passing environment variables for keys
-    // TODO update README to show running instructions
+    // TODO update README to show running instructions: pass keys as environment variables, pass keys as args directly to miner script
     // TODO detect when the user accidentally reversed their keys and gave a private key instead of a public key
     return_code_t return_code = SUCCESS;
     blockchain_t *blockchain = NULL;
