@@ -60,18 +60,36 @@ return_code_t transaction_create(
  * @brief Frees all memory associated with the transaction.
  * 
  * @param transaction The transaction.
- * @return return_code_t 
+ * @return return_code_t A return code indicating success or failure.
  */
 return_code_t transaction_destroy(transaction_t *transaction);
 
-// TODO docstring
+/**
+ * @brief Fills signature with the sender's signature for the transaction.
+ * 
+ * @param signature The pointer to fill with the signature.
+ * @param transaction The transaction for which to generate a signature. The
+ * transaction should have all fields filled out except sender_signature. This
+ * function generates a value to fill that field.
+ * @param sender_private_key The sender's private key.
+ * @return return_code_t A return code indicating success or failure.
+ */
 return_code_t transaction_generate_signature(
     ssh_signature_t *signature,
     transaction_t *transaction,
     ssh_key_t *sender_private_key
 );
 
-// TODO docstring
+/**
+ * @brief Fills is_valid_signature with the signature's correctness.
+ * 
+ * @param is_valid_signature The pointer to fill with the result. A signature is
+ * valid if decrypting the signature with the public key produces the original
+ * message (or message hash).
+ * @param transaction The transaction whose signature to verify. The signature
+ * must cover all fields in the transaction except the signature itself.
+ * @return return_code_t 
+ */
 return_code_t transaction_verify_signature(
     bool *is_valid_signature,
     transaction_t *transaction
