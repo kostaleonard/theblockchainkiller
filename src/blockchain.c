@@ -5,8 +5,8 @@
 #include "include/linked_list.h"
 #include "include/return_codes.h"
 
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
+#define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_RESET "\x1b[0m"
 
 return_code_t blockchain_create(
     blockchain_t **blockchain,

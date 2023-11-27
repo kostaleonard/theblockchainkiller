@@ -13,8 +13,17 @@
 #define PRIVATE_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_PRIVATE_KEY"
 #define PUBLIC_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_PUBLIC_KEY"
 
-return_code_t mine_blocks(blockchain_t *blockchain) {
+return_code_t mine_blocks(
+    blockchain_t *blockchain,
+    ssh_key_t *miner_public_key,
+    ssh_key_t *miner_private_key) {
     return_code_t return_code = SUCCESS;
+    if (NULL == blockchain ||
+        NULL == miner_public_key ||
+        NULL == miner_private_key) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
     while (true) {
         node_t *node = NULL;
         return_code = linked_list_get_last(blockchain->block_list, &node);
@@ -34,13 +43,12 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
         }
         transaction_t *mint_coin_transaction = NULL;
         ssh_key_t sender_public_key_for_minting = {0};
-        // TODO use the SSH key supplied at startup
-        ssh_key_t miner_public_key = {0};
         return_code = transaction_create(
             &mint_coin_transaction,
             &sender_public_key_for_minting,
-            &miner_public_key,
-            AMOUNT_GENERATED_DURING_MINTING);
+            miner_public_key,
+            AMOUNT_GENERATED_DURING_MINTING,
+            miner_private_key);
         if (SUCCESS != return_code) {
             linked_list_destroy(transaction_list);
             goto end;
@@ -82,6 +90,9 @@ end:
 }
 
 void print_usage_statement(char *program_name) {
+    if (NULL == program_name) {
+        goto end;
+    }
     fprintf(
         stderr,
         "Usage: %s "
@@ -93,6 +104,7 @@ void print_usage_statement(char *program_name) {
         "Or supply keys as environment variables %s and %s\n",
         PRIVATE_KEY_ENVIRONMENT_VARIABLE,
         PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+end:
 }
 
 int main(int argc, char **argv) {
@@ -140,6 +152,16 @@ int main(int argc, char **argv) {
     }
     // TODO check if keys exceed maximum key length
     printf("Using public key: %s\n", ssh_public_key_contents);
+    ssh_key_t miner_public_key = {0};
+    memcpy(
+        &miner_public_key.bytes,
+        ssh_public_key_contents,
+        sizeof(miner_public_key.bytes));
+    ssh_key_t miner_private_key = {0};
+    memcpy(
+        &miner_private_key.bytes,
+        ssh_private_key_contents,
+        sizeof(miner_private_key.bytes));
     return_code = blockchain_create(
         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
     if (SUCCESS != return_code) {
@@ -155,12 +177,8 @@ int main(int argc, char **argv) {
         goto end;
     }
     blockchain_print(blockchain);
-    sha_256_t genesis_block_hash = {0};
-    return_code = block_hash(genesis_block, &genesis_block_hash);
-    if (SUCCESS != return_code) {
-        goto end;
-    }
-    return_code = mine_blocks(blockchain);
+    return_code = mine_blocks(
+        blockchain, &miner_public_key, &miner_private_key);
 end:
     blockchain_destroy(blockchain);
     exit(return_code);

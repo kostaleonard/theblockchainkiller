@@ -10,6 +10,8 @@
 #include "include/return_codes.h"
 
 #define MAX_SSH_KEY_LENGTH 1024
+// TODO how big is an SSH signature?
+#define MAX_SSH_SIGNATURE_LENGTH 1024
 
 /**
  * @brief Contains an SSH key.
@@ -19,5 +21,14 @@
 typedef struct ssh_key_t {
     char bytes[MAX_SSH_KEY_LENGTH];
 } ssh_key_t;
+
+/**
+ * @brief Contains an SSH signature.
+ * 
+ * @param bytes The SSH signature string contents.
+ */
+typedef struct ssh_signature_t {
+    char bytes[MAX_SSH_SIGNATURE_LENGTH];
+} ssh_signature_t;
 
 #endif  // INCLUDE_CRYPTOGRAPHY_H_

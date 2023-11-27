@@ -7,12 +7,14 @@ return_code_t transaction_create(
     transaction_t **transaction,
     ssh_key_t *sender_public_key,
     ssh_key_t *recipient_public_key,
-    uint32_t amount
+    uint32_t amount,
+    ssh_key_t *sender_private_key
 ) {
     return_code_t return_code = SUCCESS;
     if (NULL == transaction ||
         NULL == sender_public_key ||
-        NULL == recipient_public_key) {
+        NULL == recipient_public_key ||
+        NULL == sender_private_key) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
