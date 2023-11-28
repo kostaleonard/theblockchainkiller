@@ -54,7 +54,6 @@ return_code_t transaction_create(
     uint32_t amount,
     ssh_key_t *sender_private_key
 );
-// TODO add test to ensure that transaction has non-empty signature, then valid signature
 
 /**
  * @brief Frees all memory associated with the transaction.
@@ -88,7 +87,7 @@ return_code_t transaction_generate_signature(
  * message (or message hash).
  * @param transaction The transaction whose signature to verify. The signature
  * must cover all fields in the transaction except the signature itself.
- * @return return_code_t 
+ * @return return_code_t A return code indicating success or failure.
  */
 return_code_t transaction_verify_signature(
     bool *is_valid_signature,

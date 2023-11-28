@@ -17,4 +17,8 @@ void test_transaction_destroy_returns_success();
 
 void test_transaction_destroy_fails_on_invalid_input();
 
+void test_transaction_generate_signature_gives_signature();
+
+void test_transaction_generate_signature_fails_on_invalid_input();
+
 #endif  // TESTS_TEST_TRANSACTION_H_

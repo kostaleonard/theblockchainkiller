@@ -48,3 +48,20 @@ return_code_t transaction_destroy(transaction_t *transaction) {
 end:
     return return_code;
 }
+
+return_code_t transaction_generate_signature(
+    ssh_signature_t *signature,
+    transaction_t *transaction,
+    ssh_key_t *sender_private_key
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == signature ||
+        NULL == transaction ||
+        NULL == sender_private_key) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    // TODO
+end:
+    return return_code;
+}

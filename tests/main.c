@@ -83,6 +83,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_transaction_create_fails_on_invalid_input),
         cmocka_unit_test(test_transaction_destroy_returns_success),
         cmocka_unit_test(test_transaction_destroy_fails_on_invalid_input),
+        cmocka_unit_test(test_transaction_generate_signature_gives_signature),
+        cmocka_unit_test(
+            test_transaction_generate_signature_fails_on_invalid_input),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
