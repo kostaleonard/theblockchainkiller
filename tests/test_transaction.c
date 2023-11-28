@@ -6,6 +6,7 @@
 #include "include/return_codes.h"
 #include "tests/test_transaction.h"
 
+// TODO do we need these? Get rid of them on GitHub if not
 // These environment variables need to contain a valid RSA key pair.
 #define TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY"
 #define TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY"

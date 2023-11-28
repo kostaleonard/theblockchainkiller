@@ -9,7 +9,8 @@
 #include <sys/time.h>
 #include "include/return_codes.h"
 
-#define MAX_SSH_KEY_LENGTH 1024
+// TODO separate key sizes for public and private keys, since private keys are much (4x) larger
+#define MAX_SSH_KEY_LENGTH 4096
 // TODO how big is an SSH signature?
 #define MAX_SSH_SIGNATURE_LENGTH 1024
 
