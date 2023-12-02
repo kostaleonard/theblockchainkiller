@@ -13,16 +13,15 @@
  * 
  * @param encoded The base 64 encoded string.
  * @param encoded_length The length of the encoded string.
- * @param decoded The pointer to fill with the base 64 decoded string.
- * @param max_decoded_length The maximum number of characters to write to the
- * output pointer.
+ * @param decoded The pointer to fill with the base 64 decoded string. This
+ * buffer needs to be at least 3/4 the size of the encoded string (base 64
+ * strings are always a multiple of 4 in length).
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t base64_decode(
     char *encoded,
     size_t encoded_length,
-    char *decoded,
-    size_t max_decoded_length
+    char *decoded
 );
 
 #endif  // INCLUDE_BASE64_H_

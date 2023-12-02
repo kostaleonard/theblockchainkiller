@@ -6,8 +6,7 @@
 return_code_t base64_decode(
     char *encoded,
     size_t encoded_length,
-    char *decoded,
-    size_t max_decoded_length
+    char *decoded
 ) {
     return_code_t return_code = SUCCESS;
     if (NULL == encoded || NULL == decoded) {
@@ -19,12 +18,11 @@ return_code_t base64_decode(
         (const unsigned char *)encoded,
         encoded_length
     );
-    if (decoded_length <= 0) {
-        // Error handling for decoding failure
-        return_code = FAILURE_INVALID_INPUT; // TODO actual return code
+    if (decoded_length < 0) {
+        return_code = FAILURE_OPENSSL_FUNCTION;
         goto end;
     }
-    decoded[decoded_length] = '\0'; // Null-terminate the decoded string
+    decoded[decoded_length] = '\0';
 end:
     return return_code;
 }
