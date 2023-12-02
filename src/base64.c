@@ -1,4 +1,3 @@
-#include <stdio.h> //TODO remove debugging
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include "include/base64.h"

@@ -1,7 +1,9 @@
+#include <stdio.h> //TODO remove debugging
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include "include/base64.h"
 #include "include/transaction.h"
 #include "include/return_codes.h"
 #include "tests/test_transaction.h"
@@ -107,12 +109,23 @@ void test_transaction_destroy_fails_on_invalid_input() {
 
 void test_transaction_generate_signature_gives_signature() {
     transaction_t transaction = {0};
-    // TODO not sure if getenv will work because it doesn't allow multi-line variables.
-    char *ssh_public_key_contents = getenv(
+    char *ssh_public_key_contents_base64 = getenv(
         TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+    char ssh_public_key_contents[MAX_SSH_KEY_LENGTH] = {0};
+    return_code_t return_code = base64_decode(
+        ssh_public_key_contents_base64,
+        strlen(ssh_public_key_contents_base64),
+        ssh_public_key_contents
+    );
     assert_true(NULL != ssh_public_key_contents);
-    char *ssh_private_key_contents = getenv(
+    char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
+    char ssh_private_key_contents[MAX_SSH_KEY_LENGTH] = {0};
+    return_code = base64_decode(
+        ssh_private_key_contents_base64,
+        strlen(ssh_private_key_contents_base64),
+        ssh_private_key_contents
+    );
     assert_true(NULL != ssh_private_key_contents);
     ssh_key_t ssh_public_key = {0};
     memcpy(
@@ -135,7 +148,7 @@ void test_transaction_generate_signature_gives_signature() {
         sizeof(transaction.recipient_public_key));
     transaction.amount = 17;
     ssh_signature_t signature = {0};
-    return_code_t return_code = transaction_generate_signature(
+    return_code = transaction_generate_signature(
         &signature, &transaction, &ssh_private_key);
     assert_true(SUCCESS == return_code);
     char empty_signature[MAX_SSH_SIGNATURE_LENGTH] = {0};

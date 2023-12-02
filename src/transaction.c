@@ -33,6 +33,7 @@ return_code_t transaction_create(
         recipient_public_key,
         MAX_SSH_KEY_LENGTH);
     new_transaction->amount = amount;
+    // TODO sign the transaction--test this
     *transaction = new_transaction;
 end:
     return return_code;
@@ -49,6 +50,7 @@ end:
     return return_code;
 }
 
+// TODO explain in markdown file (tests/readme.md) how to generate keys for testing locally and put them in environment variables
 return_code_t transaction_generate_signature(
     ssh_signature_t *signature,
     transaction_t *transaction,
