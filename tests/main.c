@@ -10,6 +10,7 @@
 #include "tests/test_block.h"
 #include "tests/test_blockchain.h"
 #include "tests/test_transaction.h"
+#include "tests/test_base64.h"
 
 int main(int argc, char **argv) {
     const struct CMUnitTest tests[] = {
@@ -86,6 +87,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_transaction_generate_signature_gives_signature),
         cmocka_unit_test(
             test_transaction_generate_signature_fails_on_invalid_input),
+        // test_base64.h
+        cmocka_unit_test(test_base64_decode_correctly_decodes),
+        cmocka_unit_test(test_base64_decode_fails_on_invalid_input),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
