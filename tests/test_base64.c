@@ -3,7 +3,7 @@
 #include "include/return_codes.h"
 #include "tests/test_base64.h"
 
-#define TEST_STRING_1 "Hello base64!"
+#define TEST_STRING_1 "Hello base64!\n"
 #define TEST_STRING_1_BASE64_ENCODED "SGVsbG8gYmFzZTY0IQo="
 #define TEST_STRING_2 "Hello\nbase64\n"
 #define TEST_STRING_2_BASE64_ENCODED "SGVsbG8KYmFzZTY0Cg=="
