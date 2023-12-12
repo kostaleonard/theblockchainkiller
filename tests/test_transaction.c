@@ -164,6 +164,7 @@ void test_transaction_generate_signature_gives_signature() {
 
 void test_transaction_generate_signature_fails_on_invalid_input() {
     transaction_t transaction = {0};
+    //TODO update key loading
     char *ssh_public_key_contents = getenv(
         TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE);
     assert_true(NULL != ssh_public_key_contents);
