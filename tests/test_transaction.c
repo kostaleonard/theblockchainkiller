@@ -8,8 +8,7 @@
 #include "include/return_codes.h"
 #include "tests/test_transaction.h"
 
-// TODO do we need these? Get rid of them on GitHub if not
-// These environment variables need to contain a valid RSA key pair.
+// These environment variables need to contain a base64 encoded RSA key pair.
 #define TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY"
 #define TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY"
 
@@ -164,12 +163,23 @@ void test_transaction_generate_signature_gives_signature() {
 
 void test_transaction_generate_signature_fails_on_invalid_input() {
     transaction_t transaction = {0};
-    //TODO update key loading
-    char *ssh_public_key_contents = getenv(
+    char *ssh_public_key_contents_base64 = getenv(
         TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+    char ssh_public_key_contents[MAX_SSH_KEY_LENGTH] = {0};
+    return_code_t return_code = base64_decode(
+        ssh_public_key_contents_base64,
+        strlen(ssh_public_key_contents_base64),
+        ssh_public_key_contents
+    );
     assert_true(NULL != ssh_public_key_contents);
-    char *ssh_private_key_contents = getenv(
+    char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
+    char ssh_private_key_contents[MAX_SSH_KEY_LENGTH] = {0};
+    return_code = base64_decode(
+        ssh_private_key_contents_base64,
+        strlen(ssh_private_key_contents_base64),
+        ssh_private_key_contents
+    );
     assert_true(NULL != ssh_private_key_contents);
     ssh_key_t ssh_public_key = {0};
     memcpy(
@@ -192,7 +202,7 @@ void test_transaction_generate_signature_fails_on_invalid_input() {
         sizeof(transaction.recipient_public_key));
     transaction.amount = 17;
     ssh_signature_t signature = {0};
-    return_code_t return_code = transaction_generate_signature(
+    return_code = transaction_generate_signature(
         NULL, &transaction, &ssh_private_key);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = transaction_generate_signature(
@@ -204,13 +214,130 @@ void test_transaction_generate_signature_fails_on_invalid_input() {
 }
 
 void test_transaction_verify_signature_identifies_valid_signature() {
-    // TODO
+    transaction_t transaction = {0};
+    char *ssh_public_key_contents_base64 = getenv(
+        TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+    char ssh_public_key_contents[MAX_SSH_KEY_LENGTH] = {0};
+    return_code_t return_code = base64_decode(
+        ssh_public_key_contents_base64,
+        strlen(ssh_public_key_contents_base64),
+        ssh_public_key_contents
+    );
+    assert_true(NULL != ssh_public_key_contents);
+    char *ssh_private_key_contents_base64 = getenv(
+        TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
+    char ssh_private_key_contents[MAX_SSH_KEY_LENGTH] = {0};
+    return_code = base64_decode(
+        ssh_private_key_contents_base64,
+        strlen(ssh_private_key_contents_base64),
+        ssh_private_key_contents
+    );
+    assert_true(NULL != ssh_private_key_contents);
+    ssh_key_t ssh_public_key = {0};
+    memcpy(
+        &ssh_public_key.bytes,
+        ssh_public_key_contents,
+        sizeof(ssh_public_key.bytes));
+    ssh_key_t ssh_private_key = {0};
+    memcpy(
+        &ssh_private_key.bytes,
+        ssh_private_key_contents,
+        sizeof(ssh_private_key.bytes));
+    transaction.created_at = time(NULL);
+    memcpy(
+        &transaction.sender_public_key,
+        &ssh_public_key,
+        sizeof(transaction.sender_public_key));
+    memcpy(
+        &transaction.recipient_public_key,
+        &ssh_public_key,
+        sizeof(transaction.recipient_public_key));
+    transaction.amount = 17;
+    return_code = transaction_generate_signature(
+        &transaction.sender_signature, &transaction, &ssh_private_key);
+    assert_true(SUCCESS == return_code);
+    bool is_valid_signature = false;
+    return_code = transaction_verify_signature(
+        &is_valid_signature, &transaction);
+    assert_true(SUCCESS == return_code);
+    assert_true(is_valid_signature);
 }
 
 void test_transaction_verify_signature_identifies_invalid_signature() {
-    // TODO
+    transaction_t transaction = {0};
+    char *ssh_public_key_contents_base64 = getenv(
+        TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+    char ssh_public_key_contents[MAX_SSH_KEY_LENGTH] = {0};
+    return_code_t return_code = base64_decode(
+        ssh_public_key_contents_base64,
+        strlen(ssh_public_key_contents_base64),
+        ssh_public_key_contents
+    );
+    assert_true(NULL != ssh_public_key_contents);
+    ssh_key_t ssh_public_key = {0};
+    memcpy(
+        &ssh_public_key.bytes,
+        ssh_public_key_contents,
+        sizeof(ssh_public_key.bytes));
+    transaction.created_at = time(NULL);
+    memcpy(
+        &transaction.sender_public_key,
+        &ssh_public_key,
+        sizeof(transaction.sender_public_key));
+    memcpy(
+        &transaction.recipient_public_key,
+        &ssh_public_key,
+        sizeof(transaction.recipient_public_key));
+    transaction.amount = 17;
+    // Fill the signature with garbage bytes.
+    for (size_t idx = 0;
+        idx < sizeof(transaction.sender_signature.bytes);
+        idx++) {
+        transaction.sender_signature.bytes[idx] = idx & 0xff;
+    }
+    bool is_valid_signature = false;
+    return_code = transaction_verify_signature(
+        &is_valid_signature, &transaction);
+    assert_true(SUCCESS == return_code);
+    assert_true(!is_valid_signature);
 }
 
 void test_transaction_verify_signature_fails_on_invalid_input() {
-    // TODO
+    transaction_t transaction = {0};
+    char *ssh_public_key_contents_base64 = getenv(
+        TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+    char ssh_public_key_contents[MAX_SSH_KEY_LENGTH] = {0};
+    return_code_t return_code = base64_decode(
+        ssh_public_key_contents_base64,
+        strlen(ssh_public_key_contents_base64),
+        ssh_public_key_contents
+    );
+    assert_true(NULL != ssh_public_key_contents);
+    ssh_key_t ssh_public_key = {0};
+    memcpy(
+        &ssh_public_key.bytes,
+        ssh_public_key_contents,
+        sizeof(ssh_public_key.bytes));
+    transaction.created_at = time(NULL);
+    memcpy(
+        &transaction.sender_public_key,
+        &ssh_public_key,
+        sizeof(transaction.sender_public_key));
+    memcpy(
+        &transaction.recipient_public_key,
+        &ssh_public_key,
+        sizeof(transaction.recipient_public_key));
+    transaction.amount = 17;
+    ssh_signature_t signature = {0};
+    // Fill the signature with garbage bytes.
+    for (size_t idx = 0; idx < sizeof(signature.bytes); idx++) {
+        signature.bytes[idx] = idx & 0xff;
+    }
+    bool is_valid_signature = false;
+    return_code = transaction_verify_signature(
+        NULL, &transaction);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = transaction_verify_signature(
+        &is_valid_signature, NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
 }

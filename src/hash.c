@@ -6,6 +6,7 @@ void hash_print(sha_256_t *hash) {
         return;
     }
     for (size_t idx = 0; idx < sizeof(hash->digest); idx++) {
+        // TODO should this format string be %02hhx?
         printf("%02x", hash->digest[idx]);
     }
     printf("\n");

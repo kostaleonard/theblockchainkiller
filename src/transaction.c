@@ -69,7 +69,6 @@ return_code_t transaction_generate_signature(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    // TODO sign data
     // TODO clean up error handling
     BIO *mem_bio = BIO_new_mem_buf(sender_private_key->bytes, MAX_SSH_KEY_LENGTH);
     if (!mem_bio) {
@@ -83,7 +82,6 @@ return_code_t transaction_generate_signature(
         while ((err = ERR_get_error()) != 0) {
             fprintf(stderr, "OpenSSL Error: %s\n", ERR_error_string(err, NULL));
         }
-        //TODO the key doesn't appear to be in PEM format. I think it's PKCS8 or something
         BIO_free(mem_bio);
         return FAILURE_OPENSSL_FUNCTION;
     }
@@ -109,6 +107,7 @@ return_code_t transaction_generate_signature(
         //TODO error handling
         return FAILURE_OPENSSL_FUNCTION;
     }
+    printf("Data to be signed: %p + %lld\n", transaction, sizeof(transaction_t) - sizeof(transaction->sender_signature));
 
     if (EVP_DigestSignUpdate(md_ctx, transaction, sizeof(transaction_t) - sizeof(transaction->sender_signature)) <= 0) {
         fprintf(stderr, "Error updating digest signing.\n");
@@ -117,7 +116,7 @@ return_code_t transaction_generate_signature(
         //TODO error handling
         return FAILURE_OPENSSL_FUNCTION;
     }
-    //TODO only need to call EVP_DigestSignFinal once since we have a max signature length
+    //TODO only need to call EVP_DigestSignFinal once since we have a max signature length--the first call gets the signature length
     size_t sig_len;
     if (EVP_DigestSignFinal(md_ctx, NULL, &sig_len) <= 0) {
         fprintf(stderr, "Error obtaining signature length.\n");
@@ -127,19 +126,98 @@ return_code_t transaction_generate_signature(
         return FAILURE_OPENSSL_FUNCTION;
     }
     printf("Signature length: %lld\n", sig_len);
-    if (EVP_DigestSignFinal(md_ctx, (unsigned char *)signature->bytes, &sig_len) <= 0) {
+    if (EVP_DigestSignFinal(md_ctx, signature->bytes, &sig_len) <= 0) {
         fprintf(stderr, "Error generating signature.\n");
         EVP_PKEY_free(pkey);
         EVP_MD_CTX_free(md_ctx);
         return 0;
     }
-    printf("Signature: ");
-    for (size_t idx = 0; idx < sizeof(signature->bytes); idx++) {
-        printf("%02x", signature->bytes[idx]);
-    }
-    printf("\n");
+    //TODO remove
+    // printf("Signature: ");
+    // for (size_t idx = 0; idx < sizeof(signature->bytes); idx++) {
+    //     printf("%02hhx", signature->bytes[idx]);
+    // }
+    // printf("\n");
     EVP_PKEY_free(pkey);
     EVP_MD_CTX_free(md_ctx);
+end:
+    return return_code;
+}
+
+return_code_t transaction_verify_signature(
+    bool *is_valid_signature,
+    transaction_t *transaction
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == is_valid_signature || NULL == transaction) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    // TODO
+    BIO *bio = BIO_new_mem_buf(transaction->sender_public_key.bytes, MAX_SSH_KEY_LENGTH);
+    if (bio == NULL) {
+        fprintf(stderr, "Error creating BIO object.\n");
+        return -1;
+    }
+
+    EVP_PKEY *pub_key = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL);
+    if (pub_key == NULL) {
+        fprintf(stderr, "Error reading public key.\n");
+        BIO_free(bio);
+        return -1;
+    }
+    BIO_free(bio);
+
+    EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new(pub_key, NULL);
+    if (ctx == NULL) {
+        fprintf(stderr, "Error creating PKEY context.\n");
+        EVP_PKEY_free(pub_key);
+        return -1;
+    }
+
+    // Set the signature algorithm
+    if (EVP_PKEY_verify_init(ctx) <= 0) {
+        fprintf(stderr, "Error initializing verification context.\n");
+        EVP_PKEY_CTX_free(ctx);
+        EVP_PKEY_free(pub_key);
+        return -1;
+    }
+
+    // Set the hashing algorithm (SHA256 in this case)
+    if (EVP_PKEY_CTX_set_signature_md(ctx, EVP_sha256()) <= 0) {
+        fprintf(stderr, "Error setting hashing algorithm.\n");
+        EVP_PKEY_CTX_free(ctx);
+        EVP_PKEY_free(pub_key);
+        return -1;
+    }
+    //TODO remove
+    // printf("Signature for verification: ");
+    // for (size_t idx = 0; idx < 512; idx++) {
+    //     printf("%02x", transaction->sender_signature.bytes[idx]);
+    // }
+    // printf("\n");
+    printf("Data to be verified: %p + %lld\n", transaction, sizeof(transaction_t) - sizeof(transaction->sender_signature));
+
+    unsigned char digest[SHA256_DIGEST_LENGTH];
+    SHA256((unsigned char *)transaction, sizeof(transaction_t) - sizeof(transaction->sender_signature), digest);
+
+    // TODO don't hard code signature length. It might have to go in transaction_t
+    // Verify the signature
+    if (EVP_PKEY_verify(ctx, transaction->sender_signature.bytes, 256, digest, SHA256_DIGEST_LENGTH) <= 0) {
+        fprintf(stderr, "Signature verification failed.\n");
+        unsigned long err;
+        while ((err = ERR_get_error()) != 0) {
+            fprintf(stderr, "OpenSSL Error: %s\n", ERR_error_string(err, NULL));
+        }
+        *is_valid_signature = false;
+    } else {
+        printf("Signature verified successfully.\n");
+        *is_valid_signature = true;
+    }
+
+    EVP_PKEY_CTX_free(ctx);
+    EVP_PKEY_free(pub_key);
+
 end:
     return return_code;
 }
