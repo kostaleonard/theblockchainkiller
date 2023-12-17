@@ -8,8 +8,10 @@
 #include "tests/test_transaction.h"
 
 // These environment variables need to contain a base64 encoded RSA key pair.
-#define TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY"
-#define TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY"
+#define TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE \
+    "THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY"
+#define TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE \
+    "THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY"
 
 void test_transaction_create_gives_transaction() {
     transaction_t *transaction = NULL;
@@ -113,8 +115,7 @@ void test_transaction_generate_signature_gives_signature() {
     return_code_t return_code = base64_decode(
         ssh_public_key_contents_base64,
         strlen(ssh_public_key_contents_base64),
-        ssh_public_key_contents
-    );
+        ssh_public_key_contents);
     assert_true(NULL != ssh_public_key_contents);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
@@ -122,8 +123,7 @@ void test_transaction_generate_signature_gives_signature() {
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
-        ssh_private_key_contents
-    );
+        ssh_private_key_contents);
     assert_true(NULL != ssh_private_key_contents);
     ssh_key_t ssh_public_key = {0};
     memcpy(
@@ -168,8 +168,7 @@ void test_transaction_generate_signature_fails_on_invalid_input() {
     return_code_t return_code = base64_decode(
         ssh_public_key_contents_base64,
         strlen(ssh_public_key_contents_base64),
-        ssh_public_key_contents
-    );
+        ssh_public_key_contents);
     assert_true(NULL != ssh_public_key_contents);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
@@ -177,8 +176,7 @@ void test_transaction_generate_signature_fails_on_invalid_input() {
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
-        ssh_private_key_contents
-    );
+        ssh_private_key_contents);
     assert_true(NULL != ssh_private_key_contents);
     ssh_key_t ssh_public_key = {0};
     memcpy(
@@ -220,8 +218,7 @@ void test_transaction_verify_signature_identifies_valid_signature() {
     return_code_t return_code = base64_decode(
         ssh_public_key_contents_base64,
         strlen(ssh_public_key_contents_base64),
-        ssh_public_key_contents
-    );
+        ssh_public_key_contents);
     assert_true(NULL != ssh_public_key_contents);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
@@ -229,8 +226,7 @@ void test_transaction_verify_signature_identifies_valid_signature() {
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
-        ssh_private_key_contents
-    );
+        ssh_private_key_contents);
     assert_true(NULL != ssh_private_key_contents);
     ssh_key_t ssh_public_key = {0};
     memcpy(
@@ -270,8 +266,7 @@ void test_transaction_verify_signature_identifies_invalid_signature() {
     return_code_t return_code = base64_decode(
         ssh_public_key_contents_base64,
         strlen(ssh_public_key_contents_base64),
-        ssh_public_key_contents
-    );
+        ssh_public_key_contents);
     assert_true(NULL != ssh_public_key_contents);
     ssh_key_t ssh_public_key = {0};
     memcpy(
@@ -309,8 +304,7 @@ void test_transaction_verify_signature_fails_on_invalid_input() {
     return_code_t return_code = base64_decode(
         ssh_public_key_contents_base64,
         strlen(ssh_public_key_contents_base64),
-        ssh_public_key_contents
-    );
+        ssh_public_key_contents);
     assert_true(NULL != ssh_public_key_contents);
     ssh_key_t ssh_public_key = {0};
     memcpy(

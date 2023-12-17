@@ -9,7 +9,6 @@
 #include <sys/time.h>
 #include "include/return_codes.h"
 
-// TODO separate key sizes for public and private keys, since private keys are much (4x) larger
 #define MAX_SSH_KEY_LENGTH 4096
 // OpenSSL digital signatures are 1/8 the size of the key length.
 #define MAX_SSH_SIGNATURE_LENGTH 512
@@ -29,6 +28,7 @@ typedef struct ssh_key_t {
  * @param bytes The SSH signature string contents.
  */
 typedef struct ssh_signature_t {
+    size_t length;
     unsigned char bytes[MAX_SSH_SIGNATURE_LENGTH];
 } ssh_signature_t;
 

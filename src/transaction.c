@@ -127,6 +127,7 @@ return_code_t transaction_generate_signature(
         return_code = FAILURE_OPENSSL_FUNCTION;
         goto end;
     }
+    signature->length = sig_len;
     EVP_PKEY_free(private_key);
     EVP_MD_CTX_free(md_ctx);
 end:
@@ -178,11 +179,13 @@ return_code_t transaction_verify_signature(
         return_code = FAILURE_OPENSSL_FUNCTION;
         goto end;
     }
-    //TODO don't hard code signature length
-    if (EVP_VerifyFinal(md_ctx, transaction->sender_signature.bytes, 256, public_key) == 1) {
+    if (EVP_VerifyFinal(
+            md_ctx,
+            transaction->sender_signature.bytes,
+            transaction->sender_signature.length,
+            public_key) == 1) {
         *is_valid_signature = true;
-    }
-    else {
+    } else {
         *is_valid_signature = false;
     }
     EVP_MD_CTX_free(md_ctx);

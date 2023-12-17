@@ -15,8 +15,7 @@ return_code_t base64_decode(
     int decoded_length = EVP_DecodeBlock(
         (unsigned char *)decoded,
         (const unsigned char *)encoded,
-        encoded_length
-    );
+        encoded_length);
     if (decoded_length < 0) {
         return_code = FAILURE_OPENSSL_FUNCTION;
         goto end;
