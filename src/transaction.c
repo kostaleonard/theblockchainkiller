@@ -69,6 +69,8 @@ return_code_t transaction_generate_signature(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
+    // TODO remove
+    char *data = "hello signature";
     // TODO clean up error handling
     BIO *mem_bio = BIO_new_mem_buf(sender_private_key->bytes, MAX_SSH_KEY_LENGTH);
     if (!mem_bio) {
@@ -109,7 +111,7 @@ return_code_t transaction_generate_signature(
     }
     printf("Data to be signed: %p + %lld\n", transaction, sizeof(transaction_t) - sizeof(transaction->sender_signature));
 
-    if (EVP_DigestSignUpdate(md_ctx, transaction, sizeof(transaction_t) - sizeof(transaction->sender_signature)) <= 0) {
+    if (EVP_DigestSignUpdate(md_ctx, data, strlen(data)) <= 0) {
         fprintf(stderr, "Error updating digest signing.\n");
         EVP_PKEY_free(pkey);
         EVP_MD_CTX_free(md_ctx);
@@ -133,11 +135,11 @@ return_code_t transaction_generate_signature(
         return 0;
     }
     //TODO remove
-    // printf("Signature: ");
-    // for (size_t idx = 0; idx < sizeof(signature->bytes); idx++) {
-    //     printf("%02hhx", signature->bytes[idx]);
-    // }
-    // printf("\n");
+    printf("Signature: ");
+    for (size_t idx = 0; idx < sizeof(signature->bytes); idx++) {
+        printf("%02hhx", signature->bytes[idx]);
+    }
+    printf("\n");
     EVP_PKEY_free(pkey);
     EVP_MD_CTX_free(md_ctx);
 end:
@@ -153,6 +155,8 @@ return_code_t transaction_verify_signature(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
+    // TODO remove
+    char *data = "hello signature";
     // TODO
     BIO *bio = BIO_new_mem_buf(transaction->sender_public_key.bytes, MAX_SSH_KEY_LENGTH);
     if (bio == NULL) {
@@ -168,54 +172,30 @@ return_code_t transaction_verify_signature(
     }
     BIO_free(bio);
 
-    EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new(pub_key, NULL);
-    if (ctx == NULL) {
-        fprintf(stderr, "Error creating PKEY context.\n");
-        EVP_PKEY_free(pub_key);
-        return -1;
-    }
+    EVP_MD_CTX *md_ctx_verify = EVP_MD_CTX_new();
+    EVP_VerifyInit(md_ctx_verify, EVP_sha256());
+    EVP_VerifyUpdate(md_ctx_verify, data, strlen(data));
 
-    // Set the signature algorithm
-    if (EVP_PKEY_verify_init(ctx) <= 0) {
-        fprintf(stderr, "Error initializing verification context.\n");
-        EVP_PKEY_CTX_free(ctx);
-        EVP_PKEY_free(pub_key);
-        return -1;
-    }
-
-    // Set the hashing algorithm (SHA256 in this case)
-    if (EVP_PKEY_CTX_set_signature_md(ctx, EVP_sha256()) <= 0) {
-        fprintf(stderr, "Error setting hashing algorithm.\n");
-        EVP_PKEY_CTX_free(ctx);
-        EVP_PKEY_free(pub_key);
-        return -1;
-    }
-    //TODO remove
-    // printf("Signature for verification: ");
-    // for (size_t idx = 0; idx < 512; idx++) {
-    //     printf("%02x", transaction->sender_signature.bytes[idx]);
-    // }
-    // printf("\n");
-    printf("Data to be verified: %p + %lld\n", transaction, sizeof(transaction_t) - sizeof(transaction->sender_signature));
-
-    unsigned char digest[SHA256_DIGEST_LENGTH];
-    SHA256((unsigned char *)transaction, sizeof(transaction_t) - sizeof(transaction->sender_signature), digest);
-
-    // TODO don't hard code signature length. It might have to go in transaction_t
+    //TODO don't hard code signature length
     // Verify the signature
-    if (EVP_PKEY_verify(ctx, transaction->sender_signature.bytes, 256, digest, SHA256_DIGEST_LENGTH) <= 0) {
-        fprintf(stderr, "Signature verification failed.\n");
+    int verify_result = EVP_VerifyFinal(md_ctx_verify, transaction->sender_signature.bytes, 256, pub_key);
+    EVP_MD_CTX_free(md_ctx_verify);
+
+    if (verify_result == 1) {
+        // Signature is valid
+        printf("Signature is valid!\n");
+        *is_valid_signature = true;
+    } else {
+        // Signature is not valid
+        printf("Signature verification failed!\n");
         unsigned long err;
         while ((err = ERR_get_error()) != 0) {
             fprintf(stderr, "OpenSSL Error: %s\n", ERR_error_string(err, NULL));
         }
         *is_valid_signature = false;
-    } else {
-        printf("Signature verified successfully.\n");
-        *is_valid_signature = true;
     }
 
-    EVP_PKEY_CTX_free(ctx);
+    //EVP_MD_CTX_free(md_ctx_verify);
     EVP_PKEY_free(pub_key);
 
 end:

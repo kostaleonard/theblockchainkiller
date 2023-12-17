@@ -20,7 +20,7 @@
  * @param bytes The SSH key string contents.
  */
 typedef struct ssh_key_t {
-    unsigned char bytes[MAX_SSH_KEY_LENGTH];
+    char bytes[MAX_SSH_KEY_LENGTH];
 } ssh_key_t;
 
 /**
