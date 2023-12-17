@@ -38,7 +38,13 @@ return_code_t transaction_create(
         recipient_public_key,
         MAX_SSH_KEY_LENGTH);
     new_transaction->amount = amount;
-    // TODO sign the transaction--test this
+    return_code = transaction_generate_signature(
+        &new_transaction->sender_signature,
+        new_transaction,
+        sender_private_key);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
     *transaction = new_transaction;
 end:
     return return_code;
