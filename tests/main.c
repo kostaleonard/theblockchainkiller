@@ -89,8 +89,8 @@ int main(int argc, char **argv) {
             test_transaction_generate_signature_fails_on_invalid_input),
         cmocka_unit_test(
             test_transaction_verify_signature_identifies_valid_signature),
-        // TODO uncomment
-        //cmocka_unit_test(test_transaction_verify_signature_identifies_invalid_signature),
+        cmocka_unit_test(
+            test_transaction_verify_signature_identifies_invalid_signature),
         cmocka_unit_test(
             test_transaction_verify_signature_fails_on_invalid_input),
         // test_base64.h

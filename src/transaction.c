@@ -69,8 +69,6 @@ return_code_t transaction_generate_signature(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    // TODO remove
-    char *data = "hello signature";
     // TODO clean up error handling
     BIO *mem_bio = BIO_new_mem_buf(sender_private_key->bytes, MAX_SSH_KEY_LENGTH);
     if (!mem_bio) {
@@ -109,9 +107,11 @@ return_code_t transaction_generate_signature(
         //TODO error handling
         return FAILURE_OPENSSL_FUNCTION;
     }
-    printf("Data to be signed: %p + %lld\n", transaction, sizeof(transaction_t) - sizeof(transaction->sender_signature));
+    size_t size_without_signature = offsetof(transaction_t, sender_signature);
+    printf("Data to be signed (previous): %p + %lld\n", transaction, sizeof(transaction_t) - sizeof(transaction->sender_signature));
+    printf("Data to be signed (current): %lld\n", size_without_signature);
 
-    if (EVP_DigestSignUpdate(md_ctx, data, strlen(data)) <= 0) {
+    if (EVP_DigestSignUpdate(md_ctx, transaction, size_without_signature) <= 0) {
         fprintf(stderr, "Error updating digest signing.\n");
         EVP_PKEY_free(pkey);
         EVP_MD_CTX_free(md_ctx);
@@ -155,8 +155,6 @@ return_code_t transaction_verify_signature(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    // TODO remove
-    char *data = "hello signature";
     // TODO
     BIO *bio = BIO_new_mem_buf(transaction->sender_public_key.bytes, MAX_SSH_KEY_LENGTH);
     if (bio == NULL) {
@@ -171,10 +169,10 @@ return_code_t transaction_verify_signature(
         return -1;
     }
     BIO_free(bio);
-
+    size_t size_without_signature = offsetof(transaction_t, sender_signature);
     EVP_MD_CTX *md_ctx_verify = EVP_MD_CTX_new();
     EVP_VerifyInit(md_ctx_verify, EVP_sha256());
-    EVP_VerifyUpdate(md_ctx_verify, data, strlen(data));
+    EVP_VerifyUpdate(md_ctx_verify, transaction, size_without_signature);
 
     //TODO don't hard code signature length
     // Verify the signature
