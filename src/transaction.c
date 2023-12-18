@@ -73,7 +73,6 @@ return_code_t transaction_generate_signature(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    printf("Sender public key: %s\n", transaction->sender_public_key.bytes);
     BIO *mem_bio = BIO_new_mem_buf(
         sender_private_key->bytes, MAX_SSH_KEY_LENGTH);
     if (!mem_bio) {
