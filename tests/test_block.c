@@ -1,11 +1,14 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+#include "include/base64.h"
 #include "include/block.h"
 #include "include/hash.h"
 #include "include/transaction.h"
 #include "include/return_codes.h"
 #include "tests/test_block.h"
+#include "tests/test_cryptography.h"
 
 void test_block_create_gives_block() {
     linked_list_t *transaction_list = NULL;
@@ -240,17 +243,36 @@ void test_block_hash_transactions_included_in_hash() {
         (free_function_t *)transaction_destroy,
         NULL);
     assert_true(SUCCESS == return_code);
-    transaction_t *transaction1 = NULL;
-    uint32_t user_id1 = 1;
-    uint32_t user_id2 = 2;
-    uint32_t amount1 = 5;
+    transaction_t *transaction = NULL;
+    char *ssh_public_key_contents_base64 = getenv(
+        TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+    ssh_key_t sender_public_key = {0};
+    return_code = base64_decode(
+        ssh_public_key_contents_base64,
+        strlen(ssh_public_key_contents_base64),
+        sender_public_key.bytes);
+    char *ssh_private_key_contents_base64 = getenv(
+        TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
+    ssh_key_t sender_private_key = {0};
+    return_code = base64_decode(
+        ssh_private_key_contents_base64,
+        strlen(ssh_private_key_contents_base64),
+        sender_private_key.bytes);
+    // In these test transactions, the sender and recipient are the same.
+    ssh_key_t recipient_public_key = {0};
+    memcpy(
+        &recipient_public_key,
+        &sender_public_key,
+        sizeof(recipient_public_key));
+    uint32_t amount = 5;
     return_code = transaction_create(
-        &transaction1,
-        user_id1,
-        user_id2,
-        amount1);
+        &transaction,
+        &sender_public_key,
+        &recipient_public_key,
+        amount,
+        &sender_private_key);
     assert_true(SUCCESS == return_code);
-    return_code = linked_list_prepend(transaction_list1, transaction1);
+    return_code = linked_list_prepend(transaction_list1, transaction);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;
     uint64_t proof_of_work = 123;
@@ -297,23 +319,43 @@ void test_block_hash_multiple_transactions_included_in_hash() {
         NULL);
     assert_true(SUCCESS == return_code);
     transaction_t *transaction1 = NULL;
-    uint32_t user_id1 = 1;
-    uint32_t user_id2 = 2;
-    uint32_t amount1 = 5;
+    char *ssh_public_key_contents_base64 = getenv(
+        TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+    ssh_key_t user_1_public_key = {0};
+    return_code = base64_decode(
+        ssh_public_key_contents_base64,
+        strlen(ssh_public_key_contents_base64),
+        user_1_public_key.bytes);
+    char *ssh_private_key_contents_base64 = getenv(
+        TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
+    ssh_key_t user_1_private_key = {0};
+    return_code = base64_decode(
+        ssh_private_key_contents_base64,
+        strlen(ssh_private_key_contents_base64),
+        user_1_private_key.bytes);
+    // In these test transactions, the sender and recipient are the same.
+    ssh_key_t user_2_public_key = {0};
+    memcpy(
+        &user_2_public_key,
+        &user_1_public_key,
+        sizeof(user_2_public_key));
+    uint32_t amount = 5;
     return_code = transaction_create(
         &transaction1,
-        user_id1,
-        user_id2,
-        amount1);
+        &user_1_public_key,
+        &user_2_public_key,
+        amount,
+        &user_1_private_key);
     assert_true(SUCCESS == return_code);
     // transaction2 is a copy of transaction1. We need to use a different memory
     // location to protect against race conditions when destroying both blocks.
     transaction_t *transaction2 = NULL;
     return_code = transaction_create(
         &transaction2,
-        user_id1,
-        user_id2,
-        amount1);
+        &user_1_public_key,
+        &user_2_public_key,
+        amount,
+        &user_1_private_key);
     assert_true(SUCCESS == return_code);
     return_code = linked_list_prepend(transaction_list1, transaction1);
     assert_true(SUCCESS == return_code);
@@ -321,9 +363,10 @@ void test_block_hash_multiple_transactions_included_in_hash() {
     uint32_t amount2 = 17;
     return_code = transaction_create(
         &transaction3,
-        user_id2,
-        user_id1,
-        amount2);
+        &user_1_public_key,
+        &user_2_public_key,
+        amount2,
+        &user_1_private_key);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;
     uint64_t proof_of_work = 123;

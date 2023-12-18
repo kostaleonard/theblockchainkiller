@@ -2,16 +2,31 @@
  * @brief Runs the app.
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include "include/base64.h"
 #include "include/blockchain.h"
 #include "include/block.h"
 #include "include/transaction.h"
 
 #define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3
+#define PRIVATE_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_PRIVATE_KEY"
+#define PUBLIC_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_PUBLIC_KEY"
 
-return_code_t mine_blocks(blockchain_t *blockchain) {
+return_code_t mine_blocks(
+    blockchain_t *blockchain,
+    ssh_key_t *miner_public_key,
+    ssh_key_t *miner_private_key) {
     return_code_t return_code = SUCCESS;
+    if (NULL == blockchain ||
+        NULL == miner_public_key ||
+        NULL == miner_private_key) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
     while (true) {
         node_t *node = NULL;
         return_code = linked_list_get_last(blockchain->block_list, &node);
@@ -30,12 +45,13 @@ return_code_t mine_blocks(blockchain_t *blockchain) {
             goto end;
         }
         transaction_t *mint_coin_transaction = NULL;
-        uint32_t recipient_id = 1;
+        ssh_key_t sender_public_key_for_minting = {0};
         return_code = transaction_create(
             &mint_coin_transaction,
-            SENDER_ID_FOR_MINTING,
-            recipient_id,
-            AMOUNT_GENERATED_DURING_MINTING);
+            &sender_public_key_for_minting,
+            miner_public_key,
+            AMOUNT_GENERATED_DURING_MINTING,
+            miner_private_key);
         if (SUCCESS != return_code) {
             linked_list_destroy(transaction_list);
             goto end;
@@ -76,10 +92,98 @@ end:
     return return_code;
 }
 
+void print_usage_statement(char *program_name) {
+    if (NULL == program_name) {
+        goto end;
+    }
+    fprintf(
+        stderr,
+        "Usage: %s "
+        "-p <private_key_file_base64_encoded_contents> "
+        "-k <public_key_file_base64_encoded_contents>\n",
+        program_name);
+    fprintf(
+        stderr,
+        "Or supply keys as environment variables %s and %s\n",
+        PRIVATE_KEY_ENVIRONMENT_VARIABLE,
+        PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+end:
+}
+
 int main(int argc, char **argv) {
     return_code_t return_code = SUCCESS;
     blockchain_t *blockchain = NULL;
     block_t *genesis_block = NULL;
+    char *ssh_private_key_contents_base64 = NULL;
+    char *ssh_public_key_contents_base64 = NULL;
+    int opt;
+    while ((opt = getopt(argc, argv, "p:k:")) != -1) {
+        switch (opt) {
+            case 'p':
+                printf("Using private key from argv\n");
+                ssh_private_key_contents_base64 = optarg;
+                break;
+            case 'k':
+                printf("Using public key from argv\n");
+                ssh_public_key_contents_base64 = optarg;
+                break;
+            default:
+                print_usage_statement(argv[0]);
+                return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+                goto end;
+        }
+    }
+    if (NULL == ssh_private_key_contents_base64) {
+        printf(
+            "No private key found in argv, searching env for %s\n",
+            PRIVATE_KEY_ENVIRONMENT_VARIABLE);
+        ssh_private_key_contents_base64 = getenv(
+            PRIVATE_KEY_ENVIRONMENT_VARIABLE);
+    }
+    if (NULL == ssh_public_key_contents_base64) {
+        printf(
+            "No public key found in argv, searching env for %s\n",
+            PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+        ssh_public_key_contents_base64 = getenv(
+            PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+    }
+    if (NULL == ssh_private_key_contents_base64 ||
+        NULL == ssh_public_key_contents_base64) {
+        print_usage_statement(argv[0]);
+        return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+        goto end;
+    }
+    ssh_key_t miner_public_key = {0};
+    size_t public_key_decoded_length =
+        (size_t)ceil(strlen(ssh_public_key_contents_base64) * 3 / 4) + 1;
+    if (public_key_decoded_length > sizeof(miner_public_key.bytes)) {
+        printf("Public key is too long\n");
+        return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+        goto end;
+    }
+    return_code = base64_decode(
+        ssh_public_key_contents_base64,
+        strlen(ssh_public_key_contents_base64),
+        miner_public_key.bytes);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    ssh_key_t miner_private_key = {0};
+    size_t private_key_decoded_length =
+        (size_t)ceil(strlen(ssh_private_key_contents_base64) * 3 / 4) + 1;
+    if (private_key_decoded_length > sizeof(miner_private_key.bytes)) {
+        printf("Private key is too long\n");
+        return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+        goto end;
+    }
+    return_code = base64_decode(
+        ssh_private_key_contents_base64,
+        strlen(ssh_private_key_contents_base64),
+        miner_private_key.bytes);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    printf("Using public key: %s\n", miner_public_key.bytes);
     return_code = blockchain_create(
         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
     if (SUCCESS != return_code) {
@@ -95,13 +199,9 @@ int main(int argc, char **argv) {
         goto end;
     }
     blockchain_print(blockchain);
-    sha_256_t genesis_block_hash = {0};
-    return_code = block_hash(genesis_block, &genesis_block_hash);
-    if (SUCCESS != return_code) {
-        goto end;
-    }
-    return_code = mine_blocks(blockchain);
+    return_code = mine_blocks(
+        blockchain, &miner_public_key, &miner_private_key);
 end:
     blockchain_destroy(blockchain);
-    return return_code;
+    exit(return_code);
 }
