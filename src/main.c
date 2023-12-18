@@ -2,8 +2,10 @@
  * @brief Runs the app.
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include "include/base64.h"
 #include "include/blockchain.h"
@@ -109,9 +111,6 @@ end:
 }
 
 int main(int argc, char **argv) {
-    // TODO redo gif on README to show passing environment variables for keys
-    // TODO update README to show running instructions: pass keys as environment variables, pass keys as args directly to miner script
-    // TODO detect when the user accidentally reversed their keys and gave a private key instead of a public key
     return_code_t return_code = SUCCESS;
     blockchain_t *blockchain = NULL;
     block_t *genesis_block = NULL;
@@ -154,8 +153,14 @@ int main(int argc, char **argv) {
         return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
         goto end;
     }
-    // TODO check if keys exceed maximum key length
     ssh_key_t miner_public_key = {0};
+    size_t public_key_decoded_length =
+        (size_t)ceil(strlen(ssh_public_key_contents_base64) * 3 / 4) + 1;
+    if (public_key_decoded_length > sizeof(miner_public_key.bytes)) {
+        printf("Public key is too long\n");
+        return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+        goto end;
+    }
     return_code = base64_decode(
         ssh_public_key_contents_base64,
         strlen(ssh_public_key_contents_base64),
@@ -164,6 +169,13 @@ int main(int argc, char **argv) {
         goto end;
     }
     ssh_key_t miner_private_key = {0};
+    size_t private_key_decoded_length =
+        (size_t)ceil(strlen(ssh_private_key_contents_base64) * 3 / 4) + 1;
+    if (private_key_decoded_length > sizeof(miner_private_key.bytes)) {
+        printf("Private key is too long\n");
+        return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+        goto end;
+    }
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),

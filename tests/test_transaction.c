@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include "include/base64.h"
 #include "include/transaction.h"
 #include "include/return_codes.h"
