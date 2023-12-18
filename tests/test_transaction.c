@@ -5,13 +5,8 @@
 #include "include/base64.h"
 #include "include/transaction.h"
 #include "include/return_codes.h"
+#include "tests/test_cryptography.h"
 #include "tests/test_transaction.h"
-
-// These environment variables need to contain a base64 encoded RSA key pair.
-#define TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE \
-    "THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY"
-#define TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE \
-    "THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY"
 
 void test_transaction_create_gives_transaction() {
     transaction_t *transaction = NULL;
@@ -24,11 +19,11 @@ void test_transaction_create_gives_transaction() {
         sender_public_key.bytes);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
-    ssh_key_t ssh_private_key = {0};
+    ssh_key_t sender_private_key = {0};
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
-        ssh_private_key.bytes);
+        sender_private_key.bytes);
     // In these test transactions, the sender and recipient are the same.
     ssh_key_t recipient_public_key = {0};
     memcpy(
@@ -41,7 +36,7 @@ void test_transaction_create_gives_transaction() {
         &sender_public_key,
         &recipient_public_key,
         amount,
-        &ssh_private_key);
+        &sender_private_key);
     assert_true(SUCCESS == return_code);
     assert_true(0 == memcmp(
         &transaction->sender_public_key,
@@ -72,11 +67,11 @@ void test_transaction_create_fails_on_invalid_input() {
         sender_public_key.bytes);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
-    ssh_key_t ssh_private_key = {0};
+    ssh_key_t sender_private_key = {0};
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
-        ssh_private_key.bytes);
+        sender_private_key.bytes);
     // In these test transactions, the sender and recipient are the same.
     ssh_key_t recipient_public_key = {0};
     memcpy(
@@ -89,21 +84,21 @@ void test_transaction_create_fails_on_invalid_input() {
         &sender_public_key,
         &recipient_public_key,
         amount,
-        &ssh_private_key);
+        &sender_private_key);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = transaction_create(
         &transaction,
         NULL,
         &recipient_public_key,
         amount,
-        &ssh_private_key);
+        &sender_private_key);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = transaction_create(
         &transaction,
         &sender_public_key,
         NULL,
         amount,
-        &ssh_private_key);
+        &sender_private_key);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = transaction_create(
         &transaction,
@@ -125,11 +120,11 @@ void test_transaction_destroy_returns_success() {
         sender_public_key.bytes);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
-    ssh_key_t ssh_private_key = {0};
+    ssh_key_t sender_private_key = {0};
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
-        ssh_private_key.bytes);
+        sender_private_key.bytes);
     // In these test transactions, the sender and recipient are the same.
     ssh_key_t recipient_public_key = {0};
     memcpy(
@@ -142,7 +137,7 @@ void test_transaction_destroy_returns_success() {
         &sender_public_key,
         &recipient_public_key,
         amount,
-        &ssh_private_key);
+        &sender_private_key);
     assert_true(SUCCESS == return_code);
     return_code = transaction_destroy(transaction);
     assert_true(SUCCESS == return_code);
@@ -163,11 +158,11 @@ void test_transaction_generate_signature_gives_signature() {
         transaction.sender_public_key.bytes);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
-    ssh_key_t ssh_private_key = {0};
+    ssh_key_t sender_private_key = {0};
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
-        ssh_private_key.bytes);
+        sender_private_key.bytes);
     transaction.created_at = time(NULL);
     // In these test transactions, the sender and recipient are the same.
     memcpy(
@@ -177,7 +172,7 @@ void test_transaction_generate_signature_gives_signature() {
     transaction.amount = 17;
     ssh_signature_t signature = {0};
     return_code = transaction_generate_signature(
-        &signature, &transaction, &ssh_private_key);
+        &signature, &transaction, &sender_private_key);
     assert_true(SUCCESS == return_code);
     char empty_signature[MAX_SSH_SIGNATURE_LENGTH] = {0};
     assert_true(0 == memcmp(
@@ -200,11 +195,11 @@ void test_transaction_generate_signature_fails_on_invalid_input() {
         transaction.sender_public_key.bytes);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
-    ssh_key_t ssh_private_key = {0};
+    ssh_key_t sender_private_key = {0};
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
-        ssh_private_key.bytes);
+        sender_private_key.bytes);
     transaction.created_at = time(NULL);
     // In these test transactions, the sender and recipient are the same.
     memcpy(
@@ -214,10 +209,10 @@ void test_transaction_generate_signature_fails_on_invalid_input() {
     transaction.amount = 17;
     ssh_signature_t signature = {0};
     return_code = transaction_generate_signature(
-        NULL, &transaction, &ssh_private_key);
+        NULL, &transaction, &sender_private_key);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = transaction_generate_signature(
-        &signature, NULL, &ssh_private_key);
+        &signature, NULL, &sender_private_key);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = transaction_generate_signature(
         &signature, &transaction, NULL);
@@ -234,11 +229,11 @@ void test_transaction_verify_signature_identifies_valid_signature() {
         transaction.sender_public_key.bytes);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
-    ssh_key_t ssh_private_key = {0};
+    ssh_key_t sender_private_key = {0};
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
-        ssh_private_key.bytes);
+        sender_private_key.bytes);
     transaction.created_at = time(NULL);
     // In these test transactions, the sender and recipient are the same.
     memcpy(
@@ -247,7 +242,7 @@ void test_transaction_verify_signature_identifies_valid_signature() {
         sizeof(transaction.recipient_public_key));
     transaction.amount = 17;
     return_code = transaction_generate_signature(
-        &transaction.sender_signature, &transaction, &ssh_private_key);
+        &transaction.sender_signature, &transaction, &sender_private_key);
     assert_true(SUCCESS == return_code);
     bool is_valid_signature = false;
     return_code = transaction_verify_signature(
@@ -266,11 +261,11 @@ void test_transaction_verify_signature_identifies_invalid_signature() {
         transaction.sender_public_key.bytes);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
-    ssh_key_t ssh_private_key = {0};
+    ssh_key_t sender_private_key = {0};
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
-        ssh_private_key.bytes);
+        sender_private_key.bytes);
     transaction.created_at = time(NULL);
     // In these test transactions, the sender and recipient are the same.
     memcpy(
