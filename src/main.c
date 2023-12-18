@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "include/base64.h"
 #include "include/blockchain.h"
 #include "include/block.h"
 #include "include/transaction.h"
@@ -96,8 +97,8 @@ void print_usage_statement(char *program_name) {
     fprintf(
         stderr,
         "Usage: %s "
-        "-p <private_key_file_contents> "
-        "-k <public_key_file_contents>\n",
+        "-p <private_key_file_base64_encoded_contents> "
+        "-k <public_key_file_base64_encoded_contents>\n",
         program_name);
     fprintf(
         stderr,
@@ -114,18 +115,18 @@ int main(int argc, char **argv) {
     return_code_t return_code = SUCCESS;
     blockchain_t *blockchain = NULL;
     block_t *genesis_block = NULL;
-    char *ssh_private_key_contents = NULL;
-    char *ssh_public_key_contents = NULL;
+    char *ssh_private_key_contents_base64 = NULL;
+    char *ssh_public_key_contents_base64 = NULL;
     int opt;
     while ((opt = getopt(argc, argv, "p:k:")) != -1) {
         switch (opt) {
             case 'p':
                 printf("Using private key from argv\n");
-                ssh_private_key_contents = optarg;
+                ssh_private_key_contents_base64 = optarg;
                 break;
             case 'k':
                 printf("Using public key from argv\n");
-                ssh_public_key_contents = optarg;
+                ssh_public_key_contents_base64 = optarg;
                 break;
             default:
                 print_usage_statement(argv[0]);
@@ -133,35 +134,44 @@ int main(int argc, char **argv) {
                 goto end;
         }
     }
-    if (NULL == ssh_private_key_contents) {
+    if (NULL == ssh_private_key_contents_base64) {
         printf(
             "No private key found in argv, searching env for %s\n",
             PRIVATE_KEY_ENVIRONMENT_VARIABLE);
-        ssh_private_key_contents = getenv(PRIVATE_KEY_ENVIRONMENT_VARIABLE);
+        ssh_private_key_contents_base64 = getenv(
+            PRIVATE_KEY_ENVIRONMENT_VARIABLE);
     }
-    if (NULL == ssh_public_key_contents) {
+    if (NULL == ssh_public_key_contents_base64) {
         printf(
             "No public key found in argv, searching env for %s\n",
             PUBLIC_KEY_ENVIRONMENT_VARIABLE);
-        ssh_public_key_contents = getenv(PUBLIC_KEY_ENVIRONMENT_VARIABLE);
+        ssh_public_key_contents_base64 = getenv(
+            PUBLIC_KEY_ENVIRONMENT_VARIABLE);
     }
-    if (NULL == ssh_private_key_contents || NULL == ssh_public_key_contents) {
+    if (NULL == ssh_private_key_contents_base64 ||
+        NULL == ssh_public_key_contents_base64) {
         print_usage_statement(argv[0]);
         return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
         goto end;
     }
     // TODO check if keys exceed maximum key length
-    printf("Using public key: %s\n", ssh_public_key_contents);
     ssh_key_t miner_public_key = {0};
-    memcpy(
-        &miner_public_key.bytes,
-        ssh_public_key_contents,
-        sizeof(miner_public_key.bytes));
+    return_code = base64_decode(
+        ssh_public_key_contents_base64,
+        strlen(ssh_public_key_contents_base64),
+        miner_public_key.bytes);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
     ssh_key_t miner_private_key = {0};
-    memcpy(
-        &miner_private_key.bytes,
-        ssh_private_key_contents,
-        sizeof(miner_private_key.bytes));
+    return_code = base64_decode(
+        ssh_private_key_contents_base64,
+        strlen(ssh_private_key_contents_base64),
+        miner_private_key.bytes);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    printf("Using public key: %s\n", miner_public_key.bytes);
     return_code = blockchain_create(
         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
     if (SUCCESS != return_code) {
