@@ -97,7 +97,7 @@ return_code_t blockchain_mine_block(
         goto end;
     }
     size_t best_leading_zeroes = 0;
-    size_t print_frequency = 100000;
+    size_t print_frequency = 20000;
     sha_256_t hash = {0};
     bool is_valid_block_hash = false;
     for (uint64_t new_proof = 0; new_proof < UINT64_MAX; new_proof++) {
