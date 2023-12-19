@@ -339,6 +339,11 @@ void test_block_hash_multiple_transactions_included_in_hash() {
         &user_2_public_key,
         &user_1_public_key,
         sizeof(user_2_public_key));
+    ssh_key_t user_2_private_key = {0};
+    memcpy(
+        &user_2_private_key,
+        &user_1_private_key,
+        sizeof(user_2_private_key));
     uint32_t amount = 5;
     return_code = transaction_create(
         &transaction1,
@@ -349,24 +354,18 @@ void test_block_hash_multiple_transactions_included_in_hash() {
     assert_true(SUCCESS == return_code);
     // transaction2 is a copy of transaction1. We need to use a different memory
     // location to protect against race conditions when destroying both blocks.
-    transaction_t *transaction2 = NULL;
-    return_code = transaction_create(
-        &transaction2,
-        &user_1_public_key,
-        &user_2_public_key,
-        amount,
-        &user_1_private_key);
-    assert_true(SUCCESS == return_code);
+    transaction_t *transaction2 = malloc(sizeof(transaction_t));
+    memcpy(transaction2, transaction1, sizeof(transaction_t));
     return_code = linked_list_prepend(transaction_list1, transaction1);
     assert_true(SUCCESS == return_code);
     transaction_t *transaction3 = NULL;
     uint32_t amount2 = 17;
     return_code = transaction_create(
         &transaction3,
-        &user_1_public_key,
         &user_2_public_key,
+        &user_1_public_key,
         amount2,
-        &user_1_private_key);
+        &user_2_private_key);
     assert_true(SUCCESS == return_code);
     block_t *block1 = NULL;
     uint64_t proof_of_work = 123;
