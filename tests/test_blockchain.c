@@ -249,3 +249,27 @@ void test_blockchain_mine_block_fails_on_invalid_input() {
     block_destroy(block1);
     blockchain_destroy(blockchain);
 }
+
+void test_blockchain_verify_succeeds_on_valid_blockchain() {
+    // TODO need to serialize blockchain and save as fixture
+}
+
+void test_blockchain_verify_fails_on_invalid_genesis_block() {
+    // TODO
+}
+
+void test_blockchain_verify_fails_on_invalid_proof_of_work() {
+    // TODO
+}
+
+void test_blockchain_verify_fails_on_invalid_previous_block_hash() {
+    // TODO
+}
+
+void test_blockchain_verify_fails_on_invalid_transaction_signature() {
+    // TODO
+}
+
+void test_blockchain_verify_fails_on_invalid_arguments() {
+    // TODO
+}
