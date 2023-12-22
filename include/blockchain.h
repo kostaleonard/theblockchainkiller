@@ -117,6 +117,7 @@ return_code_t blockchain_verify(
 
 // TODO unsigned char **buffer?
 // TODO not sure if size_t is big enough for buffer_size
+// TODO for every block, serialize block; for every transaction, serialize transaction
 /**
  * @brief Serializes the blockchain into a buffer for file or network I/O.
  * 
@@ -132,6 +133,22 @@ return_code_t blockchain_serialize(
     blockchain_t *blockchain,
     char **buffer,
     size_t *buffer_size
+);
+
+// TODO match arguments of blockchain_serialize
+/**
+ * @brief Reconstructs the blockchain from a buffer.
+ * 
+ * @param blockchain A pointer to fill with the reconstructed blockchain.
+ * Callers are responsible for calling blockchain_destroy when finished.
+ * @param buffer An array containing the serialized blockchain.
+ * @param buffer_size The length of the serialized blockchain.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_deserialize(
+    blockchain_t **blockchain,
+    char *buffer,
+    size_t buffer_size
 );
 
 #endif  // INCLUDE_BLOCKCHAIN_H_

@@ -273,3 +273,5 @@ void test_blockchain_verify_fails_on_invalid_transaction_signature() {
 void test_blockchain_verify_fails_on_invalid_arguments() {
     // TODO
 }
+
+// TODO tests for blockchain_serialize and blockchain_deserialize
