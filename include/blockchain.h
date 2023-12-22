@@ -115,4 +115,23 @@ return_code_t blockchain_verify(
     block_t **first_invalid_block
 );
 
+// TODO unsigned char **buffer?
+// TODO not sure if size_t is big enough for buffer_size
+/**
+ * @brief Serializes the blockchain into a buffer for file or network I/O.
+ * 
+ * @param blockchain The blockchain.
+ * @param buffer A pointer to fill with the bytes representing the blockchain.
+ * Callers can write the bytes to a file or send on the network and reconstruct
+ * the original blockchain with blockchain_deserialize. Callers are responsible
+ * for freeing the buffer.
+ * @param buffer_size A pointer to fill with the final size of the buffer.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_serialize(
+    blockchain_t *blockchain,
+    char **buffer,
+    size_t *buffer_size
+);
+
 #endif  // INCLUDE_BLOCKCHAIN_H_
