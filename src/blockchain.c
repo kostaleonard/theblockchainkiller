@@ -199,7 +199,10 @@ return_code_t blockchain_serialize(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    // TODO
+    // TODO blockchain metadata: num leading zeros and number of blocks
+    //unsigned char *new_buffer = calloc(sizeof(blockchain->num_leading_zero_bytes_required_in_block_hash) + )
+    // TODO for every block
+    // TODO for every transaction
 end:
     return return_code;
 }
