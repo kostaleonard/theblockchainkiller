@@ -270,8 +270,22 @@ void test_blockchain_verify_fails_on_invalid_transaction_signature() {
     // TODO
 }
 
-void test_blockchain_verify_fails_on_invalid_arguments() {
+void test_blockchain_verify_fails_on_invalid_input() {
     // TODO
 }
 
-// TODO tests for blockchain_serialize and blockchain_deserialize
+void test_blockchain_serialize_creates_nonempty_buffer() {
+    // TODO use blockchain with only genesis block to not take forever mining blocks
+}
+
+void test_blockchain_serialize_fails_on_invalid_arguments() {
+    // TODO
+}
+
+void test_blockchain_deserialize_reconstructs_blockchain() {
+    // TODO use fixture here so you have some actual data
+}
+
+void test_blockchain_deserialize_fails_on_invalid_input() {
+    // TODO
+}
