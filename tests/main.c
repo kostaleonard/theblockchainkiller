@@ -46,6 +46,10 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_linked_list_get_last_fails_on_empty_list),
         cmocka_unit_test(test_linked_list_get_last_gives_last_element),
         cmocka_unit_test(test_linked_list_get_last_fails_on_invalid_input),
+        cmocka_unit_test(test_linked_list_length_gives_zero_on_empty_list),
+        cmocka_unit_test(
+            test_linked_list_length_gives_num_elements_on_nonempty_list),
+        cmocka_unit_test(test_linked_list_length_fails_on_invalid_input),
         // test_block.h
         cmocka_unit_test(test_block_create_gives_block),
         cmocka_unit_test(test_block_create_fails_on_invalid_input),

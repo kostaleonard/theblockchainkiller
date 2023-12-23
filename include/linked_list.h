@@ -6,6 +6,7 @@
 #define INCLUDE_LINKED_LIST_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 #include "include/return_codes.h"
 
 /**
