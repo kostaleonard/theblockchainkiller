@@ -115,8 +115,6 @@ return_code_t blockchain_verify(
     block_t **first_invalid_block
 );
 
-// TODO unsigned char **buffer?
-// TODO not sure if size_t is big enough for buffer_size
 // TODO for every block, serialize block; for every transaction, serialize transaction
 /**
  * @brief Serializes the blockchain into a buffer for file or network I/O.
@@ -131,8 +129,8 @@ return_code_t blockchain_verify(
  */
 return_code_t blockchain_serialize(
     blockchain_t *blockchain,
-    char **buffer,
-    size_t *buffer_size
+    unsigned char **buffer,
+    uint64_t *buffer_size
 );
 
 // TODO match arguments of blockchain_serialize
@@ -147,8 +145,8 @@ return_code_t blockchain_serialize(
  */
 return_code_t blockchain_deserialize(
     blockchain_t **blockchain,
-    char *buffer,
-    size_t buffer_size
+    unsigned char *buffer,
+    uint64_t buffer_size
 );
 
 #endif  // INCLUDE_BLOCKCHAIN_H_

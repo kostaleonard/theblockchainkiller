@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include "include/block.h"
 #include "include/blockchain.h"
 #include "include/hash.h"
@@ -275,11 +276,45 @@ void test_blockchain_verify_fails_on_invalid_input() {
 }
 
 void test_blockchain_serialize_creates_nonempty_buffer() {
-    // TODO use blockchain with only genesis block to not take forever mining blocks
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    block_t *genesis_block = NULL;
+    return_code = block_create_genesis_block(&genesis_block);
+    assert_true(SUCCESS == return_code);
+    return_code = blockchain_add_block(blockchain, genesis_block);
+    assert_true(SUCCESS == return_code);
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code = blockchain_serialize(blockchain, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    assert_true(NULL != buffer);
+    assert_true(0 != buffer_size);
+    unsigned char *empty_buffer = calloc(buffer_size, 1);
+    assert_true(0 != memcmp(buffer, empty_buffer, buffer_size));
+    free(buffer);
+    free(empty_buffer);
 }
 
 void test_blockchain_serialize_fails_on_invalid_arguments() {
-    // TODO
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    block_t *genesis_block = NULL;
+    return_code = block_create_genesis_block(&genesis_block);
+    assert_true(SUCCESS == return_code);
+    return_code = blockchain_add_block(blockchain, genesis_block);
+    assert_true(SUCCESS == return_code);
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code = blockchain_serialize(NULL, &buffer, &buffer_size);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = blockchain_serialize(blockchain, NULL, &buffer_size);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = blockchain_serialize(blockchain, &buffer, NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
 }
 
 void test_blockchain_deserialize_reconstructs_blockchain() {

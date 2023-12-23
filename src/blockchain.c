@@ -188,3 +188,18 @@ void blockchain_print(blockchain_t *blockchain) {
     }
     printf("\n");
 }
+
+return_code_t blockchain_serialize(
+    blockchain_t *blockchain,
+    unsigned char **buffer,
+    uint64_t *buffer_size
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == blockchain || NULL == buffer || NULL == buffer_size) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    // TODO
+end:
+    return return_code;
+}

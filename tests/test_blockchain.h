@@ -31,4 +31,8 @@ void test_blockchain_mine_block_produces_block_with_valid_hash();
 
 void test_blockchain_mine_block_fails_on_invalid_input();
 
+void test_blockchain_serialize_creates_nonempty_buffer();
+
+void test_blockchain_serialize_fails_on_invalid_arguments();
+
 #endif  // TESTS_TEST_BLOCKCHAIN_H_
