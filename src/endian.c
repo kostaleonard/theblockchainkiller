@@ -15,5 +15,15 @@ uint64_t htobe64(uint64_t data) {
 }
 
 uint64_t betoh64(uint64_t data) {
-    return htobe64(data);
+    uint64_t decoded = 0;
+    uint8_t *p = (uint8_t *)&data;
+    decoded |= (uint64_t)p[0] << 56;
+    decoded |= (uint64_t)p[1] << 48;
+    decoded |= (uint64_t)p[2] << 40;
+    decoded |= (uint64_t)p[3] << 32;
+    decoded |= (uint64_t)p[4] << 24;
+    decoded |= (uint64_t)p[5] << 16;
+    decoded |= (uint64_t)p[6] << 8;
+    decoded |= (uint64_t)p[7] << 0;
+    return decoded;
 }
