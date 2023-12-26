@@ -11,6 +11,7 @@
 #include "tests/test_blockchain.h"
 #include "tests/test_transaction.h"
 #include "tests/test_base64.h"
+#include "tests/test_endian.h"
 
 int main(int argc, char **argv) {
     const struct CMUnitTest tests[] = {
@@ -102,6 +103,9 @@ int main(int argc, char **argv) {
         // test_base64.h
         cmocka_unit_test(test_base64_decode_correctly_decodes),
         cmocka_unit_test(test_base64_decode_fails_on_invalid_input),
+        // test_endian.h
+        cmocka_unit_test(test_htobe64_correctly_encodes_data),
+        cmocka_unit_test(test_betoh64_correctly_decodes_data),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

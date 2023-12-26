@@ -200,9 +200,20 @@ return_code_t blockchain_serialize(
         goto end;
     }
     // TODO blockchain metadata: num leading zeros and number of blocks
-    //unsigned char *new_buffer = calloc(sizeof(blockchain->num_leading_zero_bytes_required_in_block_hash) + )
+    uint64_t num_blocks = 0;
+    return_code = linked_list_length(blockchain->block_list, &num_blocks);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    unsigned char *new_buffer = calloc(
+        1,
+        sizeof(blockchain->num_leading_zero_bytes_required_in_block_hash) +
+        sizeof(num_blocks));
+    
+    // TODO portable htobe64?
     // TODO for every block
     // TODO for every transaction
+    *buffer = new_buffer;
 end:
     return return_code;
 }
