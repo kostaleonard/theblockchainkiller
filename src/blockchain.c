@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include "include/block.h"
 #include "include/blockchain.h"
+#include "include/endian.h"
 #include "include/linked_list.h"
 #include "include/return_codes.h"
+#include "include/transaction.h"
 
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_RESET "\x1b[0m"
@@ -199,21 +201,101 @@ return_code_t blockchain_serialize(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    // TODO blockchain metadata: num leading zeros and number of blocks
     uint64_t num_blocks = 0;
     return_code = linked_list_length(blockchain->block_list, &num_blocks);
     if (SUCCESS != return_code) {
         goto end;
     }
-    unsigned char *new_buffer = calloc(
-        1,
+    uint64_t size = 
         sizeof(blockchain->num_leading_zero_bytes_required_in_block_hash) +
-        sizeof(num_blocks));
-    
-    // TODO portable htobe64?
-    // TODO for every block
-    // TODO for every transaction
+        sizeof(num_blocks);
+    unsigned char *new_buffer = calloc(1, size);
+    if (NULL == new_buffer) {
+        return_code = FAILURE_COULD_NOT_MALLOC;
+        goto end;
+    }
+    unsigned char *next_spot_in_buffer = new_buffer;
+    *(uint64_t *)next_spot_in_buffer = htobe64(
+        blockchain->num_leading_zero_bytes_required_in_block_hash);
+    next_spot_in_buffer += sizeof(
+        blockchain->num_leading_zero_bytes_required_in_block_hash);
+    *(uint64_t *)next_spot_in_buffer = htobe64(num_blocks);
+    next_spot_in_buffer += sizeof(num_blocks);
+    for (node_t *block_node = blockchain->block_list->head;
+        NULL != block_node;
+        block_node = block_node->next) {
+        block_t *block = (block_t *)block_node->data;
+        uint64_t num_transactions_in_block = 0;
+        return_code = linked_list_length(
+            block->transaction_list, &num_transactions_in_block);
+        if (SUCCESS != return_code) {
+            free(new_buffer);
+            goto end;
+        }
+        size += sizeof(block->created_at);
+        size += sizeof(block->previous_block_hash);
+        size += sizeof(block->proof_of_work);
+        size += sizeof(num_transactions_in_block);
+        new_buffer = realloc(new_buffer, size);
+        if (NULL == new_buffer) {
+            goto end;
+        }
+        *(uint64_t *)next_spot_in_buffer = htobe64(block->created_at);
+        next_spot_in_buffer += sizeof(block->created_at);
+        for (size_t idx = 0; idx < sizeof(block->previous_block_hash); idx++) {
+            *next_spot_in_buffer = block->previous_block_hash.digest[idx];
+            next_spot_in_buffer++;
+        }
+        *(uint64_t *)next_spot_in_buffer = htobe64(block->proof_of_work);
+        next_spot_in_buffer += sizeof(block->proof_of_work);
+        *(uint64_t *)next_spot_in_buffer = htobe64(num_transactions_in_block);
+        next_spot_in_buffer += sizeof(num_transactions_in_block);
+        for (node_t *transaction_node = block->transaction_list->head;
+            NULL != transaction_node;
+            transaction_node = transaction_node->next) {
+            transaction_t *transaction = (transaction_t *)
+                transaction_node->data;
+            size += sizeof(transaction->created_at);
+            size += sizeof(transaction->sender_public_key);
+            size += sizeof(transaction->recipient_public_key);
+            size += sizeof(transaction->amount);
+            size += sizeof(transaction->sender_signature.length);
+            size += sizeof(transaction->sender_signature.bytes);
+            new_buffer = realloc(new_buffer, size);
+            if (NULL == new_buffer) {
+                goto end;
+            }
+            *(uint64_t *)next_spot_in_buffer = htobe64(transaction->created_at);
+            next_spot_in_buffer += sizeof(transaction->created_at);
+            for (size_t idx = 0;
+                 idx < sizeof(transaction->sender_public_key);
+                 idx++) {
+                *next_spot_in_buffer =
+                    transaction->sender_public_key.bytes[idx];
+                next_spot_in_buffer++;
+            }
+            for (size_t idx = 0;
+                 idx < sizeof(transaction->recipient_public_key);
+                 idx++) {
+                *next_spot_in_buffer =
+                    transaction->recipient_public_key.bytes[idx];
+                next_spot_in_buffer++;
+            }
+            *(uint64_t *)next_spot_in_buffer = htobe64(transaction->amount);
+            next_spot_in_buffer += sizeof(transaction->amount);
+            *(uint64_t *)next_spot_in_buffer = htobe64(
+                transaction->sender_signature.length);
+            next_spot_in_buffer += sizeof(transaction->sender_signature.length);
+            for (size_t idx = 0;
+                idx < sizeof(transaction->sender_signature.bytes);
+                idx++) {
+                *next_spot_in_buffer = transaction->sender_signature.bytes[idx];
+                next_spot_in_buffer++;
+            }
+        }
+    }
     *buffer = new_buffer;
+    *buffer_size = size;
 end:
     return return_code;
 }
