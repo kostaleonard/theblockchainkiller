@@ -84,6 +84,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(
             test_blockchain_mine_block_produces_block_with_valid_hash),
         cmocka_unit_test(test_blockchain_mine_block_fails_on_invalid_input),
+        // TODO put these in the correct order
         cmocka_unit_test(test_blockchain_serialize_creates_nonempty_buffer),
         cmocka_unit_test(test_blockchain_serialize_fails_on_invalid_arguments),
         // test_transaction.h

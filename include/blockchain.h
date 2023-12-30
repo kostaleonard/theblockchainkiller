@@ -115,7 +115,6 @@ return_code_t blockchain_verify(
     block_t **first_invalid_block
 );
 
-// TODO for every block, serialize block; for every transaction, serialize transaction
 /**
  * @brief Serializes the blockchain into a buffer for file or network I/O.
  * 
@@ -133,7 +132,6 @@ return_code_t blockchain_serialize(
     uint64_t *buffer_size
 );
 
-// TODO match arguments of blockchain_serialize
 /**
  * @brief Reconstructs the blockchain from a buffer.
  * 
@@ -147,6 +145,31 @@ return_code_t blockchain_deserialize(
     blockchain_t **blockchain,
     unsigned char *buffer,
     uint64_t buffer_size
+);
+
+/**
+ * @brief Saves the blockchain to a file.
+ * 
+ * @param blockchain The blockchain.
+ * @param filename The path to which to write the blockchain.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_write_to_file(
+    blockchain_t *blockchain,
+    char *filename
+);
+
+/**
+ * @brief Reads the blockchain from a file.
+ * 
+ * @param blockchain A pointer to fill with the reconstructed blockchain.
+ * Callers are responsible for calling blockchain_destroy when finished.
+ * @param filename The path from which to read the blockchain.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_read_from_file(
+    blockchain_t **blockchain,
+    char *filename
 );
 
 #endif  // INCLUDE_BLOCKCHAIN_H_
