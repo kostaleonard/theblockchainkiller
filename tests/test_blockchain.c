@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "include/block.h"
 #include "include/blockchain.h"
 #include "include/hash.h"
@@ -295,6 +297,7 @@ void test_blockchain_serialize_creates_nonempty_buffer() {
     assert_true(0 != memcmp(buffer, empty_buffer, buffer_size));
     free(buffer);
     free(empty_buffer);
+    blockchain_destroy(blockchain);
 }
 
 void test_blockchain_serialize_fails_on_invalid_arguments() {
@@ -315,6 +318,7 @@ void test_blockchain_serialize_fails_on_invalid_arguments() {
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = blockchain_serialize(blockchain, &buffer, NULL);
     assert_true(FAILURE_INVALID_INPUT == return_code);
+    blockchain_destroy(blockchain);
 }
 
 void test_blockchain_deserialize_reconstructs_blockchain() {
@@ -326,7 +330,24 @@ void test_blockchain_deserialize_fails_on_invalid_input() {
 }
 
 void test_blockchain_write_to_file_creates_nonempty_file() {
-    // TODO
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    block_t *genesis_block = NULL;
+    return_code = block_create_genesis_block(&genesis_block);
+    assert_true(SUCCESS == return_code);
+    return_code = blockchain_add_block(blockchain, genesis_block);
+    assert_true(SUCCESS == return_code);
+    FILE *f = tmpfile();
+    return_code = blockchain_write_to_file(blockchain, f);
+    assert_true(SUCCESS == return_code);
+    int file_descriptor = fileno(f);
+    struct stat file_stats = {0};
+    assert_true(0 != fstat(file_descriptor, &file_stats));
+    assert_true(0 != file_stats.st_size);
+    fclose(f);
+    blockchain_destroy(blockchain);
 }
 
 void test_blockchain_write_to_file_fails_on_invalid_input() {

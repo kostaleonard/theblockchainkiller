@@ -151,12 +151,13 @@ return_code_t blockchain_deserialize(
  * @brief Saves the blockchain to a file.
  * 
  * @param blockchain The blockchain.
- * @param filename The path to which to write the blockchain.
+ * @param outfile The file to which to write the blockchain. The file should be
+ * open in "wb" mode.
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t blockchain_write_to_file(
     blockchain_t *blockchain,
-    char *filename
+    FILE *outfile
 );
 
 /**
@@ -164,12 +165,13 @@ return_code_t blockchain_write_to_file(
  * 
  * @param blockchain A pointer to fill with the reconstructed blockchain.
  * Callers are responsible for calling blockchain_destroy when finished.
- * @param filename The path from which to read the blockchain.
+ * @param infile The file from which to read the blockchain. The file should be
+ * open in "rb" mode.
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t blockchain_read_from_file(
     blockchain_t **blockchain,
-    char *filename
+    FILE *infile
 );
 
 #endif  // INCLUDE_BLOCKCHAIN_H_
