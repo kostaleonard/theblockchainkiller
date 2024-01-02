@@ -264,7 +264,7 @@ void test_block_hash_transactions_included_in_hash() {
         &recipient_public_key,
         &sender_public_key,
         sizeof(recipient_public_key));
-    uint32_t amount = 5;
+    uint64_t amount = 5;
     return_code = transaction_create(
         &transaction,
         &sender_public_key,
@@ -344,7 +344,7 @@ void test_block_hash_multiple_transactions_included_in_hash() {
         &user_2_private_key,
         &user_1_private_key,
         sizeof(user_2_private_key));
-    uint32_t amount = 5;
+    uint64_t amount = 5;
     return_code = transaction_create(
         &transaction1,
         &user_1_public_key,
@@ -359,7 +359,7 @@ void test_block_hash_multiple_transactions_included_in_hash() {
     return_code = linked_list_prepend(transaction_list1, transaction1);
     assert_true(SUCCESS == return_code);
     transaction_t *transaction3 = NULL;
-    uint32_t amount2 = 17;
+    uint64_t amount2 = 17;
     return_code = transaction_create(
         &transaction3,
         &user_2_public_key,

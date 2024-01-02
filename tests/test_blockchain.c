@@ -352,6 +352,22 @@ void test_blockchain_write_to_file_creates_nonempty_file() {
 
 void test_blockchain_write_to_file_fails_on_invalid_input() {
     // TODO
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    block_t *genesis_block = NULL;
+    return_code = block_create_genesis_block(&genesis_block);
+    assert_true(SUCCESS == return_code);
+    return_code = blockchain_add_block(blockchain, genesis_block);
+    assert_true(SUCCESS == return_code);
+    FILE *f = tmpfile();
+    return_code = blockchain_write_to_file(blockchain, NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = blockchain_write_to_file(NULL, f);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    fclose(f);
+    blockchain_destroy(blockchain);
 }
 
 void test_blockchain_read_from_file_reconstructs_blockchain() {

@@ -31,7 +31,7 @@ void test_transaction_create_gives_transaction() {
         &recipient_public_key,
         &sender_public_key,
         sizeof(recipient_public_key));
-    uint32_t amount = 5;
+    uint64_t amount = 5;
     return_code = transaction_create(
         &transaction,
         &sender_public_key,
@@ -79,7 +79,7 @@ void test_transaction_create_fails_on_invalid_input() {
         &recipient_public_key,
         &sender_public_key,
         sizeof(recipient_public_key));
-    uint32_t amount = 5;
+    uint64_t amount = 5;
     return_code = transaction_create(
         NULL,
         &sender_public_key,
@@ -132,7 +132,7 @@ void test_transaction_destroy_returns_success() {
         &recipient_public_key,
         &sender_public_key,
         sizeof(recipient_public_key));
-    uint32_t amount = 5;
+    uint64_t amount = 5;
     return_code = transaction_create(
         &transaction,
         &sender_public_key,

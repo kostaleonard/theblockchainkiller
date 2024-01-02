@@ -299,3 +299,28 @@ return_code_t blockchain_serialize(
 end:
     return return_code;
 }
+
+return_code_t blockchain_write_to_file(
+    blockchain_t *blockchain,
+    FILE *outfile
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == blockchain || NULL == outfile) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    unsigned char *buffer = NULL;
+    size_t buffer_size = 0;
+    return_code = blockchain_serialize(blockchain, &buffer, &buffer_size);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    size_t bytes_written = fwrite(buffer, 1, buffer_size, outfile);
+    free(buffer);
+    if (bytes_written != buffer_size) {
+        return_code = FAILURE_FILE_IO;
+        goto end;
+    }
+end:
+    return return_code;
+}
