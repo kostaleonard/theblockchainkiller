@@ -86,8 +86,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_blockchain_mine_block_fails_on_invalid_input),
         // TODO put these in the correct order
         // TODO serialization code or tests have an error--we can see things run correctly when we comment them out
-        //cmocka_unit_test(test_blockchain_serialize_creates_nonempty_buffer),
-        //cmocka_unit_test(test_blockchain_serialize_fails_on_invalid_arguments),
+        cmocka_unit_test(test_blockchain_serialize_creates_nonempty_buffer),
+        cmocka_unit_test(test_blockchain_serialize_fails_on_invalid_arguments),
         // test_transaction.h
         cmocka_unit_test(test_transaction_create_gives_transaction),
         cmocka_unit_test(test_transaction_create_fails_on_invalid_input),
