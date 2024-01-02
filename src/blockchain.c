@@ -232,7 +232,6 @@ return_code_t blockchain_serialize(
     }
     printf("\n");
     // TODO add in full serialization code
-    /*
     for (node_t *block_node = blockchain->block_list->head;
         NULL != block_node;
         block_node = block_node->next) {
@@ -244,6 +243,7 @@ return_code_t blockchain_serialize(
             free(new_buffer);
             goto end;
         }
+        uint64_t next_spot_in_buffer_offset = size;
         size += sizeof(block->created_at);
         size += sizeof(block->previous_block_hash);
         size += sizeof(block->proof_of_work);
@@ -252,6 +252,7 @@ return_code_t blockchain_serialize(
         if (NULL == new_buffer) {
             goto end;
         }
+        next_spot_in_buffer = new_buffer + next_spot_in_buffer_offset;
         *(uint64_t *)next_spot_in_buffer = htobe64(block->created_at);
         next_spot_in_buffer += sizeof(block->created_at);
         for (size_t idx = 0; idx < sizeof(block->previous_block_hash); idx++) {
@@ -262,11 +263,18 @@ return_code_t blockchain_serialize(
         next_spot_in_buffer += sizeof(block->proof_of_work);
         *(uint64_t *)next_spot_in_buffer = htobe64(num_transactions_in_block);
         next_spot_in_buffer += sizeof(num_transactions_in_block);
+        // TODO remove debugging
+        printf("Next spot in buffer: %p\n", next_spot_in_buffer);
+        for (unsigned char *c = new_buffer; c < next_spot_in_buffer; c++) {
+            printf("%02hhx", *c);
+        }
+        printf("\n");
         for (node_t *transaction_node = block->transaction_list->head;
             NULL != transaction_node;
             transaction_node = transaction_node->next) {
             transaction_t *transaction = (transaction_t *)
                 transaction_node->data;
+            next_spot_in_buffer_offset = size;
             size += sizeof(transaction->created_at);
             size += sizeof(transaction->sender_public_key);
             size += sizeof(transaction->recipient_public_key);
@@ -277,6 +285,7 @@ return_code_t blockchain_serialize(
             if (NULL == new_buffer) {
                 goto end;
             }
+            next_spot_in_buffer = new_buffer + next_spot_in_buffer_offset;
             *(uint64_t *)next_spot_in_buffer = htobe64(transaction->created_at);
             next_spot_in_buffer += sizeof(transaction->created_at);
             for (size_t idx = 0;
@@ -304,9 +313,14 @@ return_code_t blockchain_serialize(
                 *next_spot_in_buffer = transaction->sender_signature.bytes[idx];
                 next_spot_in_buffer++;
             }
+            // TODO remove debugging
+            printf("Next spot in buffer: %p\n", next_spot_in_buffer);
+            for (unsigned char *c = new_buffer; c < next_spot_in_buffer; c++) {
+                printf("%02hhx", *c);
+            }
+            printf("\n");
         }
     }
-    */
     *buffer = new_buffer;
     *buffer_size = size;
 end:
