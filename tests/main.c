@@ -24,6 +24,7 @@ int unlink_callback(
     struct FTW *ftwbuf)
 {
     int return_value = remove(fpath);
+    printf("Remove %s: %d\n", fpath, return_value);
     if (return_value) {
         perror(fpath);
     }
@@ -40,6 +41,7 @@ int create_empty_output_directory(char *dirname) {
     if (0 != return_value) {
         goto end;
     }
+    printf("Making output directory\n");
     return_value = mkdir(dirname);
 end:
     return return_value;
@@ -53,7 +55,14 @@ int main(int argc, char **argv) {
         goto end;
     }
     printf("Output directory: %s\n", output_directory);
-    create_empty_output_directory(output_directory);
+    // return_value = create_empty_output_directory(output_directory);
+    // if (0 != return_value) {
+    //     goto end;
+    // }
+    if (RemoveDirectory(output_directory) == 0) {
+        perror("Error removing directory");
+        return 1;
+    }
     const struct CMUnitTest tests[] = {
         // test_linked_list.h
         cmocka_unit_test(test_linked_list_create_gives_linked_list),
