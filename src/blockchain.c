@@ -191,6 +191,7 @@ void blockchain_print(blockchain_t *blockchain) {
     printf("\n");
 }
 
+// TODO add issue to use JSON serialization rather than binary
 return_code_t blockchain_serialize(
     blockchain_t *blockchain,
     unsigned char **buffer,
@@ -329,7 +330,7 @@ end:
 
 return_code_t blockchain_write_to_file(
     blockchain_t *blockchain,
-    FILE *outfile
+    char *outfile
 ) {
     return_code_t return_code = SUCCESS;
     if (NULL == blockchain || NULL == outfile) {
@@ -342,7 +343,13 @@ return_code_t blockchain_write_to_file(
     if (SUCCESS != return_code) {
         goto end;
     }
-    size_t bytes_written = fwrite(buffer, 1, buffer_size, outfile);
+    FILE *f = fopen(outfile, "wb");
+    if (NULL == f) {
+        return_code = FAILURE_FILE_IO;
+        goto end;
+    }
+    size_t bytes_written = fwrite(buffer, 1, buffer_size, f);
+    fclose(f);
     free(buffer);
     if (bytes_written != buffer_size) {
         return_code = FAILURE_FILE_IO;

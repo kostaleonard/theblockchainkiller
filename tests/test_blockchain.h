@@ -35,4 +35,8 @@ void test_blockchain_serialize_creates_nonempty_buffer();
 
 void test_blockchain_serialize_fails_on_invalid_arguments();
 
+void test_blockchain_write_to_file_creates_nonempty_file();
+
+void test_blockchain_write_to_file_fails_on_invalid_input();
+
 #endif  // TESTS_TEST_BLOCKCHAIN_H_

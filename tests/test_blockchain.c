@@ -7,6 +7,7 @@
 #include "include/blockchain.h"
 #include "include/hash.h"
 #include "include/linked_list.h"
+#include "tests/file_paths.h"
 #include "tests/test_blockchain.h"
 
 #define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 2
@@ -339,19 +340,17 @@ void test_blockchain_write_to_file_creates_nonempty_file() {
     assert_true(SUCCESS == return_code);
     return_code = blockchain_add_block(blockchain, genesis_block);
     assert_true(SUCCESS == return_code);
-    FILE *f = tmpfile();
-    return_code = blockchain_write_to_file(blockchain, f);
+    // TODO
+    char *outfile = "TODO"; //TEST_OUTPUT_DIR "blockchain";
+    return_code = blockchain_write_to_file(blockchain, outfile);
     assert_true(SUCCESS == return_code);
-    int file_descriptor = fileno(f);
     struct stat file_stats = {0};
-    assert_true(0 != fstat(file_descriptor, &file_stats));
+    assert_true(0 != stat(outfile, &file_stats));
     assert_true(0 != file_stats.st_size);
-    fclose(f);
     blockchain_destroy(blockchain);
 }
 
 void test_blockchain_write_to_file_fails_on_invalid_input() {
-    // TODO
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_create(
         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
@@ -361,12 +360,12 @@ void test_blockchain_write_to_file_fails_on_invalid_input() {
     assert_true(SUCCESS == return_code);
     return_code = blockchain_add_block(blockchain, genesis_block);
     assert_true(SUCCESS == return_code);
-    FILE *f = tmpfile();
+    // TODO
+    char *outfile = "TODO"; //TEST_OUTPUT_DIR "blockchain";
     return_code = blockchain_write_to_file(blockchain, NULL);
     assert_true(FAILURE_INVALID_INPUT == return_code);
-    return_code = blockchain_write_to_file(NULL, f);
+    return_code = blockchain_write_to_file(NULL, outfile);
     assert_true(FAILURE_INVALID_INPUT == return_code);
-    fclose(f);
     blockchain_destroy(blockchain);
 }
 

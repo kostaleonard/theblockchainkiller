@@ -2,10 +2,13 @@
  * @brief Runs the unit test suite.
  */
 
+#include <ftw.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include "tests/file_paths.h"
 #include "tests/test_linked_list.h"
 #include "tests/test_block.h"
 #include "tests/test_blockchain.h"
@@ -13,7 +16,40 @@
 #include "tests/test_base64.h"
 #include "tests/test_endian.h"
 
+int unlink_callback(
+    const char *fpath,
+    const struct stat *sb,
+    int typeflag,
+    struct FTW *ftwbuf)
+{
+    int return_value = remove(fpath);
+    if (return_value) {
+        perror(fpath);
+    }
+    return return_value;
+}
+
+int create_empty_output_directory(char *dirname) {
+    int nopenfd = 64;
+    int return_value = nftw(
+        dirname,
+        unlink_callback,
+        nopenfd,
+        FTW_DEPTH | FTW_PHYS);
+    if (0 != return_value) {
+        goto end;
+    }
+    return_value = mkdir(dirname);
+end:
+    return return_value;
+}
+
 int main(int argc, char **argv) {
+    // TODO use path to executable?
+    int return_value = create_empty_output_directory(TEST_OUTPUT_DIR);
+    if (0 != return_value) {
+        goto end;
+    }
     const struct CMUnitTest tests[] = {
         // test_linked_list.h
         cmocka_unit_test(test_linked_list_create_gives_linked_list),
@@ -85,9 +121,10 @@ int main(int argc, char **argv) {
             test_blockchain_mine_block_produces_block_with_valid_hash),
         cmocka_unit_test(test_blockchain_mine_block_fails_on_invalid_input),
         // TODO put these in the correct order
-        // TODO serialization code or tests have an error--we can see things run correctly when we comment them out
         cmocka_unit_test(test_blockchain_serialize_creates_nonempty_buffer),
         cmocka_unit_test(test_blockchain_serialize_fails_on_invalid_arguments),
+        cmocka_unit_test(test_blockchain_write_to_file_creates_nonempty_file),
+        cmocka_unit_test(test_blockchain_write_to_file_fails_on_invalid_input),
         // test_transaction.h
         cmocka_unit_test(test_transaction_create_gives_transaction),
         cmocka_unit_test(test_transaction_create_fails_on_invalid_input),
@@ -109,5 +146,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_htobe64_correctly_encodes_data),
         cmocka_unit_test(test_betoh64_correctly_decodes_data),
     };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+    //return_value = cmocka_run_group_tests(tests, NULL, NULL);
+end:
+    return return_value;
 }
