@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include <windows.h> // TODO remove
 #include "tests/file_paths.h"
 #include "tests/test_linked_list.h"
 #include "tests/test_block.h"
@@ -45,11 +46,14 @@ end:
 }
 
 int main(int argc, char **argv) {
-    // TODO use path to executable?
-    int return_value = create_empty_output_directory(TEST_OUTPUT_DIR);
+    // TODO Unix does not have MAX_PATH
+    char output_directory[MAX_PATH] = {0};
+    int return_value = get_output_directory(output_directory);
     if (0 != return_value) {
         goto end;
     }
+    printf("Output directory: %s\n", output_directory);
+    create_empty_output_directory(output_directory);
     const struct CMUnitTest tests[] = {
         // test_linked_list.h
         cmocka_unit_test(test_linked_list_create_gives_linked_list),
@@ -146,7 +150,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_htobe64_correctly_encodes_data),
         cmocka_unit_test(test_betoh64_correctly_decodes_data),
     };
-    //return_value = cmocka_run_group_tests(tests, NULL, NULL);
+    return_value = cmocka_run_group_tests(tests, NULL, NULL);
 end:
     return return_value;
 }

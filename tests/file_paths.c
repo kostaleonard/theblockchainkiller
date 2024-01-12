@@ -49,10 +49,27 @@ int get_fixture_directory(char *dirname) {
     if (0 != return_code) {
         goto end;
     }
-    return_code = snprintf(
+    printf("Executable directory: %s\n", executable_directory); //TODO remove
+    snprintf(
         dirname,
         MAX_PATH,
         "%s/../tests/fixtures/",
+        executable_directory);
+end:
+    return return_code;
+}
+
+int get_output_directory(char *dirname) {
+    // TODO MAX_PATH is only on Windows?
+    char executable_directory[MAX_PATH] = {0};
+    int return_code = get_executable_directory(executable_directory);
+    if (0 != return_code) {
+        goto end;
+    }
+    snprintf(
+        dirname,
+        MAX_PATH,
+        "%s/../tests/output/",
         executable_directory);
 end:
     return return_code;
