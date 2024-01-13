@@ -42,7 +42,7 @@ end:
     return return_code;
 }
 
-int get_fixture_directory(char *dirname) {
+int _get_tests_subdirectory(char *dirname, char *subdirname) {
     char executable_directory[TESTS_MAX_PATH] = {0};
     int return_code = get_executable_directory(executable_directory);
     if (0 != return_code) {
@@ -51,23 +51,17 @@ int get_fixture_directory(char *dirname) {
     snprintf(
         dirname,
         TESTS_MAX_PATH,
-        "%s/../tests/fixtures/",
-        executable_directory);
+        "%s/../tests/%s/",
+        executable_directory,
+        subdirname);
 end:
     return return_code;
 }
 
+int get_fixture_directory(char *dirname) {
+    return _get_tests_subdirectory(dirname, "fixtures");
+}
+
 int get_output_directory(char *dirname) {
-    char executable_directory[TESTS_MAX_PATH] = {0};
-    int return_code = get_executable_directory(executable_directory);
-    if (0 != return_code) {
-        goto end;
-    }
-    snprintf(
-        dirname,
-        TESTS_MAX_PATH,
-        "%s/../tests/output/",
-        executable_directory);
-end:
-    return return_code;
+    return _get_tests_subdirectory(dirname, "output");
 }
