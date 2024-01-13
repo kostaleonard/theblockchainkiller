@@ -4,6 +4,9 @@
 
 #ifndef TESTS_FILE_PATHS_H_
 #define TESTS_FILE_PATHS_H_
+// Windows has a MAX_PATH of 260. Many versions of Unix have a PATH_MAX of 4096.
+// We want the test suite to run on many systems, so we will use 260.
+#define TESTS_MAX_PATH 260
 
 /**
  * @brief Fills dirname with the path to the fixture directory.

@@ -23,45 +23,54 @@ int unlink_callback(
     int typeflag,
     struct FTW *ftwbuf)
 {
-    int return_value = remove(fpath);
-    printf("Remove %s: %d\n", fpath, return_value);
-    if (return_value) {
-        perror(fpath);
+    struct stat st;
+    int return_value = stat(fpath, &st);
+    if (0 != return_value) {
+        goto end;
     }
+    if (S_ISDIR(st.st_mode)) {
+        return_value = rmdir(fpath);
+    } else {
+        return_value = remove(fpath);
+    }
+    if (0 != return_value) {
+        perror(fpath);
+        goto end;
+    }
+end:
     return return_value;
 }
 
 int create_empty_output_directory(char *dirname) {
-    int nopenfd = 64;
-    int return_value = nftw(
-        dirname,
-        unlink_callback,
-        nopenfd,
-        FTW_DEPTH | FTW_PHYS);
-    if (0 != return_value) {
-        goto end;
+    struct stat st;
+    int return_value = stat(dirname, &st);
+    // If the directory exists, delete it.
+    if (0 == return_value) {
+        int nopenfd = 64;
+        return_value = nftw(
+            dirname,
+            unlink_callback,
+            nopenfd,
+            FTW_DEPTH | FTW_PHYS);
+        if (0 != return_value) {
+            perror(dirname);
+            goto end;
+        }
     }
-    printf("Making output directory\n");
     return_value = mkdir(dirname);
 end:
     return return_value;
 }
 
 int main(int argc, char **argv) {
-    // TODO Unix does not have MAX_PATH
-    char output_directory[MAX_PATH] = {0};
+    char output_directory[TESTS_MAX_PATH] = {0};
     int return_value = get_output_directory(output_directory);
     if (0 != return_value) {
         goto end;
     }
-    printf("Output directory: %s\n", output_directory);
-    // return_value = create_empty_output_directory(output_directory);
-    // if (0 != return_value) {
-    //     goto end;
-    // }
-    if (RemoveDirectory(output_directory) == 0) {
-        perror("Error removing directory");
-        return 1;
+    return_value = create_empty_output_directory(output_directory);
+    if (0 != return_value) {
+        goto end;
     }
     const struct CMUnitTest tests[] = {
         // test_linked_list.h
