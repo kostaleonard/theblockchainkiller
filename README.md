@@ -4,7 +4,7 @@ This app allows you to mine LeoCoin, the hottest new cryptocurrency.
 
 ## How much is LeoCoin worth?
 
-LeoCoin is ~~worthless~~ priceless.
+LeoCoin is ~~worthless~~ priceless. It's worth as much as Leo will pay for it.
 
 ## Quickstart
 
