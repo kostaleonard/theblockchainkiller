@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <cmocka.h>
-#include <windows.h> // TODO remove
+#include "include/return_codes.h"
 #include "tests/file_paths.h"
 #include "tests/test_linked_list.h"
 #include "tests/test_block.h"
@@ -17,7 +17,7 @@
 #include "tests/test_base64.h"
 #include "tests/test_endian.h"
 
-int unlink_callback(
+int _unlink_callback(
     const char *fpath,
     const struct stat *sb,
     int typeflag,
@@ -41,7 +41,7 @@ end:
     return return_value;
 }
 
-int create_empty_output_directory(char *dirname) {
+return_code_t _create_empty_output_directory(char *dirname) {
     struct stat st;
     int return_value = stat(dirname, &st);
     // If the directory exists, delete it.
@@ -49,7 +49,7 @@ int create_empty_output_directory(char *dirname) {
         int nopenfd = 64;
         return_value = nftw(
             dirname,
-            unlink_callback,
+            _unlink_callback,
             nopenfd,
             FTW_DEPTH | FTW_PHYS);
         if (0 != return_value) {
@@ -59,17 +59,18 @@ int create_empty_output_directory(char *dirname) {
     }
     return_value = mkdir(dirname);
 end:
-    return return_value;
+    return_code_t return_code = return_value == 0 ? SUCCESS : FAILURE_FILE_IO;
+    return return_code;
 }
 
 int main(int argc, char **argv) {
     char output_directory[TESTS_MAX_PATH] = {0};
-    int return_value = get_output_directory(output_directory);
-    if (0 != return_value) {
+    return_code_t return_code = get_output_directory(output_directory);
+    if (0 != return_code) {
         goto end;
     }
-    return_value = create_empty_output_directory(output_directory);
-    if (0 != return_value) {
+    return_code = _create_empty_output_directory(output_directory);
+    if (0 != return_code) {
         goto end;
     }
     const struct CMUnitTest tests[] = {
@@ -168,7 +169,7 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_htobe64_correctly_encodes_data),
         cmocka_unit_test(test_betoh64_correctly_decodes_data),
     };
-    return_value = cmocka_run_group_tests(tests, NULL, NULL);
+    return_code = cmocka_run_group_tests(tests, NULL, NULL);
 end:
-    return return_value;
+    return return_code;
 }

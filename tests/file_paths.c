@@ -8,12 +8,12 @@
 #endif
 #include "tests/file_paths.h"
 
-int get_executable_directory(char *dirname) {
-    int return_code = 0;
+return_code_t _get_executable_directory(char *dirname) {
+    return_code_t return_code = SUCCESS;
 #ifdef _WIN32
     DWORD length = GetModuleFileName(NULL, dirname, TESTS_MAX_PATH);
     if (0 == length || length == TESTS_MAX_PATH) {
-        return_code = 1;
+        return_code = FAILURE_FILE_IO;
         goto end;
     } else {
         // Remove the executable name to get the directory.
@@ -25,9 +25,12 @@ int get_executable_directory(char *dirname) {
 #else
     // On Unix-like systems, read the symbolic link /proc/self/exe
     ssize_t length = readlink("/proc/self/exe", NULL, 0);
-    if (length > 0) {
-        if (readlink("/proc/self/exe", dirname, length + 1) == -1) {
-            return_code = 2;
+    if (length <= 0 || length >= TESTS_MAX_PATH) {
+        return_code = FAILURE_FILE_IO;
+        goto end;
+    } else {
+        if (-1 == readlink("/proc/self/exe", dirname, length + 1)) {
+            return_code = FAILURE_FILE_IO;
             goto end;
         } else {
             // Remove the executable name to get the directory.
@@ -42,9 +45,9 @@ end:
     return return_code;
 }
 
-int _get_tests_subdirectory(char *dirname, char *subdirname) {
+return_code_t _get_tests_subdirectory(char *dirname, char *subdirname) {
     char executable_directory[TESTS_MAX_PATH] = {0};
-    int return_code = get_executable_directory(executable_directory);
+    return_code_t return_code = _get_executable_directory(executable_directory);
     if (0 != return_code) {
         goto end;
     }
@@ -58,10 +61,10 @@ end:
     return return_code;
 }
 
-int get_fixture_directory(char *dirname) {
+return_code_t get_fixture_directory(char *dirname) {
     return _get_tests_subdirectory(dirname, "fixtures");
 }
 
-int get_output_directory(char *dirname) {
+return_code_t get_output_directory(char *dirname) {
     return _get_tests_subdirectory(dirname, "output");
 }

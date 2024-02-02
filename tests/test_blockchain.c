@@ -341,6 +341,8 @@ void test_blockchain_write_to_file_creates_nonempty_file() {
     return_code = blockchain_add_block(blockchain, genesis_block);
     assert_true(SUCCESS == return_code);
     // TODO
+    char output_directory[TESTS_MAX_PATH];
+    get_output_directory(output_directory);
     char *outfile = "TODO"; //TEST_OUTPUT_DIR "blockchain";
     return_code = blockchain_write_to_file(blockchain, outfile);
     assert_true(SUCCESS == return_code);
