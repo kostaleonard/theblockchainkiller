@@ -340,14 +340,20 @@ void test_blockchain_write_to_file_creates_nonempty_file() {
     assert_true(SUCCESS == return_code);
     return_code = blockchain_add_block(blockchain, genesis_block);
     assert_true(SUCCESS == return_code);
-    // TODO
     char output_directory[TESTS_MAX_PATH];
     get_output_directory(output_directory);
-    char *outfile = "TODO"; //TEST_OUTPUT_DIR "blockchain";
-    return_code = blockchain_write_to_file(blockchain, outfile);
-    assert_true(SUCCESS == return_code);
+    char outfile[TESTS_MAX_PATH];
+    snprintf(
+        outfile,
+        TESTS_MAX_PATH,
+        "%s/%s",
+        output_directory,
+        "blockchain_test_blockchain_write_to_file_creates_nonempty_file");
     struct stat file_stats = {0};
     assert_true(0 != stat(outfile, &file_stats));
+    return_code = blockchain_write_to_file(blockchain, outfile);
+    assert_true(SUCCESS == return_code);
+    assert_true(0 == stat(outfile, &file_stats));
     assert_true(0 != file_stats.st_size);
     blockchain_destroy(blockchain);
 }
@@ -362,8 +368,15 @@ void test_blockchain_write_to_file_fails_on_invalid_input() {
     assert_true(SUCCESS == return_code);
     return_code = blockchain_add_block(blockchain, genesis_block);
     assert_true(SUCCESS == return_code);
-    // TODO
-    char *outfile = "TODO"; //TEST_OUTPUT_DIR "blockchain";
+    char output_directory[TESTS_MAX_PATH];
+    get_output_directory(output_directory);
+    char outfile[TESTS_MAX_PATH];
+    snprintf(
+        outfile,
+        TESTS_MAX_PATH,
+        "%s/%s",
+        output_directory,
+        "blockchain_test_blockchain_write_to_file_fails_on_invalid_input");
     return_code = blockchain_write_to_file(blockchain, NULL);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = blockchain_write_to_file(NULL, outfile);
