@@ -385,7 +385,32 @@ void test_blockchain_write_to_file_fails_on_invalid_input() {
 }
 
 void test_blockchain_read_from_file_reconstructs_blockchain() {
-    // TODO
+    char fixture_directory[TESTS_MAX_PATH];
+    get_fixture_directory(fixture_directory);
+    char infile[TESTS_MAX_PATH];
+    snprintf(
+        infile,
+        TESTS_MAX_PATH,
+        "%s/%s",
+        fixture_directory,
+        "blockchain_3_blocks_no_transactions");
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_read_from_file(&blockchain, infile);
+    assert_true(SUCCESS == return_code);
+    assert_true(NULL != blockchain);
+    assert_true(blockchain->num_leading_zero_bytes_required_in_block_hash != 0);
+    assert_true(NULL != blockchain->block_list);
+    // TODO check against fixture data
+    uint64_t num_blocks = 0;
+    for (node_t *block_node = blockchain->block_list->head;
+        NULL != block_node;
+        block_node = block_node->next) {
+        block_t *block = (block_t *)block_node->data;
+        assert_true(0 != block->created_at);
+        assert_true(NULL != block->transaction_list);
+
+        num_blocks++;
+    }
 }
 
 void test_blockchain_read_from_file_fails_on_invalid_input() {
