@@ -400,17 +400,21 @@ void test_blockchain_read_from_file_reconstructs_blockchain() {
     assert_true(NULL != blockchain);
     assert_true(blockchain->num_leading_zero_bytes_required_in_block_hash != 0);
     assert_true(NULL != blockchain->block_list);
-    // TODO check against fixture data
     uint64_t num_blocks = 0;
-    for (node_t *block_node = blockchain->block_list->head;
-        NULL != block_node;
-        block_node = block_node->next) {
-        block_t *block = (block_t *)block_node->data;
-        assert_true(0 != block->created_at);
-        assert_true(NULL != block->transaction_list);
-
-        num_blocks++;
-    }
+    return_code = linked_list_length(blockchain->block_list, &num_blocks);
+    assert_true(SUCCESS == return_code);
+    assert_true(3 == num_blocks);
+    block_t *block1 = (block_t *)blockchain->block_list->head->data;
+    assert_true(GENESIS_BLOCK_PROOF_OF_WORK == block1->proof_of_work);
+    sha_256_t empty_block_hash = {0};
+    assert_true(0 == memcmp(
+        &block1->previous_block_hash, &empty_block_hash, sizeof(sha_256_t)));
+    bool transaction_list_is_empty = true;
+    return_code = linked_list_is_empty(
+        block1->transaction_list, &transaction_list_is_empty);
+    assert_true(SUCCESS == return_code);
+    assert_true(transaction_list_is_empty);
+    // TODO check blocks 2 and 3
 }
 
 void test_blockchain_read_from_file_fails_on_invalid_input() {

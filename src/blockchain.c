@@ -331,6 +331,21 @@ end:
     return return_code;
 }
 
+return_code_t blockchain_deserialize(
+    blockchain_t **blockchain,
+    unsigned char *buffer,
+    uint64_t buffer_size
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == blockchain || NULL == buffer) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    // TODO
+end:
+    return return_code;
+}
+
 return_code_t blockchain_write_to_file(
     blockchain_t *blockchain,
     char *outfile
@@ -358,6 +373,41 @@ return_code_t blockchain_write_to_file(
         return_code = FAILURE_FILE_IO;
         goto end;
     }
+end:
+    return return_code;
+}
+
+return_code_t blockchain_read_from_file(
+    blockchain_t **blockchain,
+    char *infile
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == blockchain || NULL == infile) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    FILE *f = fopen(infile, "rb");
+    if (NULL == f) {
+        return_code = FAILURE_FILE_IO;
+        goto end;
+    }
+    fseek(f, 0, SEEK_END);
+    uint64_t buffer_size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    char *buffer = (char *)malloc(buffer_size);
+    if (NULL == buffer) {
+        return_code = FAILURE_COULD_NOT_MALLOC;
+        goto end;
+    }
+    size_t read_size = fread(buffer, 1, buffer_size, f);
+    if (read_size != (size_t)buffer_size) {
+        return_code = FAILURE_FILE_IO;
+        goto cleanup;
+    }
+    return_code = blockchain_deserialize(blockchain, buffer, buffer_size);
+cleanup:
+    fclose(f);
+    free(buffer);
 end:
     return return_code;
 }
