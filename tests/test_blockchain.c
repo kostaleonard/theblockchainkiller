@@ -7,6 +7,7 @@
 #include "include/blockchain.h"
 #include "include/hash.h"
 #include "include/linked_list.h"
+#include "include/transaction.h"
 #include "tests/file_paths.h"
 #include "tests/test_blockchain.h"
 
@@ -393,7 +394,7 @@ void test_blockchain_read_from_file_reconstructs_blockchain() {
         TESTS_MAX_PATH,
         "%s/%s",
         fixture_directory,
-        "blockchain_3_blocks_no_transactions");
+        "blockchain_4_blocks_no_transactions");
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_read_from_file(&blockchain, infile);
     assert_true(SUCCESS == return_code);
@@ -403,7 +404,7 @@ void test_blockchain_read_from_file_reconstructs_blockchain() {
     uint64_t num_blocks = 0;
     return_code = linked_list_length(blockchain->block_list, &num_blocks);
     assert_true(SUCCESS == return_code);
-    assert_true(3 == num_blocks);
+    assert_true(4 == num_blocks);
     block_t *block1 = (block_t *)blockchain->block_list->head->data;
     assert_true(GENESIS_BLOCK_PROOF_OF_WORK == block1->proof_of_work);
     sha_256_t empty_block_hash = {0};
@@ -414,7 +415,27 @@ void test_blockchain_read_from_file_reconstructs_blockchain() {
         block1->transaction_list, &transaction_list_is_empty);
     assert_true(SUCCESS == return_code);
     assert_true(transaction_list_is_empty);
-    // TODO check blocks 2 and 3
+    block_t *block2 = (block_t *)blockchain->block_list->head->next->data;
+    assert_true(0 != block2->proof_of_work);
+    uint64_t num_transactions = 0;
+    return_code = linked_list_length(
+        block2->transaction_list, &num_transactions);
+    assert_true(SUCCESS == return_code);
+    assert_true(1 == num_transactions);
+    transaction_t *transaction =
+        (transaction_t *)block2->transaction_list->head->data;
+    assert_true(AMOUNT_GENERATED_DURING_MINTING == transaction->amount);
+    assert_true(0 != transaction->created_at);
+    ssh_key_t empty_key = {0};
+    assert_true(0 == memcmp(
+        &transaction->sender_public_key, &empty_key, sizeof(ssh_key_t)));
+    assert_true(0 != memcmp(
+        &transaction->recipient_public_key, &empty_key, sizeof(ssh_key_t)));
+    ssh_signature_t empty_signature = {0};
+    assert_true(0 != memcmp(
+        &transaction->sender_signature,
+        &empty_signature,
+        sizeof(ssh_signature_t)));
 }
 
 void test_blockchain_read_from_file_fails_on_invalid_input() {

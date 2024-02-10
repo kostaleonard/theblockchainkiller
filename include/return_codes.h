@@ -15,6 +15,7 @@ typedef enum return_code_t {
     FAILRE_INVALID_COMMAND_LINE_ARGS,
     FAILURE_OPENSSL_FUNCTION,
     FAILURE_FILE_IO,
+    FAILURE_SIGNATURE_TOO_LONG,
 } return_code_t;
 
 #endif  // INCLUDE_RETURN_CODES_H_

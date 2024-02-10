@@ -289,7 +289,8 @@ return_code_t blockchain_serialize(
             }
             // When we realloc, serialization_buffer may move. We need to use an
             // offset so we can get the next memory location to write.
-            next_spot_in_buffer = serialization_buffer + next_spot_in_buffer_offset;
+            next_spot_in_buffer =
+                serialization_buffer + next_spot_in_buffer_offset;
             *(uint64_t *)next_spot_in_buffer = htobe64(transaction->created_at);
             next_spot_in_buffer += sizeof(transaction->created_at);
             for (size_t idx = 0;
@@ -334,14 +335,115 @@ end:
 return_code_t blockchain_deserialize(
     blockchain_t **blockchain,
     unsigned char *buffer,
-    uint64_t buffer_size
+    uint64_t buffer_size // TODO get rid of buffer_size? I don't think we need it.
 ) {
     return_code_t return_code = SUCCESS;
     if (NULL == blockchain || NULL == buffer) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    // TODO
+    unsigned char *next_spot_in_buffer = buffer;
+    uint64_t num_leading_zero_bytes_required_in_block_hash = betoh64(
+        *(uint64_t *)next_spot_in_buffer);
+    next_spot_in_buffer += sizeof(
+        num_leading_zero_bytes_required_in_block_hash);
+    blockchain_t *new_blockchain = NULL;
+    return_code = blockchain_create(
+        &new_blockchain, num_leading_zero_bytes_required_in_block_hash);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    uint64_t num_blocks = betoh64(*(uint64_t *)next_spot_in_buffer);
+    next_spot_in_buffer += sizeof(num_blocks);
+    for (uint64_t block_idx = 0; block_idx < num_blocks; block_idx++) {
+        // TODO deserialize block
+        block_t *block = NULL;
+        time_t block_created_at = betoh64(*(uint64_t *)next_spot_in_buffer);
+        next_spot_in_buffer += sizeof(block_created_at);
+        sha_256_t previous_block_hash = {0};
+        for (size_t idx = 0; idx < sizeof(previous_block_hash); idx++) {
+            previous_block_hash.digest[idx] = *next_spot_in_buffer;
+            next_spot_in_buffer++;
+        }
+        uint64_t proof_of_work = betoh64(*(uint64_t *)next_spot_in_buffer);
+        next_spot_in_buffer += sizeof(proof_of_work);
+        uint64_t num_transactions = betoh64(*(uint64_t *)next_spot_in_buffer);
+        next_spot_in_buffer += sizeof(num_transactions);
+        linked_list_t *transaction_list = NULL;
+        return_code = linked_list_create(
+            &transaction_list, (free_function_t *)transaction_destroy, NULL);
+        if (SUCCESS != return_code) {
+            blockchain_destroy(new_blockchain);
+            goto end;
+        }
+        for (uint64_t transaction_idx = 0;
+            transaction_idx < num_transactions;
+            transaction_idx++) {
+            // TODO transaction_create interface doesn't allow us to pass in a signature directly, so I manually alloc--not sure if good or bad
+            transaction_t *transaction = calloc(1, sizeof(transaction_t));
+            if (NULL == transaction) {
+                return_code = FAILURE_COULD_NOT_MALLOC;
+                blockchain_destroy(new_blockchain);
+                linked_list_destroy(transaction_list);
+                goto end;
+            }
+            transaction->created_at = betoh64(*(uint64_t *)next_spot_in_buffer);
+            next_spot_in_buffer += sizeof(transaction->created_at);
+            for (size_t idx = 0;
+                idx < sizeof(transaction->sender_public_key);
+                idx++) {
+                transaction->sender_public_key.bytes[idx] =
+                    *next_spot_in_buffer;
+                next_spot_in_buffer++;
+            }
+            for (size_t idx = 0;
+                idx < sizeof(transaction->recipient_public_key);
+                idx++) {
+                transaction->recipient_public_key.bytes[idx] =
+                    *next_spot_in_buffer;
+                next_spot_in_buffer++;
+            }
+            transaction->amount = betoh64(*(uint64_t *)next_spot_in_buffer);
+            next_spot_in_buffer += sizeof(transaction->amount);
+            transaction->sender_signature.length = betoh64(
+                *(uint64_t *)next_spot_in_buffer);
+            next_spot_in_buffer += sizeof(transaction->sender_signature.length);
+            if (transaction->sender_signature.length > MAX_SSH_KEY_LENGTH) {
+                return_code = FAILURE_SIGNATURE_TOO_LONG;
+                blockchain_destroy(new_blockchain);
+                linked_list_destroy(transaction_list);
+                free(transaction);
+                goto end;
+            }
+            for (size_t idx = 0;
+                idx < transaction->sender_signature.length;
+                idx++) {
+                transaction->sender_signature.bytes[idx] = *next_spot_in_buffer;
+                next_spot_in_buffer++;
+            }
+            return_code = linked_list_append(transaction_list, transaction);
+            if (SUCCESS != return_code) {
+                blockchain_destroy(new_blockchain);
+                linked_list_destroy(transaction_list);
+                free(transaction);
+                goto end;
+            }
+        }
+        return_code = block_create(
+            &block, transaction_list, proof_of_work, previous_block_hash);
+        if (SUCCESS != return_code) {
+            blockchain_destroy(new_blockchain);
+            linked_list_destroy(transaction_list);
+            goto end;
+        }
+        return_code = blockchain_add_block(new_blockchain, block);
+        if (SUCCESS != return_code) {
+            blockchain_destroy(new_blockchain);
+            block_destroy(block);
+            goto end;
+        }
+    }
+    *blockchain = new_blockchain;
 end:
     return return_code;
 }
@@ -394,7 +496,7 @@ return_code_t blockchain_read_from_file(
     fseek(f, 0, SEEK_END);
     uint64_t buffer_size = ftell(f);
     fseek(f, 0, SEEK_SET);
-    char *buffer = (char *)malloc(buffer_size);
+    unsigned char *buffer = malloc(buffer_size);
     if (NULL == buffer) {
         return_code = FAILURE_COULD_NOT_MALLOC;
         goto end;

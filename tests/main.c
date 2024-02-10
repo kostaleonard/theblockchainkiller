@@ -148,6 +148,9 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_blockchain_serialize_fails_on_invalid_arguments),
         cmocka_unit_test(test_blockchain_write_to_file_creates_nonempty_file),
         cmocka_unit_test(test_blockchain_write_to_file_fails_on_invalid_input),
+        cmocka_unit_test(
+            test_blockchain_read_from_file_reconstructs_blockchain),
+        cmocka_unit_test(test_blockchain_read_from_file_fails_on_invalid_input),
         // test_transaction.h
         cmocka_unit_test(test_transaction_create_gives_transaction),
         cmocka_unit_test(test_transaction_create_fails_on_invalid_input),
