@@ -347,11 +347,11 @@ void test_blockchain_deserialize_reconstructs_blockchain() {
         &deserialized_blockchain, buffer, buffer_size);
     assert_true(SUCCESS == return_code);
     assert_true(NULL != deserialized_blockchain);
-    uint64_t length = 0;
+    uint64_t num_blocks = 0;
     return_code = linked_list_length(
-        deserialized_blockchain->block_list, &length);
+        deserialized_blockchain->block_list, &num_blocks);
     assert_true(SUCCESS == return_code);
-    assert_true(1 == length);
+    assert_true(1 == num_blocks);
     block_t *deserialized_genesis_block =
         (block_t *)deserialized_blockchain->block_list->head->data;
     assert_true(
@@ -373,13 +373,49 @@ void test_blockchain_deserialize_reconstructs_blockchain() {
 }
 
 void test_blockchain_deserialize_fails_on_attempted_read_past_buffer() {
-    // TODO
-    assert_true(false);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    block_t *genesis_block = NULL;
+    return_code = block_create_genesis_block(&genesis_block);
+    assert_true(SUCCESS == return_code);
+    return_code = blockchain_add_block(blockchain, genesis_block);
+    assert_true(SUCCESS == return_code);
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code = blockchain_serialize(blockchain, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    blockchain_t *deserialized_blockchain = NULL;
+    return_code = blockchain_deserialize(
+        &deserialized_blockchain, buffer, buffer_size - 50);
+    assert_true(FAILURE_BUFFER_TOO_SMALL == return_code);
+    free(buffer);
+    blockchain_destroy(blockchain);
 }
 
 void test_blockchain_deserialize_fails_on_invalid_input() {
-    // TODO
-    assert_true(false);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    block_t *genesis_block = NULL;
+    return_code = block_create_genesis_block(&genesis_block);
+    assert_true(SUCCESS == return_code);
+    return_code = blockchain_add_block(blockchain, genesis_block);
+    assert_true(SUCCESS == return_code);
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code = blockchain_serialize(blockchain, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    blockchain_t *deserialized_blockchain = NULL;
+    return_code = blockchain_deserialize(NULL, buffer, buffer_size);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = blockchain_deserialize(
+        &deserialized_blockchain, NULL, buffer_size);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    free(buffer);
+    blockchain_destroy(blockchain);
 }
 
 void test_blockchain_write_to_file_creates_nonempty_file() {

@@ -332,10 +332,11 @@ end:
     return return_code;
 }
 
+// TODO make issue that this function is too complex, too hard to error-check
 return_code_t blockchain_deserialize(
     blockchain_t **blockchain,
     unsigned char *buffer,
-    uint64_t buffer_size // TODO if we ever read past buffer_size, fail
+    uint64_t buffer_size
 ) {
     return_code_t return_code = SUCCESS;
     if (NULL == blockchain || NULL == buffer) {
@@ -343,6 +344,11 @@ return_code_t blockchain_deserialize(
         goto end;
     }
     unsigned char *next_spot_in_buffer = buffer;
+    ptrdiff_t total_read_size = next_spot_in_buffer + sizeof(uint64_t) - buffer;
+    if (total_read_size > buffer_size) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+        goto end;
+    }
     uint64_t num_leading_zero_bytes_required_in_block_hash = betoh64(
         *(uint64_t *)next_spot_in_buffer);
     next_spot_in_buffer += sizeof(
@@ -353,19 +359,48 @@ return_code_t blockchain_deserialize(
     if (SUCCESS != return_code) {
         goto end;
     }
+    total_read_size = next_spot_in_buffer + sizeof(uint64_t) - buffer;
+    if (total_read_size > buffer_size) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+        goto end;
+    }
     uint64_t num_blocks = betoh64(*(uint64_t *)next_spot_in_buffer);
     next_spot_in_buffer += sizeof(num_blocks);
     for (uint64_t block_idx = 0; block_idx < num_blocks; block_idx++) {
         block_t *block = NULL;
+        total_read_size = next_spot_in_buffer + sizeof(uint64_t) - buffer;
+        if (total_read_size > buffer_size) {
+            return_code = FAILURE_BUFFER_TOO_SMALL;
+            blockchain_destroy(new_blockchain);
+            goto end;
+        }
         time_t block_created_at = betoh64(*(uint64_t *)next_spot_in_buffer);
         next_spot_in_buffer += sizeof(block_created_at);
+        total_read_size = next_spot_in_buffer + sizeof(sha_256_t) - buffer;
+        if (total_read_size > buffer_size) {
+            return_code = FAILURE_BUFFER_TOO_SMALL;
+            blockchain_destroy(new_blockchain);
+            goto end;
+        }
         sha_256_t previous_block_hash = {0};
         for (size_t idx = 0; idx < sizeof(previous_block_hash); idx++) {
             previous_block_hash.digest[idx] = *next_spot_in_buffer;
             next_spot_in_buffer++;
         }
+        total_read_size = next_spot_in_buffer + sizeof(uint64_t) - buffer;
+        if (total_read_size > buffer_size) {
+            return_code = FAILURE_BUFFER_TOO_SMALL;
+            blockchain_destroy(new_blockchain);
+            goto end;
+        }
         uint64_t proof_of_work = betoh64(*(uint64_t *)next_spot_in_buffer);
         next_spot_in_buffer += sizeof(proof_of_work);
+        total_read_size = next_spot_in_buffer + sizeof(uint64_t) - buffer;
+        if (total_read_size > buffer_size) {
+            return_code = FAILURE_BUFFER_TOO_SMALL;
+            blockchain_destroy(new_blockchain);
+            goto end;
+        }
         uint64_t num_transactions = betoh64(*(uint64_t *)next_spot_in_buffer);
         next_spot_in_buffer += sizeof(num_transactions);
         linked_list_t *transaction_list = NULL;
@@ -386,14 +421,38 @@ return_code_t blockchain_deserialize(
                 linked_list_destroy(transaction_list);
                 goto end;
             }
+            total_read_size = next_spot_in_buffer + sizeof(uint64_t) - buffer;
+            if (total_read_size > buffer_size) {
+                return_code = FAILURE_BUFFER_TOO_SMALL;
+                blockchain_destroy(new_blockchain);
+                linked_list_destroy(transaction_list);
+                free(transaction);
+                goto end;
+            }
             transaction->created_at = betoh64(*(uint64_t *)next_spot_in_buffer);
             next_spot_in_buffer += sizeof(transaction->created_at);
+            total_read_size = next_spot_in_buffer + sizeof(ssh_key_t) - buffer;
+            if (total_read_size > buffer_size) {
+                return_code = FAILURE_BUFFER_TOO_SMALL;
+                blockchain_destroy(new_blockchain);
+                linked_list_destroy(transaction_list);
+                free(transaction);
+                goto end;
+            }
             for (size_t idx = 0;
                 idx < sizeof(transaction->sender_public_key);
                 idx++) {
                 transaction->sender_public_key.bytes[idx] =
                     *next_spot_in_buffer;
                 next_spot_in_buffer++;
+            }
+            total_read_size = next_spot_in_buffer + sizeof(ssh_key_t) - buffer;
+            if (total_read_size > buffer_size) {
+                return_code = FAILURE_BUFFER_TOO_SMALL;
+                blockchain_destroy(new_blockchain);
+                linked_list_destroy(transaction_list);
+                free(transaction);
+                goto end;
             }
             for (size_t idx = 0;
                 idx < sizeof(transaction->recipient_public_key);
@@ -402,13 +461,40 @@ return_code_t blockchain_deserialize(
                     *next_spot_in_buffer;
                 next_spot_in_buffer++;
             }
+            total_read_size = next_spot_in_buffer + sizeof(uint64_t) - buffer;
+            if (total_read_size > buffer_size) {
+                return_code = FAILURE_BUFFER_TOO_SMALL;
+                blockchain_destroy(new_blockchain);
+                linked_list_destroy(transaction_list);
+                free(transaction);
+                goto end;
+            }
             transaction->amount = betoh64(*(uint64_t *)next_spot_in_buffer);
             next_spot_in_buffer += sizeof(transaction->amount);
+            total_read_size = next_spot_in_buffer + sizeof(uint64_t) - buffer;
+            if (total_read_size > buffer_size) {
+                return_code = FAILURE_BUFFER_TOO_SMALL;
+                blockchain_destroy(new_blockchain);
+                linked_list_destroy(transaction_list);
+                free(transaction);
+                goto end;
+            }
             transaction->sender_signature.length = betoh64(
                 *(uint64_t *)next_spot_in_buffer);
             next_spot_in_buffer += sizeof(transaction->sender_signature.length);
             if (transaction->sender_signature.length > MAX_SSH_KEY_LENGTH) {
                 return_code = FAILURE_SIGNATURE_TOO_LONG;
+                blockchain_destroy(new_blockchain);
+                linked_list_destroy(transaction_list);
+                free(transaction);
+                goto end;
+            }
+            total_read_size =
+                next_spot_in_buffer +
+                transaction->sender_signature.length -
+                buffer;
+            if (total_read_size > buffer_size) {
+                return_code = FAILURE_BUFFER_TOO_SMALL;
                 blockchain_destroy(new_blockchain);
                 linked_list_destroy(transaction_list);
                 free(transaction);

@@ -16,6 +16,7 @@ typedef enum return_code_t {
     FAILURE_OPENSSL_FUNCTION,
     FAILURE_FILE_IO,
     FAILURE_SIGNATURE_TOO_LONG,
+    FAILURE_BUFFER_TOO_SMALL,
 } return_code_t;
 
 #endif  // INCLUDE_RETURN_CODES_H_
