@@ -255,30 +255,6 @@ void test_blockchain_mine_block_fails_on_invalid_input() {
     blockchain_destroy(blockchain);
 }
 
-void test_blockchain_verify_succeeds_on_valid_blockchain() {
-    // TODO need to serialize blockchain and save as fixture
-}
-
-void test_blockchain_verify_fails_on_invalid_genesis_block() {
-    // TODO
-}
-
-void test_blockchain_verify_fails_on_invalid_proof_of_work() {
-    // TODO
-}
-
-void test_blockchain_verify_fails_on_invalid_previous_block_hash() {
-    // TODO
-}
-
-void test_blockchain_verify_fails_on_invalid_transaction_signature() {
-    // TODO
-}
-
-void test_blockchain_verify_fails_on_invalid_input() {
-    // TODO
-}
-
 void test_blockchain_serialize_creates_nonempty_buffer() {
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_create(
@@ -302,7 +278,7 @@ void test_blockchain_serialize_creates_nonempty_buffer() {
     blockchain_destroy(blockchain);
 }
 
-void test_blockchain_serialize_fails_on_invalid_arguments() {
+void test_blockchain_serialize_fails_on_invalid_input() {
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_create(
         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);

@@ -29,7 +29,6 @@ return_code_t mine_blocks(
         goto end;
     }
     while (true) {
-        // TODO verify blockchain here just before mining a new block
         node_t *node = NULL;
         return_code = linked_list_get_last(blockchain->block_list, &node);
         if (SUCCESS != return_code) {

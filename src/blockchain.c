@@ -191,7 +191,6 @@ void blockchain_print(blockchain_t *blockchain) {
     printf("\n");
 }
 
-// TODO add issue to use JSON serialization rather than binary
 return_code_t blockchain_serialize(
     blockchain_t *blockchain,
     unsigned char **buffer,
@@ -207,7 +206,7 @@ return_code_t blockchain_serialize(
     if (SUCCESS != return_code) {
         goto end;
     }
-    uint64_t size = 
+    uint64_t size =
         sizeof(blockchain->num_leading_zero_bytes_required_in_block_hash) +
         sizeof(num_blocks);
     unsigned char *serialization_buffer = calloc(1, size);
@@ -310,7 +309,6 @@ end:
     return return_code;
 }
 
-// TODO make issue that this function is too complex, too hard to error-check
 return_code_t blockchain_deserialize(
     blockchain_t **blockchain,
     unsigned char *buffer,
@@ -391,7 +389,6 @@ return_code_t blockchain_deserialize(
         for (uint64_t transaction_idx = 0;
             transaction_idx < num_transactions;
             transaction_idx++) {
-            // TODO transaction_create interface doesn't allow us to pass in a signature directly, so I manually alloc--not sure if good or bad
             transaction_t *transaction = calloc(1, sizeof(transaction_t));
             if (NULL == transaction) {
                 return_code = FAILURE_COULD_NOT_MALLOC;

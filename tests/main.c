@@ -21,8 +21,7 @@ int _unlink_callback(
     const char *fpath,
     const struct stat *sb,
     int typeflag,
-    struct FTW *ftwbuf)
-{
+    struct FTW *ftwbuf) {
     struct stat st;
     int return_value = stat(fpath, &st);
     if (0 != return_value) {
@@ -143,9 +142,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(
             test_blockchain_mine_block_produces_block_with_valid_hash),
         cmocka_unit_test(test_blockchain_mine_block_fails_on_invalid_input),
-        // TODO put these in the correct order
         cmocka_unit_test(test_blockchain_serialize_creates_nonempty_buffer),
-        cmocka_unit_test(test_blockchain_serialize_fails_on_invalid_arguments),
+        cmocka_unit_test(test_blockchain_serialize_fails_on_invalid_input),
         cmocka_unit_test(test_blockchain_deserialize_reconstructs_blockchain),
         cmocka_unit_test(
             test_blockchain_deserialize_fails_on_attempted_read_past_buffer),
