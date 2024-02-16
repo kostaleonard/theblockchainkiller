@@ -65,7 +65,6 @@ return_code_t _create_empty_output_directory(char *dirname) {
     #else
         return_value = mkdir(dirname, 0755);
     #endif
-    
 end:
     return_code_t return_code = return_value == 0 ? SUCCESS : FAILURE_FILE_IO;
     return return_code;
