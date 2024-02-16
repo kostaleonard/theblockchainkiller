@@ -346,6 +346,7 @@ void test_blockchain_deserialize_reconstructs_blockchain() {
     assert_true(is_empty);
     free(buffer);
     blockchain_destroy(blockchain);
+    blockchain_destroy(deserialized_blockchain);
 }
 
 void test_blockchain_deserialize_fails_on_attempted_read_past_buffer() {
@@ -502,6 +503,7 @@ void test_blockchain_read_from_file_reconstructs_blockchain() {
         &transaction->sender_signature,
         &empty_signature,
         sizeof(ssh_signature_t)));
+    blockchain_destroy(blockchain);
 }
 
 void test_blockchain_read_from_file_fails_on_invalid_input() {

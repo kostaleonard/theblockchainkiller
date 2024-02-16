@@ -338,6 +338,7 @@ return_code_t blockchain_deserialize(
     total_read_size = next_spot_in_buffer + sizeof(uint64_t) - buffer;
     if (total_read_size > buffer_size) {
         return_code = FAILURE_BUFFER_TOO_SMALL;
+        blockchain_destroy(new_blockchain);
         goto end;
     }
     uint64_t num_blocks = betoh64(*(uint64_t *)next_spot_in_buffer);
