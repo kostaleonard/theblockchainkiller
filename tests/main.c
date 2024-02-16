@@ -74,10 +74,12 @@ int main(int argc, char **argv) {
     char output_directory[TESTS_MAX_PATH] = {0};
     return_code_t return_code = get_output_directory(output_directory);
     if (0 != return_code) {
+        printf("Failed to get output directory\n");
         goto end;
     }
     return_code = _create_empty_output_directory(output_directory);
     if (0 != return_code) {
+        printf("Failed to create output directory\n");
         goto end;
     }
     const struct CMUnitTest tests[] = {

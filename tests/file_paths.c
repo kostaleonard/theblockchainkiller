@@ -24,21 +24,15 @@ return_code_t _get_executable_directory(char *dirname) {
     }
 #else
     // On Unix-like systems, read the symbolic link /proc/self/exe
-    ssize_t length = readlink("/proc/self/exe", NULL, 0);
+    ssize_t length = readlink("/proc/self/exe", dirname, TESTS_MAX_PATH);
     if (length <= 0 || length >= TESTS_MAX_PATH) {
         return_code = FAILURE_FILE_IO;
         goto end;
-    } else {
-        if (-1 == readlink("/proc/self/exe", dirname, length + 1)) {
-            return_code = FAILURE_FILE_IO;
-            goto end;
-        } else {
-            // Remove the executable name to get the directory.
-            char *last_slash = strrchr(dirname, '/');
-            if (NULL != last_slash) {
-                *last_slash = '\0';
-            }
-        }
+    }
+    // Remove the executable name to get the directory.
+    char *last_slash = strrchr(dirname, '/');
+    if (NULL != last_slash) {
+        *last_slash = '\0';
     }
 #endif
 end:
