@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #ifdef _WIN32
-#include <windows.h>
+    #include <windows.h>
 #else
-#include <unistd.h>
+    #include <unistd.h>
 #endif
 #include "tests/file_paths.h"
 
@@ -51,12 +51,15 @@ return_code_t _get_tests_subdirectory(char *dirname, char *subdirname) {
     if (0 != return_code) {
         goto end;
     }
-    snprintf(
+    int return_value = snprintf(
         dirname,
         TESTS_MAX_PATH,
         "%s/../tests/%s/",
         executable_directory,
         subdirname);
+    if (return_value >= TESTS_MAX_PATH) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+    }
 end:
     return return_code;
 }

@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#ifndef _WIN32
+    #include <sys/stat.h>
+    #include <unistd.h>
+#endif
 #include "include/return_codes.h"
 #include "tests/file_paths.h"
 #include "tests/test_linked_list.h"
@@ -56,7 +60,12 @@ return_code_t _create_empty_output_directory(char *dirname) {
             goto end;
         }
     }
-    return_value = mkdir(dirname);
+    #ifdef _WIN32
+        return_value = mkdir(dirname);
+    #else
+        return_value = mkdir(dirname, 0755);
+    #endif
+    
 end:
     return_code_t return_code = return_value == 0 ? SUCCESS : FAILURE_FILE_IO;
     return return_code;

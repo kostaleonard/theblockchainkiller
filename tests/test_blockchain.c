@@ -407,12 +407,13 @@ void test_blockchain_write_to_file_creates_nonempty_file() {
     char output_directory[TESTS_MAX_PATH];
     get_output_directory(output_directory);
     char outfile[TESTS_MAX_PATH];
-    snprintf(
+    int return_value = snprintf(
         outfile,
         TESTS_MAX_PATH,
         "%s/%s",
         output_directory,
         "blockchain_test_blockchain_write_to_file_creates_nonempty_file");
+    assert_true(return_value < TESTS_MAX_PATH);
     struct stat file_stats = {0};
     assert_true(0 != stat(outfile, &file_stats));
     return_code = blockchain_write_to_file(blockchain, outfile);
@@ -435,12 +436,13 @@ void test_blockchain_write_to_file_fails_on_invalid_input() {
     char output_directory[TESTS_MAX_PATH];
     get_output_directory(output_directory);
     char outfile[TESTS_MAX_PATH];
-    snprintf(
+    int return_value = snprintf(
         outfile,
         TESTS_MAX_PATH,
         "%s/%s",
         output_directory,
         "blockchain_test_blockchain_write_to_file_fails_on_invalid_input");
+    assert_true(return_value < TESTS_MAX_PATH);
     return_code = blockchain_write_to_file(blockchain, NULL);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = blockchain_write_to_file(NULL, outfile);
@@ -452,12 +454,13 @@ void test_blockchain_read_from_file_reconstructs_blockchain() {
     char fixture_directory[TESTS_MAX_PATH];
     get_fixture_directory(fixture_directory);
     char infile[TESTS_MAX_PATH];
-    snprintf(
+    int return_value = snprintf(
         infile,
         TESTS_MAX_PATH,
         "%s/%s",
         fixture_directory,
         "blockchain_4_blocks_no_transactions");
+    assert_true(return_value < TESTS_MAX_PATH);
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_read_from_file(&blockchain, infile);
     assert_true(SUCCESS == return_code);
@@ -505,12 +508,13 @@ void test_blockchain_read_from_file_fails_on_invalid_input() {
     char fixture_directory[TESTS_MAX_PATH];
     get_fixture_directory(fixture_directory);
     char infile[TESTS_MAX_PATH];
-    snprintf(
+    int return_value = snprintf(
         infile,
         TESTS_MAX_PATH,
         "%s/%s",
         fixture_directory,
         "blockchain_4_blocks_no_transactions");
+    assert_true(return_value < TESTS_MAX_PATH);
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_read_from_file(NULL, infile);
     assert_true(FAILURE_INVALID_INPUT == return_code);
