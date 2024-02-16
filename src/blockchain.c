@@ -335,7 +335,7 @@ end:
 return_code_t blockchain_deserialize(
     blockchain_t **blockchain,
     unsigned char *buffer,
-    uint64_t buffer_size // TODO get rid of buffer_size? I don't think we need it.
+    uint64_t buffer_size // TODO if we ever read past buffer_size, fail
 ) {
     return_code_t return_code = SUCCESS;
     if (NULL == blockchain || NULL == buffer) {
@@ -356,7 +356,6 @@ return_code_t blockchain_deserialize(
     uint64_t num_blocks = betoh64(*(uint64_t *)next_spot_in_buffer);
     next_spot_in_buffer += sizeof(num_blocks);
     for (uint64_t block_idx = 0; block_idx < num_blocks; block_idx++) {
-        // TODO deserialize block
         block_t *block = NULL;
         time_t block_created_at = betoh64(*(uint64_t *)next_spot_in_buffer);
         next_spot_in_buffer += sizeof(block_created_at);

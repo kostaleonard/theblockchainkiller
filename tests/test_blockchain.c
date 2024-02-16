@@ -324,11 +324,62 @@ void test_blockchain_serialize_fails_on_invalid_arguments() {
 }
 
 void test_blockchain_deserialize_reconstructs_blockchain() {
-    // TODO use fixture here so you have some actual data
+    // See test_blockchain_read_from_file_reconstructs_blockchain. Since
+    // blockchain_read_from_file calls blockchain_deserialize, the
+    // aforementioned test already covers deserialization fairly well. Here we
+    // will just test on a single-block blockchain to preserve compute and add
+    // diversity to the tests.
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    block_t *genesis_block = NULL;
+    return_code = block_create_genesis_block(&genesis_block);
+    assert_true(SUCCESS == return_code);
+    return_code = blockchain_add_block(blockchain, genesis_block);
+    assert_true(SUCCESS == return_code);
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code = blockchain_serialize(blockchain, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    blockchain_t *deserialized_blockchain = NULL;
+    return_code = blockchain_deserialize(
+        &deserialized_blockchain, buffer, buffer_size);
+    assert_true(SUCCESS == return_code);
+    assert_true(NULL != deserialized_blockchain);
+    uint64_t length = 0;
+    return_code = linked_list_length(
+        deserialized_blockchain->block_list, &length);
+    assert_true(SUCCESS == return_code);
+    assert_true(1 == length);
+    block_t *deserialized_genesis_block =
+        (block_t *)deserialized_blockchain->block_list->head->data;
+    assert_true(
+        genesis_block->created_at == deserialized_genesis_block->created_at);
+    assert_true(0 == memcmp(
+        &genesis_block->previous_block_hash,
+        &deserialized_genesis_block->previous_block_hash,
+        sizeof(sha_256_t)));
+    assert_true(
+        genesis_block->proof_of_work ==
+        deserialized_genesis_block->proof_of_work);
+    bool is_empty = false;
+    return_code = linked_list_is_empty(
+        deserialized_genesis_block->transaction_list, &is_empty);
+    assert_true(SUCCESS == return_code);
+    assert_true(is_empty);
+    free(buffer);
+    blockchain_destroy(blockchain);
+}
+
+void test_blockchain_deserialize_fails_on_attempted_read_past_buffer() {
+    // TODO
+    assert_true(false);
 }
 
 void test_blockchain_deserialize_fails_on_invalid_input() {
     // TODO
+    assert_true(false);
 }
 
 void test_blockchain_write_to_file_creates_nonempty_file() {

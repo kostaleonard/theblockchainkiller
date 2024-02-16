@@ -146,6 +146,10 @@ int main(int argc, char **argv) {
         // TODO put these in the correct order
         cmocka_unit_test(test_blockchain_serialize_creates_nonempty_buffer),
         cmocka_unit_test(test_blockchain_serialize_fails_on_invalid_arguments),
+        cmocka_unit_test(test_blockchain_deserialize_reconstructs_blockchain),
+        cmocka_unit_test(
+            test_blockchain_deserialize_fails_on_attempted_read_past_buffer),
+        cmocka_unit_test(test_blockchain_deserialize_fails_on_invalid_input),
         cmocka_unit_test(test_blockchain_write_to_file_creates_nonempty_file),
         cmocka_unit_test(test_blockchain_write_to_file_fails_on_invalid_input),
         cmocka_unit_test(
