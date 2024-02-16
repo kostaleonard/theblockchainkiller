@@ -255,6 +255,174 @@ void test_blockchain_mine_block_fails_on_invalid_input() {
     blockchain_destroy(blockchain);
 }
 
+void test_blockchain_verify_succeeds_on_valid_blockchain() {
+    char fixture_directory[TESTS_MAX_PATH];
+    get_fixture_directory(fixture_directory);
+    char infile[TESTS_MAX_PATH];
+    int return_value = snprintf(
+        infile,
+        TESTS_MAX_PATH,
+        "%s/%s",
+        fixture_directory,
+        "blockchain_4_blocks_no_transactions");
+    assert_true(return_value < TESTS_MAX_PATH);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_read_from_file(&blockchain, infile);
+    assert_true(SUCCESS == return_code);
+    bool is_valid = false;
+    block_t *first_invalid_block = NULL;
+    return_code = blockchain_verify(
+        blockchain, &is_valid, &first_invalid_block);
+    assert_true(SUCCESS == return_code);
+    assert_true(is_valid);
+    assert_true(NULL == first_invalid_block);
+    blockchain_destroy(blockchain);
+}
+
+void test_blockchain_verify_fails_on_invalid_genesis_block() {
+    char fixture_directory[TESTS_MAX_PATH];
+    get_fixture_directory(fixture_directory);
+    char infile[TESTS_MAX_PATH];
+    int return_value = snprintf(
+        infile,
+        TESTS_MAX_PATH,
+        "%s/%s",
+        fixture_directory,
+        "blockchain_4_blocks_no_transactions");
+    assert_true(return_value < TESTS_MAX_PATH);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_read_from_file(&blockchain, infile);
+    assert_true(SUCCESS == return_code);
+    block_t *genesis_block = (block_t *)blockchain->block_list->head->data;
+    genesis_block->proof_of_work += 1;
+    bool is_valid = false;
+    block_t *first_invalid_block = NULL;
+    return_code = blockchain_verify(
+        blockchain, &is_valid, &first_invalid_block);
+    assert_true(SUCCESS == return_code);
+    assert_true(!is_valid);
+    assert_true(first_invalid_block == genesis_block);
+    genesis_block->proof_of_work = GENESIS_BLOCK_PROOF_OF_WORK;
+    genesis_block->previous_block_hash.digest[0] = 'A';
+    is_valid = false;
+    first_invalid_block = NULL;
+    return_code = blockchain_verify(
+        blockchain, &is_valid, &first_invalid_block);
+    assert_true(SUCCESS == return_code);
+    assert_true(!is_valid);
+    assert_true(first_invalid_block == genesis_block);
+    blockchain_destroy(blockchain);
+}
+
+void test_blockchain_verify_fails_on_invalid_proof_of_work() {
+    char fixture_directory[TESTS_MAX_PATH];
+    get_fixture_directory(fixture_directory);
+    char infile[TESTS_MAX_PATH];
+    int return_value = snprintf(
+        infile,
+        TESTS_MAX_PATH,
+        "%s/%s",
+        fixture_directory,
+        "blockchain_4_blocks_no_transactions");
+    assert_true(return_value < TESTS_MAX_PATH);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_read_from_file(&blockchain, infile);
+    assert_true(SUCCESS == return_code);
+    block_t *block = (block_t *)blockchain->block_list->head->next->data;
+    block->proof_of_work += 1;
+    bool is_valid = false;
+    block_t *first_invalid_block = NULL;
+    return_code = blockchain_verify(
+        blockchain, &is_valid, &first_invalid_block);
+    assert_true(SUCCESS == return_code);
+    assert_true(!is_valid);
+    assert_true(first_invalid_block == block);
+    blockchain_destroy(blockchain);
+}
+
+void test_blockchain_verify_fails_on_invalid_previous_block_hash() {
+    char fixture_directory[TESTS_MAX_PATH];
+    get_fixture_directory(fixture_directory);
+    char infile[TESTS_MAX_PATH];
+    int return_value = snprintf(
+        infile,
+        TESTS_MAX_PATH,
+        "%s/%s",
+        fixture_directory,
+        "blockchain_4_blocks_no_transactions");
+    assert_true(return_value < TESTS_MAX_PATH);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_read_from_file(&blockchain, infile);
+    assert_true(SUCCESS == return_code);
+    block_t *block = (block_t *)blockchain->block_list->head->next->next->data;
+    block->previous_block_hash.digest[0] = 'A';
+    block->previous_block_hash.digest[1] = 'A';
+    block->previous_block_hash.digest[2] = 'A';
+    bool is_valid = false;
+    block_t *first_invalid_block = NULL;
+    return_code = blockchain_verify(
+        blockchain, &is_valid, &first_invalid_block);
+    assert_true(SUCCESS == return_code);
+    assert_true(!is_valid);
+    assert_true(first_invalid_block == block);
+    blockchain_destroy(blockchain);
+}
+
+void test_blockchain_verify_fails_on_invalid_transaction_signature() {
+    char fixture_directory[TESTS_MAX_PATH];
+    get_fixture_directory(fixture_directory);
+    char infile[TESTS_MAX_PATH];
+    int return_value = snprintf(
+        infile,
+        TESTS_MAX_PATH,
+        "%s/%s",
+        fixture_directory,
+        "blockchain_4_blocks_no_transactions");
+    assert_true(return_value < TESTS_MAX_PATH);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_read_from_file(&blockchain, infile);
+    assert_true(SUCCESS == return_code);
+    block_t *block = (block_t *)blockchain->block_list->head->next->next->data;
+    transaction_t *minting_transaction =
+        (transaction_t *)block->transaction_list->head->data;
+    minting_transaction->sender_signature.bytes[0] = 'A';
+    minting_transaction->sender_signature.bytes[1] = 'A';
+    minting_transaction->sender_signature.bytes[2] = 'A';
+    bool is_valid = false;
+    block_t *first_invalid_block = NULL;
+    return_code = blockchain_verify(
+        blockchain, &is_valid, &first_invalid_block);
+    assert_true(SUCCESS == return_code);
+    assert_true(!is_valid);
+    assert_true(first_invalid_block == block);
+    blockchain_destroy(blockchain);
+}
+
+void test_blockchain_verify_fails_on_invalid_input() {
+    char fixture_directory[TESTS_MAX_PATH];
+    get_fixture_directory(fixture_directory);
+    char infile[TESTS_MAX_PATH];
+    int return_value = snprintf(
+        infile,
+        TESTS_MAX_PATH,
+        "%s/%s",
+        fixture_directory,
+        "blockchain_4_blocks_no_transactions");
+    assert_true(return_value < TESTS_MAX_PATH);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_read_from_file(&blockchain, infile);
+    assert_true(SUCCESS == return_code);
+    bool is_valid = false;
+    block_t *first_invalid_block = NULL;
+    return_code = blockchain_verify(
+        NULL, &is_valid, &first_invalid_block);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = blockchain_verify(
+        blockchain, NULL, &first_invalid_block);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    blockchain_destroy(blockchain);
+}
+
 void test_blockchain_serialize_creates_nonempty_buffer() {
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_create(

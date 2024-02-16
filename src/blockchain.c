@@ -191,6 +191,15 @@ void blockchain_print(blockchain_t *blockchain) {
     printf("\n");
 }
 
+return_code_t blockchain_verify(
+    blockchain_t *blockchain,
+    bool *is_valid_blockchain,
+    block_t **first_invalid_block
+) {
+    // TODO
+    return FAILURE_INVALID_INPUT;
+}
+
 return_code_t blockchain_serialize(
     blockchain_t *blockchain,
     unsigned char **buffer,
