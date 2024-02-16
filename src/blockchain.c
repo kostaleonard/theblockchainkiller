@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "include/block.h"
 #include "include/blockchain.h"
 #include "include/endian.h"
@@ -196,8 +197,69 @@ return_code_t blockchain_verify(
     bool *is_valid_blockchain,
     block_t **first_invalid_block
 ) {
-    // TODO
-    return FAILURE_INVALID_INPUT;
+    return_code_t return_code = SUCCESS;
+    if (NULL == blockchain || NULL == is_valid_blockchain) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    if (NULL == blockchain->block_list->head) {
+        *is_valid_blockchain = true;
+        goto end;
+    }
+    // Check the genesis block, which is unique.
+    block_t *genesis_block = (block_t *)blockchain->block_list->head->data;
+    bool genesis_block_transaction_list_is_empty = false;
+    return_code = linked_list_is_empty(
+        genesis_block->transaction_list,
+        &genesis_block_transaction_list_is_empty);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    sha_256_t empty_block_hash = {0};
+    if (!genesis_block_transaction_list_is_empty ||
+        genesis_block->proof_of_work != GENESIS_BLOCK_PROOF_OF_WORK ||
+        0 != memcmp(
+            &genesis_block->previous_block_hash,
+            &empty_block_hash,
+            sizeof(sha_256_t))) {
+        *is_valid_blockchain = false;
+        if (NULL != first_invalid_block) {
+            *first_invalid_block = genesis_block;
+        }
+        goto end;
+    }
+    // Check the remaining blocks.
+    //node_t *previous_node = blockchain->block_list->head; // TODO remove and change to for loop
+    node_t *current_node = blockchain->block_list->head->next;
+    while (NULL != current_node) {
+        //block_t *previous_block = (block_t *)previous_node->data;
+        block_t *current_block = (block_t *)current_node->data;
+        sha_256_t current_block_hash = {0};
+        return_code = block_hash(current_block, &current_block_hash);
+        if (SUCCESS != return_code) {
+            goto end;
+        }
+        if (0 != memcmp(
+                &current_block_hash,
+                &empty_block_hash,
+                blockchain->num_leading_zero_bytes_required_in_block_hash)) {
+            *is_valid_blockchain = false;
+            if (NULL != first_invalid_block) {
+                *first_invalid_block = current_block;
+            }
+            goto end;
+        }
+        // TODO check that previous block hash is accurate
+
+        // TODO check that all transactions in current block have valid signature
+
+
+        //previous_node = current_node;
+        current_node = current_node->next;
+    }
+    *is_valid_blockchain = true;
+end:
+    return return_code;
 }
 
 return_code_t blockchain_serialize(
