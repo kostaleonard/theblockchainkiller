@@ -89,4 +89,61 @@ return_code_t blockchain_mine_block(
  */
 void blockchain_print(blockchain_t *blockchain);
 
+/**
+ * @brief Serializes the blockchain into a buffer for file or network I/O.
+ * 
+ * @param blockchain The blockchain.
+ * @param buffer A pointer to fill with the bytes representing the blockchain.
+ * Callers can write the bytes to a file or send on the network and reconstruct
+ * the original blockchain with blockchain_deserialize. Callers are responsible
+ * for freeing the buffer.
+ * @param buffer_size A pointer to fill with the final size of the buffer.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_serialize(
+    blockchain_t *blockchain,
+    unsigned char **buffer,
+    uint64_t *buffer_size
+);
+
+/**
+ * @brief Reconstructs the blockchain from a buffer.
+ * 
+ * @param blockchain A pointer to fill with the reconstructed blockchain.
+ * Callers are responsible for calling blockchain_destroy when finished.
+ * @param buffer An array containing the serialized blockchain.
+ * @param buffer_size The length of the serialized blockchain.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_deserialize(
+    blockchain_t **blockchain,
+    unsigned char *buffer,
+    uint64_t buffer_size
+);
+
+/**
+ * @brief Saves the blockchain to a file.
+ * 
+ * @param blockchain The blockchain.
+ * @param outfile The path to the file to which to write the blockchain.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_write_to_file(
+    blockchain_t *blockchain,
+    char *outfile
+);
+
+/**
+ * @brief Reads the blockchain from a file.
+ * 
+ * @param blockchain A pointer to fill with the reconstructed blockchain.
+ * Callers are responsible for calling blockchain_destroy when finished.
+ * @param infile The path to the file from which to read the blockchain.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_read_from_file(
+    blockchain_t **blockchain,
+    char *infile
+);
+
 #endif  // INCLUDE_BLOCKCHAIN_H_

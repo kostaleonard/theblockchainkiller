@@ -17,8 +17,9 @@
  * 
  * @param created_at The datetime at which the user created this block.
  * @param transaction_list A list of the transactions this block contains.
- * @param proof_of_work A number p' such that hash(pp') contains some number of
- * leading zeros, where p is the previous block's proof of work.
+ * @param proof_of_work A number such that the hash of the block_t contains
+ * some number of leading zeros. It has no meaning other than as part of the
+ * hash.
  * @param previous_block_hash The hash of the previous block.
  */
 typedef struct block_t {
@@ -33,8 +34,9 @@ typedef struct block_t {
  * 
  * @param block The pointer to fill with the new block.
  * @param transaction_list A list of the transactions this block contains.
- * @param proof_of_work A number p' such that hash(pp') contains some number of
- * leading zeros, where p is the previous block's proof of work.
+ * @param proof_of_work A number such that the hash of the block_t contains
+ * some number of leading zeros. It has no meaning other than as part of the
+ * hash.
  * @param previous_block_hash The hash of the previous block.
  * @return return_code_t A return code indicating success or failure.
  */

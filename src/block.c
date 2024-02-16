@@ -88,6 +88,9 @@ return_code_t block_hash(block_t *block, sha_256_t *hash) {
         NULL != node;
         node = node->next) {
         transaction_t *transaction = (transaction_t *)node->data;
+        // We can just hash the entire transaction directly because it contains
+        // no pointers. Memory locations don't have meaning, so we can't hash
+        // pointers.
         EVP_DigestUpdate(mdctx, (void *)transaction, sizeof(*transaction));
     }
     EVP_DigestFinal_ex(mdctx, hash->digest, NULL);

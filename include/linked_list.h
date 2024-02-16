@@ -6,6 +6,7 @@
 #define INCLUDE_LINKED_LIST_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 #include "include/return_codes.h"
 
 /**
@@ -147,5 +148,14 @@ return_code_t linked_list_append(linked_list_t *linked_list, void *data);
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t linked_list_get_last(linked_list_t *linked_list, node_t **node);
+
+/**
+ * @brief Fills length with the number of items in the linked list.
+ * 
+ * @param linked_list The linked list.
+ * @param length A pointer to fill with the length of the list.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t linked_list_length(linked_list_t *linked_list, uint64_t *length);
 
 #endif  // INCLUDE_LINKED_LIST_H_

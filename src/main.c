@@ -19,7 +19,8 @@
 return_code_t mine_blocks(
     blockchain_t *blockchain,
     ssh_key_t *miner_public_key,
-    ssh_key_t *miner_private_key) {
+    ssh_key_t *miner_private_key,
+    char *outfile) {
     return_code_t return_code = SUCCESS;
     if (NULL == blockchain ||
         NULL == miner_public_key ||
@@ -86,6 +87,9 @@ return_code_t mine_blocks(
                 goto end;
             }
             blockchain_print(blockchain);
+            if (NULL != outfile) {
+                blockchain_write_to_file(blockchain, outfile);
+            }
         }
     }
 end:
@@ -200,7 +204,7 @@ int main(int argc, char **argv) {
     }
     blockchain_print(blockchain);
     return_code = mine_blocks(
-        blockchain, &miner_public_key, &miner_private_key);
+        blockchain, &miner_public_key, &miner_private_key, "blockchain");
 end:
     blockchain_destroy(blockchain);
     exit(return_code);

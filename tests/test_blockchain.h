@@ -31,4 +31,22 @@ void test_blockchain_mine_block_produces_block_with_valid_hash();
 
 void test_blockchain_mine_block_fails_on_invalid_input();
 
+void test_blockchain_serialize_creates_nonempty_buffer();
+
+void test_blockchain_serialize_fails_on_invalid_input();
+
+void test_blockchain_deserialize_reconstructs_blockchain();
+
+void test_blockchain_deserialize_fails_on_attempted_read_past_buffer();
+
+void test_blockchain_deserialize_fails_on_invalid_input();
+
+void test_blockchain_write_to_file_creates_nonempty_file();
+
+void test_blockchain_write_to_file_fails_on_invalid_input();
+
+void test_blockchain_read_from_file_reconstructs_blockchain();
+
+void test_blockchain_read_from_file_fails_on_invalid_input();
+
 #endif  // TESTS_TEST_BLOCKCHAIN_H_

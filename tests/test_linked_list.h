@@ -63,4 +63,10 @@ void test_linked_list_get_last_gives_last_element();
 
 void test_linked_list_get_last_fails_on_invalid_input();
 
+void test_linked_list_length_gives_zero_on_empty_list();
+
+void test_linked_list_length_gives_num_elements_on_nonempty_list();
+
+void test_linked_list_length_fails_on_invalid_input();
+
 #endif  // TESTS_TEST_LINKED_LIST_H_

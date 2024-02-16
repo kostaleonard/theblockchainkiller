@@ -3,6 +3,7 @@
 
 build
 scrap
+tests/output
 
 ### C ###
 # Prerequisites

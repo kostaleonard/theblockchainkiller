@@ -198,3 +198,18 @@ return_code_t linked_list_get_last(linked_list_t *linked_list, node_t **node) {
 end:
     return return_code;
 }
+
+return_code_t linked_list_length(linked_list_t *linked_list, uint64_t *length) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == linked_list || NULL == length) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    uint64_t result = 0;
+    for (node_t *node = linked_list->head; NULL != node; node = node->next) {
+        result++;
+    }
+    *length = result;
+end:
+    return return_code;
+}
