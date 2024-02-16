@@ -216,22 +216,12 @@ return_code_t blockchain_serialize(
         goto end;
     }
     unsigned char *next_spot_in_buffer = serialization_buffer;
-    // TODO remove debugging
-    printf("Next spot in buffer: %p\n", next_spot_in_buffer);
     *(uint64_t *)next_spot_in_buffer = htobe64(
         blockchain->num_leading_zero_bytes_required_in_block_hash);
     next_spot_in_buffer += sizeof(
         blockchain->num_leading_zero_bytes_required_in_block_hash);
-    // TODO remove debugging
-    printf("Next spot in buffer: %p\n", next_spot_in_buffer);
     *(uint64_t *)next_spot_in_buffer = htobe64(num_blocks);
     next_spot_in_buffer += sizeof(num_blocks);
-    // TODO remove debugging
-    printf("Next spot in buffer: %p\n", next_spot_in_buffer);
-    for (unsigned char *c = serialization_buffer; c < next_spot_in_buffer; c++) {
-        printf("%02hhx", *c);
-    }
-    printf("\n");
     for (node_t *block_node = blockchain->block_list->head;
         NULL != block_node;
         block_node = block_node->next) {
@@ -265,12 +255,6 @@ return_code_t blockchain_serialize(
         next_spot_in_buffer += sizeof(block->proof_of_work);
         *(uint64_t *)next_spot_in_buffer = htobe64(num_transactions_in_block);
         next_spot_in_buffer += sizeof(num_transactions_in_block);
-        // TODO remove debugging
-        printf("Next spot in buffer: %p\n", next_spot_in_buffer);
-        for (unsigned char *c = serialization_buffer; c < next_spot_in_buffer; c++) {
-            printf("%02hhx", *c);
-        }
-        printf("\n");
         for (node_t *transaction_node = block->transaction_list->head;
             NULL != transaction_node;
             transaction_node = transaction_node->next) {
@@ -318,12 +302,6 @@ return_code_t blockchain_serialize(
                 *next_spot_in_buffer = transaction->sender_signature.bytes[idx];
                 next_spot_in_buffer++;
             }
-            // TODO remove debugging
-            printf("Next spot in buffer: %p\n", next_spot_in_buffer);
-            for (unsigned char *c = serialization_buffer; c < next_spot_in_buffer; c++) {
-                printf("%02hhx", *c);
-            }
-            printf("\n");
         }
     }
     *buffer = serialization_buffer;
