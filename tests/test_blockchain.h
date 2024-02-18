@@ -61,4 +61,6 @@ void test_blockchain_read_from_file_reconstructs_blockchain();
 
 void test_blockchain_read_from_file_fails_on_invalid_input();
 
+void test_blockchain_serialization_does_not_alter_block_hash();
+
 #endif  // TESTS_TEST_BLOCKCHAIN_H_

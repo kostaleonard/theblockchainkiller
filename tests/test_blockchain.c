@@ -652,6 +652,9 @@ void test_blockchain_read_from_file_reconstructs_blockchain() {
     assert_true(transaction_list_is_empty);
     block_t *block2 = (block_t *)blockchain->block_list->head->next->data;
     assert_true(0 != block2->proof_of_work);
+    assert_true(0 != block2->created_at);
+    assert_true(0 != memcmp(
+        &block2->previous_block_hash, &empty_block_hash, sizeof(sha_256_t)));
     uint64_t num_transactions = 0;
     return_code = linked_list_length(
         block2->transaction_list, &num_transactions);
@@ -667,6 +670,26 @@ void test_blockchain_read_from_file_reconstructs_blockchain() {
     assert_true(0 != memcmp(
         &transaction->recipient_public_key, &empty_key, sizeof(ssh_key_t)));
     ssh_signature_t empty_signature = {0};
+    assert_true(0 != memcmp(
+        &transaction->sender_signature,
+        &empty_signature,
+        sizeof(ssh_signature_t)));
+    block_t *block3 = (block_t *)blockchain->block_list->head->next->next->data;
+    assert_true(0 != block3->proof_of_work);
+    assert_true(0 != block3->created_at);
+    assert_true(0 != memcmp(
+        &block3->previous_block_hash, &empty_block_hash, sizeof(sha_256_t)));
+    return_code = linked_list_length(
+        block3->transaction_list, &num_transactions);
+    assert_true(SUCCESS == return_code);
+    assert_true(1 == num_transactions);
+    transaction = (transaction_t *)block3->transaction_list->head->data;
+    assert_true(AMOUNT_GENERATED_DURING_MINTING == transaction->amount);
+    assert_true(0 != transaction->created_at);
+    assert_true(0 == memcmp(
+        &transaction->sender_public_key, &empty_key, sizeof(ssh_key_t)));
+    assert_true(0 != memcmp(
+        &transaction->recipient_public_key, &empty_key, sizeof(ssh_key_t)));
     assert_true(0 != memcmp(
         &transaction->sender_signature,
         &empty_signature,
@@ -690,4 +713,56 @@ void test_blockchain_read_from_file_fails_on_invalid_input() {
     assert_true(FAILURE_INVALID_INPUT == return_code);
     return_code = blockchain_read_from_file(&blockchain, NULL);
     assert_true(FAILURE_INVALID_INPUT == return_code);
+}
+
+void test_blockchain_serialization_does_not_alter_block_hash() {
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    block_t *genesis_block = NULL;
+    return_code = block_create_genesis_block(&genesis_block);
+    assert_true(SUCCESS == return_code);
+    // Set created_at to get a consistent hash between test suite executions.
+    // This is just for debugging. We might want to print out the hashes and
+    // make sure they don't change between runs as a sanity check.
+    genesis_block->created_at = 1;
+    return_code = blockchain_add_block(blockchain, genesis_block);
+    assert_true(SUCCESS == return_code);
+    sha_256_t genesis_block_hash_before_serialization = {0};
+    return_code = block_hash(
+        genesis_block, &genesis_block_hash_before_serialization);
+    assert_true(SUCCESS == return_code);
+    // TODO remove
+    hash_print(&genesis_block_hash_before_serialization);
+    printf("\n");
+    printf("Serialized genesis block created_at: %lld\n", genesis_block->created_at);
+
+
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code = blockchain_serialize(blockchain, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    blockchain_t *deserialized_blockchain = NULL;
+    return_code = blockchain_deserialize(
+        &deserialized_blockchain, buffer, buffer_size);
+    assert_true(SUCCESS == return_code);
+    block_t *deserialized_genesis_block =
+        (block_t *)deserialized_blockchain->block_list->head->data;
+    sha_256_t genesis_block_hash_after_serialization = {0};
+    return_code = block_hash(
+        deserialized_genesis_block, &genesis_block_hash_after_serialization);
+    assert_true(SUCCESS == return_code);
+    // TODO remove
+    hash_print(&genesis_block_hash_after_serialization);
+    printf("\n");
+    printf("Deserialized genesis block created_at: %lld\n", deserialized_genesis_block->created_at);
+
+    assert_true(0 == memcmp(
+        &genesis_block_hash_before_serialization,
+        &genesis_block_hash_after_serialization,
+        sizeof(sha_256_t)));
+    free(buffer);
+    blockchain_destroy(blockchain);
+    blockchain_destroy(deserialized_blockchain);
 }

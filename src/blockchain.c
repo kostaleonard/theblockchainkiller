@@ -4,6 +4,7 @@
 #include "include/block.h"
 #include "include/blockchain.h"
 #include "include/endian.h"
+#include "include/hash.h"
 #include "include/linked_list.h"
 #include "include/return_codes.h"
 #include "include/transaction.h"
@@ -228,26 +229,47 @@ return_code_t blockchain_verify(
         }
         goto end;
     }
+    // TODO remove
+    printf("Genesis block ok\n");
+    sha_256_t genesis_block_hash = {0};
+    block_hash(genesis_block, &genesis_block_hash);
+    printf("Genesis block hash: ");
+    hash_print(&genesis_block_hash);
     // Check the remaining blocks.
     //node_t *previous_node = blockchain->block_list->head; // TODO remove and change to for loop
+    uint64_t num_blocks = 0;
+    return_code = linked_list_length(blockchain->block_list, &num_blocks);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    printf("Expected number of blocks: %lld\n", num_blocks);
     node_t *current_node = blockchain->block_list->head->next;
     while (NULL != current_node) {
         //block_t *previous_block = (block_t *)previous_node->data;
         block_t *current_block = (block_t *)current_node->data;
+        char *time_string = ctime(&current_block->created_at);
+        printf("%s", time_string);
+        printf("Previous block hash: ");
+        hash_print(&current_block->previous_block_hash);
         sha_256_t current_block_hash = {0};
         return_code = block_hash(current_block, &current_block_hash);
         if (SUCCESS != return_code) {
+            printf("Hash failed\n");
             goto end;
         }
+        printf("Current block hash: ");
+        hash_print(&current_block_hash);
         if (0 != memcmp(
                 &current_block_hash,
                 &empty_block_hash,
                 blockchain->num_leading_zero_bytes_required_in_block_hash)) {
+            printf("invalid block\n");
             *is_valid_blockchain = false;
             if (NULL != first_invalid_block) {
                 *first_invalid_block = current_block;
             }
-            goto end;
+            // TODO uncomment
+            //goto end;
         }
         // TODO check that previous block hash is accurate
 
@@ -256,6 +278,7 @@ return_code_t blockchain_verify(
 
         //previous_node = current_node;
         current_node = current_node->next;
+        printf("block ok\n");
     }
     *is_valid_blockchain = true;
 end:
@@ -548,7 +571,7 @@ return_code_t blockchain_deserialize(
                 goto end;
             }
             for (size_t idx = 0;
-                idx < transaction->sender_signature.length;
+                idx < sizeof(transaction->sender_signature.bytes);
                 idx++) {
                 transaction->sender_signature.bytes[idx] = *next_spot_in_buffer;
                 next_spot_in_buffer++;
@@ -568,6 +591,7 @@ return_code_t blockchain_deserialize(
             linked_list_destroy(transaction_list);
             goto end;
         }
+        block->created_at = block_created_at;
         return_code = blockchain_add_block(new_blockchain, block);
         if (SUCCESS != return_code) {
             blockchain_destroy(new_blockchain);

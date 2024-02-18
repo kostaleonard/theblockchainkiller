@@ -171,6 +171,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(
             test_blockchain_read_from_file_reconstructs_blockchain),
         cmocka_unit_test(test_blockchain_read_from_file_fails_on_invalid_input),
+        cmocka_unit_test(
+            test_blockchain_serialization_does_not_alter_block_hash),
         // test_transaction.h
         cmocka_unit_test(test_transaction_create_gives_transaction),
         cmocka_unit_test(test_transaction_create_fails_on_invalid_input),
