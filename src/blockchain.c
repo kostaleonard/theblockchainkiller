@@ -231,18 +231,12 @@ return_code_t blockchain_verify(
     }
     // TODO remove
     printf("Genesis block ok\n");
-    sha_256_t genesis_block_hash = {0};
-    block_hash(genesis_block, &genesis_block_hash);
+    sha_256_t previous_block_hash = {0};
+    block_hash(genesis_block, &previous_block_hash);
     printf("Genesis block hash: ");
-    hash_print(&genesis_block_hash);
+    hash_print(&previous_block_hash);
     // Check the remaining blocks.
     //node_t *previous_node = blockchain->block_list->head; // TODO remove and change to for loop
-    uint64_t num_blocks = 0;
-    return_code = linked_list_length(blockchain->block_list, &num_blocks);
-    if (SUCCESS != return_code) {
-        goto end;
-    }
-    printf("Expected number of blocks: %lld\n", num_blocks);
     node_t *current_node = blockchain->block_list->head->next;
     while (NULL != current_node) {
         //block_t *previous_block = (block_t *)previous_node->data;
@@ -268,15 +262,66 @@ return_code_t blockchain_verify(
             if (NULL != first_invalid_block) {
                 *first_invalid_block = current_block;
             }
-            // TODO uncomment
-            //goto end;
+            goto end;
         }
-        // TODO check that previous block hash is accurate
-
-        // TODO check that all transactions in current block have valid signature
-
-
-        //previous_node = current_node;
+        if (0 != memcmp(
+            &current_block->previous_block_hash,
+            &previous_block_hash,
+            sizeof(sha_256_t))) {
+            *is_valid_blockchain = false;
+            if (NULL != first_invalid_block) {
+                *first_invalid_block = current_block;
+            }
+            goto end;
+        }
+        // Every block must contain at least the minting transaction.
+        bool block_transaction_list_is_empty = false;
+        return_code = linked_list_is_empty(
+            current_block->transaction_list,
+            &block_transaction_list_is_empty);
+        if (SUCCESS != return_code) {
+            goto end;
+        }
+        if (block_transaction_list_is_empty) {
+            *is_valid_blockchain = false;
+            goto end;
+        }
+        node_t *minting_transaction_node =
+            current_block->transaction_list->head;
+        transaction_t *minting_transaction =
+            (transaction_t *)minting_transaction_node->data;
+        if (AMOUNT_GENERATED_DURING_MINTING != minting_transaction->amount ||
+            0 != memcmp(
+                &minting_transaction->sender_public_key,
+                &minting_transaction->recipient_public_key,
+                sizeof(ssh_key_t))) {
+            *is_valid_blockchain = false;
+            if (NULL != first_invalid_block) {
+                *first_invalid_block = current_block;
+            }
+            goto end;
+        }
+        // Check that every transaction has a valid signature.
+        for (node_t *transaction_node = minting_transaction_node;
+            NULL != transaction_node;
+            transaction_node = transaction_node->next) {
+            transaction_t *transaction = 
+                (transaction_t *)transaction_node->data;
+            bool is_valid_signature = false;
+            return_code = transaction_verify_signature(
+                &is_valid_signature, transaction);
+            if (SUCCESS != return_code) {
+                goto end;
+            }
+            if (!is_valid_signature) {
+                *is_valid_blockchain = false;
+                if (NULL != first_invalid_block) {
+                    *first_invalid_block = current_block;
+                }
+                goto end;
+            }
+        }
+        memcpy(&previous_block_hash, &current_block_hash, sizeof(sha_256_t));
         current_node = current_node->next;
         printf("block ok\n");
     }

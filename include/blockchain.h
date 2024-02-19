@@ -101,7 +101,10 @@ void blockchain_print(blockchain_t *blockchain);
  * first block.
  * 2. Every block must have a correct previous block hash. For the genesis
  * block, the previous block hash must be zero.
- * 3. Every transaction in every block must have a valid digital signature.
+ * 3. Every block except the genesis block must have a minting transaction. The
+ * minting transaction has an amount of 1 and has both sender and recipient
+ * keys set to the miner.
+ * 4. Every transaction in every block must have a valid digital signature.
  * 
  * @param blockchain The blockchain.
  * @param is_valid_blockchain A pointer to fill with the result.

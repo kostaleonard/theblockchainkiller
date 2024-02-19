@@ -665,10 +665,12 @@ void test_blockchain_read_from_file_reconstructs_blockchain() {
     assert_true(AMOUNT_GENERATED_DURING_MINTING == transaction->amount);
     assert_true(0 != transaction->created_at);
     ssh_key_t empty_key = {0};
-    assert_true(0 == memcmp(
-        &transaction->sender_public_key, &empty_key, sizeof(ssh_key_t)));
     assert_true(0 != memcmp(
-        &transaction->recipient_public_key, &empty_key, sizeof(ssh_key_t)));
+        &transaction->sender_public_key, &empty_key, sizeof(ssh_key_t)));
+    assert_true(0 == memcmp(
+        &transaction->sender_public_key,
+        &transaction->recipient_public_key,
+        sizeof(ssh_key_t)));
     ssh_signature_t empty_signature = {0};
     assert_true(0 != memcmp(
         &transaction->sender_signature,
@@ -686,10 +688,12 @@ void test_blockchain_read_from_file_reconstructs_blockchain() {
     transaction = (transaction_t *)block3->transaction_list->head->data;
     assert_true(AMOUNT_GENERATED_DURING_MINTING == transaction->amount);
     assert_true(0 != transaction->created_at);
-    assert_true(0 == memcmp(
-        &transaction->sender_public_key, &empty_key, sizeof(ssh_key_t)));
     assert_true(0 != memcmp(
-        &transaction->recipient_public_key, &empty_key, sizeof(ssh_key_t)));
+        &transaction->sender_public_key, &empty_key, sizeof(ssh_key_t)));
+    assert_true(0 == memcmp(
+        &transaction->sender_public_key,
+        &transaction->recipient_public_key,
+        sizeof(ssh_key_t)));
     assert_true(0 != memcmp(
         &transaction->sender_signature,
         &empty_signature,

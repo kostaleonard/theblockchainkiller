@@ -47,10 +47,9 @@ return_code_t mine_blocks(
             goto end;
         }
         transaction_t *mint_coin_transaction = NULL;
-        ssh_key_t sender_public_key_for_minting = {0};
         return_code = transaction_create(
             &mint_coin_transaction,
-            &sender_public_key_for_minting,
+            miner_public_key,
             miner_public_key,
             AMOUNT_GENERATED_DURING_MINTING,
             miner_private_key);
