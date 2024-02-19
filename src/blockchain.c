@@ -229,35 +229,22 @@ return_code_t blockchain_verify(
         }
         goto end;
     }
-    // TODO remove
-    printf("Genesis block ok\n");
     sha_256_t previous_block_hash = {0};
     block_hash(genesis_block, &previous_block_hash);
-    printf("Genesis block hash: ");
-    hash_print(&previous_block_hash);
     // Check the remaining blocks.
-    //node_t *previous_node = blockchain->block_list->head; // TODO remove and change to for loop
-    node_t *current_node = blockchain->block_list->head->next;
-    while (NULL != current_node) {
-        //block_t *previous_block = (block_t *)previous_node->data;
+    for (node_t *current_node = blockchain->block_list->head->next;
+        NULL != current_node;
+        current_node = current_node->next) {
         block_t *current_block = (block_t *)current_node->data;
-        char *time_string = ctime(&current_block->created_at);
-        printf("%s", time_string);
-        printf("Previous block hash: ");
-        hash_print(&current_block->previous_block_hash);
         sha_256_t current_block_hash = {0};
         return_code = block_hash(current_block, &current_block_hash);
         if (SUCCESS != return_code) {
-            printf("Hash failed\n");
             goto end;
         }
-        printf("Current block hash: ");
-        hash_print(&current_block_hash);
         if (0 != memcmp(
                 &current_block_hash,
                 &empty_block_hash,
                 blockchain->num_leading_zero_bytes_required_in_block_hash)) {
-            printf("invalid block\n");
             *is_valid_blockchain = false;
             if (NULL != first_invalid_block) {
                 *first_invalid_block = current_block;
@@ -322,8 +309,6 @@ return_code_t blockchain_verify(
             }
         }
         memcpy(&previous_block_hash, &current_block_hash, sizeof(sha_256_t));
-        current_node = current_node->next;
-        printf("block ok\n");
     }
     *is_valid_blockchain = true;
 end:

@@ -29,7 +29,24 @@ return_code_t mine_blocks(
         goto end;
     }
     while (true) {
-        // TODO verify blockchain here just before mining a new block
+        bool is_valid_blockchain = false;
+        block_t *first_invalid_block = NULL;
+        return_code = blockchain_verify(
+            blockchain, &is_valid_blockchain, &first_invalid_block);
+        if (SUCCESS != return_code) {
+            goto end;
+        }
+        if (!is_valid_blockchain) {
+            printf(
+                "Invalid blockchain detected. First invalid block follows.\n");
+            char *time_string = ctime(&first_invalid_block->created_at);
+            printf("Created at: %s", time_string);
+            printf("Proof of work: %lld\n", first_invalid_block->proof_of_work);
+            printf("Block hash: ");
+            hash_print(&first_invalid_block->previous_block_hash);
+            return_code = FAILURE_INVALID_BLOCKCHAIN;
+            goto end;
+        }
         node_t *node = NULL;
         return_code = linked_list_get_last(blockchain->block_list, &node);
         if (SUCCESS != return_code) {

@@ -737,12 +737,6 @@ void test_blockchain_serialization_does_not_alter_block_hash() {
     return_code = block_hash(
         genesis_block, &genesis_block_hash_before_serialization);
     assert_true(SUCCESS == return_code);
-    // TODO remove
-    hash_print(&genesis_block_hash_before_serialization);
-    printf("\n");
-    printf("Serialized genesis block created_at: %lld\n", genesis_block->created_at);
-
-
     unsigned char *buffer = NULL;
     uint64_t buffer_size = 0;
     return_code = blockchain_serialize(blockchain, &buffer, &buffer_size);
@@ -757,11 +751,6 @@ void test_blockchain_serialization_does_not_alter_block_hash() {
     return_code = block_hash(
         deserialized_genesis_block, &genesis_block_hash_after_serialization);
     assert_true(SUCCESS == return_code);
-    // TODO remove
-    hash_print(&genesis_block_hash_after_serialization);
-    printf("\n");
-    printf("Deserialized genesis block created_at: %lld\n", deserialized_genesis_block->created_at);
-
     assert_true(0 == memcmp(
         &genesis_block_hash_before_serialization,
         &genesis_block_hash_after_serialization,
