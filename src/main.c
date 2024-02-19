@@ -40,8 +40,10 @@ return_code_t mine_blocks(
         if (!is_valid_blockchain) {
             printf(
                 "Invalid blockchain detected. First invalid block follows.\n");
-            printf("Created at: %lld\n", first_invalid_block->created_at);
-            printf("Proof of work: %lld\n", first_invalid_block->proof_of_work);
+            printf("Created at: %"PRIu64"\n", first_invalid_block->created_at);
+            printf(
+                "Proof of work: %"PRIu64"\n",
+                first_invalid_block->proof_of_work);
             printf("Block hash: ");
             hash_print(&first_invalid_block->previous_block_hash);
             return_code = FAILURE_INVALID_BLOCKCHAIN;
