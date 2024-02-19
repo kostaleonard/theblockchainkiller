@@ -90,6 +90,35 @@ return_code_t blockchain_mine_block(
 void blockchain_print(blockchain_t *blockchain);
 
 /**
+ * @brief Verifies that the blockchain is valid.
+ * 
+ * A blockchain is valid if it meets the following conditions.
+ * 
+ * 1. Every block has a valid proof of work. For every block other than the
+ * genesis block, the block must hash to a value that contains the number of
+ * leading zero bytes in the blockchain data structure. The genesis block must
+ * have the magic number proof of work GENESIS_BLOCK_PROOF_OF_WORK and be the
+ * first block.
+ * 2. Every block must have a correct previous block hash. For the genesis
+ * block, the previous block hash must be zero.
+ * 3. Every block except the genesis block must have a minting transaction. The
+ * minting transaction has an amount of 1 and has both sender and recipient
+ * keys set to the miner.
+ * 4. Every transaction in every block must have a valid digital signature.
+ * 
+ * @param blockchain The blockchain.
+ * @param is_valid_blockchain A pointer to fill with the result.
+ * @param first_invalid_block If the blockchain is invalid and this argument is
+ * not NULL, the function fills this pointer with the first invalid block.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t blockchain_verify(
+    blockchain_t *blockchain,
+    bool *is_valid_blockchain,
+    block_t **first_invalid_block
+);
+
+/**
  * @brief Serializes the blockchain into a buffer for file or network I/O.
  * 
  * @param blockchain The blockchain.

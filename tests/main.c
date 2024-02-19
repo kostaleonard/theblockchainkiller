@@ -152,6 +152,14 @@ int main(int argc, char **argv) {
         cmocka_unit_test(
             test_blockchain_mine_block_produces_block_with_valid_hash),
         cmocka_unit_test(test_blockchain_mine_block_fails_on_invalid_input),
+        cmocka_unit_test(test_blockchain_verify_succeeds_on_valid_blockchain),
+        cmocka_unit_test(test_blockchain_verify_fails_on_invalid_genesis_block),
+        cmocka_unit_test(test_blockchain_verify_fails_on_invalid_proof_of_work),
+        cmocka_unit_test(
+            test_blockchain_verify_fails_on_invalid_previous_block_hash),
+        cmocka_unit_test(
+            test_blockchain_verify_fails_on_invalid_transaction_signature),
+        cmocka_unit_test(test_blockchain_verify_fails_on_invalid_input),
         cmocka_unit_test(test_blockchain_serialize_creates_nonempty_buffer),
         cmocka_unit_test(test_blockchain_serialize_fails_on_invalid_input),
         cmocka_unit_test(test_blockchain_deserialize_reconstructs_blockchain),
@@ -163,6 +171,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(
             test_blockchain_read_from_file_reconstructs_blockchain),
         cmocka_unit_test(test_blockchain_read_from_file_fails_on_invalid_input),
+        cmocka_unit_test(
+            test_blockchain_serialization_does_not_alter_block_hash),
         // test_transaction.h
         cmocka_unit_test(test_transaction_create_gives_transaction),
         cmocka_unit_test(test_transaction_create_fails_on_invalid_input),

@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "include/block.h"
 #include "include/blockchain.h"
 #include "include/endian.h"
+#include "include/hash.h"
 #include "include/linked_list.h"
 #include "include/return_codes.h"
 #include "include/transaction.h"
@@ -189,6 +191,128 @@ void blockchain_print(blockchain_t *blockchain) {
         printf("%"PRIu64"->", block->proof_of_work);
     }
     printf("\n");
+}
+
+return_code_t blockchain_verify(
+    blockchain_t *blockchain,
+    bool *is_valid_blockchain,
+    block_t **first_invalid_block
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == blockchain || NULL == is_valid_blockchain) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    if (NULL == blockchain->block_list->head) {
+        *is_valid_blockchain = true;
+        goto end;
+    }
+    // Check the genesis block, which is unique.
+    block_t *genesis_block = (block_t *)blockchain->block_list->head->data;
+    bool genesis_block_transaction_list_is_empty = false;
+    return_code = linked_list_is_empty(
+        genesis_block->transaction_list,
+        &genesis_block_transaction_list_is_empty);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    sha_256_t empty_block_hash = {0};
+    if (!genesis_block_transaction_list_is_empty ||
+        genesis_block->proof_of_work != GENESIS_BLOCK_PROOF_OF_WORK ||
+        0 != memcmp(
+            &genesis_block->previous_block_hash,
+            &empty_block_hash,
+            sizeof(sha_256_t))) {
+        *is_valid_blockchain = false;
+        if (NULL != first_invalid_block) {
+            *first_invalid_block = genesis_block;
+        }
+        goto end;
+    }
+    sha_256_t previous_block_hash = {0};
+    block_hash(genesis_block, &previous_block_hash);
+    // Check the remaining blocks.
+    for (node_t *current_node = blockchain->block_list->head->next;
+        NULL != current_node;
+        current_node = current_node->next) {
+        block_t *current_block = (block_t *)current_node->data;
+        sha_256_t current_block_hash = {0};
+        return_code = block_hash(current_block, &current_block_hash);
+        if (SUCCESS != return_code) {
+            goto end;
+        }
+        if (0 != memcmp(
+                &current_block_hash,
+                &empty_block_hash,
+                blockchain->num_leading_zero_bytes_required_in_block_hash)) {
+            *is_valid_blockchain = false;
+            if (NULL != first_invalid_block) {
+                *first_invalid_block = current_block;
+            }
+            goto end;
+        }
+        if (0 != memcmp(
+            &current_block->previous_block_hash,
+            &previous_block_hash,
+            sizeof(sha_256_t))) {
+            *is_valid_blockchain = false;
+            if (NULL != first_invalid_block) {
+                *first_invalid_block = current_block;
+            }
+            goto end;
+        }
+        // Every block must contain at least the minting transaction.
+        bool block_transaction_list_is_empty = false;
+        return_code = linked_list_is_empty(
+            current_block->transaction_list,
+            &block_transaction_list_is_empty);
+        if (SUCCESS != return_code) {
+            goto end;
+        }
+        if (block_transaction_list_is_empty) {
+            *is_valid_blockchain = false;
+            goto end;
+        }
+        node_t *minting_transaction_node =
+            current_block->transaction_list->head;
+        transaction_t *minting_transaction =
+            (transaction_t *)minting_transaction_node->data;
+        if (AMOUNT_GENERATED_DURING_MINTING != minting_transaction->amount ||
+            0 != memcmp(
+                &minting_transaction->sender_public_key,
+                &minting_transaction->recipient_public_key,
+                sizeof(ssh_key_t))) {
+            *is_valid_blockchain = false;
+            if (NULL != first_invalid_block) {
+                *first_invalid_block = current_block;
+            }
+            goto end;
+        }
+        // Check that every transaction has a valid signature.
+        for (node_t *transaction_node = minting_transaction_node;
+            NULL != transaction_node;
+            transaction_node = transaction_node->next) {
+            transaction_t *transaction =
+                (transaction_t *)transaction_node->data;
+            bool is_valid_signature = false;
+            return_code = transaction_verify_signature(
+                &is_valid_signature, transaction);
+            if (SUCCESS != return_code) {
+                goto end;
+            }
+            if (!is_valid_signature) {
+                *is_valid_blockchain = false;
+                if (NULL != first_invalid_block) {
+                    *first_invalid_block = current_block;
+                }
+                goto end;
+            }
+        }
+        memcpy(&previous_block_hash, &current_block_hash, sizeof(sha_256_t));
+    }
+    *is_valid_blockchain = true;
+end:
+    return return_code;
 }
 
 return_code_t blockchain_serialize(
@@ -477,7 +601,7 @@ return_code_t blockchain_deserialize(
                 goto end;
             }
             for (size_t idx = 0;
-                idx < transaction->sender_signature.length;
+                idx < sizeof(transaction->sender_signature.bytes);
                 idx++) {
                 transaction->sender_signature.bytes[idx] = *next_spot_in_buffer;
                 next_spot_in_buffer++;
@@ -497,6 +621,7 @@ return_code_t blockchain_deserialize(
             linked_list_destroy(transaction_list);
             goto end;
         }
+        block->created_at = block_created_at;
         return_code = blockchain_add_block(new_blockchain, block);
         if (SUCCESS != return_code) {
             blockchain_destroy(new_blockchain);

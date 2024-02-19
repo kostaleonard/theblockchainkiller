@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include "include/base64.h"
 #include "include/blockchain.h"
@@ -29,6 +30,25 @@ return_code_t mine_blocks(
         goto end;
     }
     while (true) {
+        bool is_valid_blockchain = false;
+        block_t *first_invalid_block = NULL;
+        return_code = blockchain_verify(
+            blockchain, &is_valid_blockchain, &first_invalid_block);
+        if (SUCCESS != return_code) {
+            goto end;
+        }
+        if (!is_valid_blockchain) {
+            printf(
+                "Invalid blockchain detected. First invalid block follows.\n");
+            printf("Created at: %"PRIu64"\n", first_invalid_block->created_at);
+            printf(
+                "Proof of work: %"PRIu64"\n",
+                first_invalid_block->proof_of_work);
+            printf("Block hash: ");
+            hash_print(&first_invalid_block->previous_block_hash);
+            return_code = FAILURE_INVALID_BLOCKCHAIN;
+            goto end;
+        }
         node_t *node = NULL;
         return_code = linked_list_get_last(blockchain->block_list, &node);
         if (SUCCESS != return_code) {
@@ -46,10 +66,9 @@ return_code_t mine_blocks(
             goto end;
         }
         transaction_t *mint_coin_transaction = NULL;
-        ssh_key_t sender_public_key_for_minting = {0};
         return_code = transaction_create(
             &mint_coin_transaction,
-            &sender_public_key_for_minting,
+            miner_public_key,
             miner_public_key,
             AMOUNT_GENERATED_DURING_MINTING,
             miner_private_key);
