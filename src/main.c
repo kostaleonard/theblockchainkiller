@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include "include/base64.h"
 #include "include/blockchain.h"
@@ -39,8 +40,7 @@ return_code_t mine_blocks(
         if (!is_valid_blockchain) {
             printf(
                 "Invalid blockchain detected. First invalid block follows.\n");
-            char *time_string = ctime(&first_invalid_block->created_at);
-            printf("Created at: %s", time_string);
+            printf("Created at: %lld\n", first_invalid_block->created_at);
             printf("Proof of work: %lld\n", first_invalid_block->proof_of_work);
             printf("Block hash: ");
             hash_print(&first_invalid_block->previous_block_hash);

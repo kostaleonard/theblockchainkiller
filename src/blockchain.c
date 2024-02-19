@@ -292,7 +292,7 @@ return_code_t blockchain_verify(
         for (node_t *transaction_node = minting_transaction_node;
             NULL != transaction_node;
             transaction_node = transaction_node->next) {
-            transaction_t *transaction = 
+            transaction_t *transaction =
                 (transaction_t *)transaction_node->data;
             bool is_valid_signature = false;
             return_code = transaction_verify_signature(
