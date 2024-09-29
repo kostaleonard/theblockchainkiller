@@ -55,6 +55,19 @@ end:
     return return_code;
 }
 
+return_code_t synchronized_blockchain_create(
+    synchronized_blockchain_t **sync,
+    blockchain_t *initial_blockchain
+) {
+    // TODO
+    return FAILURE_INVALID_INPUT;
+}
+
+return_code_t synchronized_blockchain_destroy(synchronized_blockchain_t *sync) {
+    // TODO
+    return FAILURE_INVALID_INPUT;
+}
+
 return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block) {
     return_code_t return_code = SUCCESS;
     if (NULL == blockchain || NULL == block) {

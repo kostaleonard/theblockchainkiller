@@ -50,6 +50,26 @@ void test_blockchain_destroy_fails_on_invalid_input() {
     assert_true(FAILURE_INVALID_INPUT == return_code);
 }
 
+void test_synchronized_blockchain_create_gives_blockchain() {
+    // TODO
+    assert_true(false);
+}
+
+void test_synchronized_blockchain_create_fails_on_invalid_input() {
+    // TODO
+    assert_true(false);
+}
+
+void test_synchronized_blockchain_destroy_returns_success() {
+    // TODO
+    assert_true(false);
+}
+
+void test_synchronized_blockchain_destroy_fails_on_invalid_input() {
+    // TODO
+    assert_true(false);
+}
+
 void test_blockchain_add_block_appends_block() {
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_create(

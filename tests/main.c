@@ -141,6 +141,12 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_blockchain_create_fails_on_invalid_input),
         cmocka_unit_test(test_blockchain_destroy_returns_success),
         cmocka_unit_test(test_blockchain_destroy_fails_on_invalid_input),
+        cmocka_unit_test(test_synchronized_blockchain_create_gives_blockchain),
+        cmocka_unit_test(
+            test_synchronized_blockchain_create_fails_on_invalid_input),
+        cmocka_unit_test(test_synchronized_blockchain_destroy_returns_success),
+        cmocka_unit_test(
+            test_synchronized_blockchain_destroy_fails_on_invalid_input),
         cmocka_unit_test(test_blockchain_add_block_appends_block),
         cmocka_unit_test(test_blockchain_add_block_fails_on_invalid_input),
         cmocka_unit_test(

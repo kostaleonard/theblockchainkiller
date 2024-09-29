@@ -65,6 +65,27 @@ return_code_t blockchain_create(
 return_code_t blockchain_destroy(blockchain_t *blockchain);
 
 /**
+ * @brief Fills sync with a newly allocated synchronized blockchain.
+ * 
+ * @param sync A pointer to fill with the synchronized blockchain's address.
+ * @param initial_blockchain A pointer to the initial blockchain that should be
+ * put into the data structure.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t synchronized_blockchain_create(
+    synchronized_blockchain_t **sync,
+    blockchain_t *initial_blockchain
+);
+
+/**
+ * @brief Frees all memory associated with a synchronized blockchain.
+ * 
+ * @param sync The synchronized blockchain to destroy.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t synchronized_blockchain_destroy(synchronized_blockchain_t *sync);
+
+/**
  * @brief Appends a block to the blockchain.
  * 
  * @param blockchain The blockchain.
@@ -121,9 +142,9 @@ void blockchain_print(blockchain_t *blockchain);
  * first block.
  * 2. Every block must have a correct previous block hash. For the genesis
  * block, the previous block hash must be zero.
- * 3. Every block except the genesis block must have a minting transaction. The
- * minting transaction has an amount of 1 and has both sender and recipient
- * keys set to the miner.
+ * 3. Every block except the genesis block must have a minting transaction as
+ * its first transaction. The minting transaction has an amount of 1 and has
+ * both sender and recipient keys set to the miner.
  * 4. Every transaction in every block must have a valid digital signature.
  * 
  * @param blockchain The blockchain.
