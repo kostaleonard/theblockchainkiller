@@ -10,6 +10,8 @@
 
 #include <stdint.h>
 #include <sys/time.h>
+#include <stdatomic.h>
+#include <pthread.h>
 #include "include/block.h"
 #include "include/return_codes.h"
 
@@ -22,6 +24,24 @@ typedef struct blockchain_t {
     linked_list_t *block_list;
     size_t num_leading_zero_bytes_required_in_block_hash;
 } blockchain_t;
+
+// TODO add create/destroy functions
+/**
+ * @brief A synchronized blockchain.
+ * 
+ * @param blockchain The blockchain.
+ * @param version A number indicating how many times the blockchain pointer has
+ * been changed. It is initially zero. Writer threads can lock, update the
+ * blockchain pointer, increment this number to signal an update, and unlock.
+ * Reader threads can check this value without locking to know whether they need
+ * to lock and read the value of blockchain.
+ * @param mutex The mutex protecting access to this data structure's fields.
+ */
+typedef struct synchronized_blockchain_t {
+    blockchain_t *blockchain;
+    atomic_size_t version;
+    pthread_mutex_t mutex;
+} synchronized_blockchain_t;
 
 /**
  * @brief Fills blockchain with a pointer to the newly allocated blockchain.

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-set(CMAKE_C_FLAGS "-Wall -Werror -std=c99")
+set(CMAKE_C_FLAGS "-Wall -Werror -std=c11")
 set(CMAKE_CXX_FLAGS "-Wall -Werror")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(theblockchainkiller)
