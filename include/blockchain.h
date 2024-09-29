@@ -25,7 +25,6 @@ typedef struct blockchain_t {
     size_t num_leading_zero_bytes_required_in_block_hash;
 } blockchain_t;
 
-// TODO add create/destroy functions
 /**
  * @brief A synchronized blockchain.
  * 

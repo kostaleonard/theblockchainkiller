@@ -20,6 +20,7 @@
 #include "tests/test_transaction.h"
 #include "tests/test_base64.h"
 #include "tests/test_endian.h"
+#include "tests/test_miner.h"
 
 int _unlink_callback(
     const char *fpath,
@@ -199,6 +200,8 @@ int main(int argc, char **argv) {
         // test_endian.h
         cmocka_unit_test(test_htobe64_correctly_encodes_data),
         cmocka_unit_test(test_betoh64_correctly_decodes_data),
+        // test_miner.h
+        cmocka_unit_test(test_mine_blocks_exits_when_should_stop_is_set),
     };
     return_code = cmocka_run_group_tests(tests, NULL, NULL);
 end:
