@@ -51,23 +51,47 @@ void test_blockchain_destroy_fails_on_invalid_input() {
 }
 
 void test_synchronized_blockchain_create_gives_blockchain() {
-    // TODO
-    assert_true(false);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    synchronized_blockchain_t *sync = NULL;
+    return_code = synchronized_blockchain_create(&sync, blockchain);
+    assert_true(SUCCESS == return_code);
+    assert_true(NULL != sync);
+    assert_true(sync->blockchain == blockchain);
+    assert_true(sync->version == 0);
+    synchronized_blockchain_destroy(sync);
 }
 
 void test_synchronized_blockchain_create_fails_on_invalid_input() {
-    // TODO
-    assert_true(false);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    synchronized_blockchain_t *sync = NULL;
+    return_code = synchronized_blockchain_create(NULL, blockchain);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = synchronized_blockchain_create(&sync, NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    blockchain_destroy(blockchain);
 }
 
 void test_synchronized_blockchain_destroy_returns_success() {
-    // TODO
-    assert_true(false);
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    synchronized_blockchain_t *sync = NULL;
+    return_code = synchronized_blockchain_create(&sync, blockchain);
+    assert_true(SUCCESS == return_code);
+    return_code = synchronized_blockchain_destroy(sync);
+    assert_true(SUCCESS == return_code);
 }
 
 void test_synchronized_blockchain_destroy_fails_on_invalid_input() {
-    // TODO
-    assert_true(false);
+    return_code_t return_code = synchronized_blockchain_destroy(NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
 }
 
 void test_blockchain_add_block_appends_block() {

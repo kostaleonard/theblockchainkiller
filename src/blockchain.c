@@ -59,13 +59,35 @@ return_code_t synchronized_blockchain_create(
     synchronized_blockchain_t **sync,
     blockchain_t *initial_blockchain
 ) {
-    // TODO
-    return FAILURE_INVALID_INPUT;
+    return_code_t return_code = SUCCESS;
+    if (NULL == sync || NULL == initial_blockchain) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto done;
+    }
+    synchronized_blockchain_t *new_sync = malloc(sizeof(
+        synchronized_blockchain_t));
+    new_sync->blockchain = initial_blockchain;
+    atomic_init(&new_sync->version, 0);
+    pthread_mutex_init(&new_sync->mutex, NULL);
+    *sync = new_sync;
+done:
+    return return_code;
 }
 
 return_code_t synchronized_blockchain_destroy(synchronized_blockchain_t *sync) {
-    // TODO
-    return FAILURE_INVALID_INPUT;
+    return_code_t return_code = SUCCESS;
+    if (NULL == sync) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto done;
+    }
+    return_code = blockchain_destroy(sync->blockchain);
+    if (SUCCESS != return_code) {
+        goto done;
+    }
+    pthread_mutex_destroy(&sync->mutex);
+    free(sync);
+done:
+    return return_code;
 }
 
 return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block) {
