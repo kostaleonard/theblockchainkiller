@@ -12,12 +12,13 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
     synchronized_blockchain_t *sync = args->sync;
     ssh_key_t *miner_public_key = args->miner_public_key;
     ssh_key_t *miner_private_key = args->miner_private_key;
-    // TODO use this variable:
-    //atomic_bool *should_stop = args->should_stop;
     bool print_progress = args->print_progress;
     char *outfile = args->outfile;
-    // TODO fix logic
-    // TODO add tests
+    atomic_bool *should_stop = args->should_stop;
+    bool *exit_ready = args->exit_ready;
+    pthread_cond_t *exit_ready_cond = &args->exit_ready_cond;
+    pthread_mutex_t *exit_ready_mutex = &args->exit_ready_mutex;
+    // TODO add logic for replacing the blockchain when it's been changed
     if (0 != pthread_mutex_lock(&sync->mutex)) {
         return_code = FAILURE_PTHREAD_FUNCTION;
         goto end;
@@ -27,7 +28,7 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
         return_code = FAILURE_PTHREAD_FUNCTION;
         goto end;
     }
-    while (true) {
+    while (!*should_stop) {
         bool is_valid_blockchain = false;
         block_t *first_invalid_block = NULL;
         return_code = blockchain_verify(
@@ -88,15 +89,15 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
             linked_list_destroy(transaction_list);
             goto end;
         }
-        // TODO synchronized_blockchain_mine_block
+        // TODO synchronized_blockchain_mine_block?
         return_code = blockchain_mine_block(
-            blockchain, next_block, print_progress);
+            blockchain, next_block, print_progress, should_stop);
         if (SUCCESS != return_code) {
             block_destroy(next_block);
             if (FAILURE_COULD_NOT_FIND_VALID_PROOF_OF_WORK == return_code) {
                 printf("\nCouldn't find valid proof of work for block; "
                        "generating new block\n");
-            } else {
+            } else if (FAILURE_STOPPED_EARLY != return_code) {
                 goto end;
             }
         } else {
@@ -105,12 +106,18 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
                 block_destroy(next_block);
                 goto end;
             }
-            blockchain_print(blockchain);
+            if (print_progress) {
+                blockchain_print(blockchain);
+            }
             if (NULL != outfile) {
                 blockchain_write_to_file(blockchain, outfile);
             }
         }
     }
+    pthread_mutex_lock(exit_ready_mutex);
+    *exit_ready = true;
+    pthread_cond_signal(exit_ready_cond);
+    pthread_mutex_unlock(exit_ready_mutex);
 end:
     return_code_t *return_code_ptr = malloc(sizeof(return_code_t));
     *return_code_ptr = return_code;

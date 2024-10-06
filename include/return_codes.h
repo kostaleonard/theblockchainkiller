@@ -19,6 +19,7 @@ typedef enum return_code_t {
     FAILURE_BUFFER_TOO_SMALL,
     FAILURE_INVALID_BLOCKCHAIN,
     FAILURE_PTHREAD_FUNCTION,
+    FAILURE_STOPPED_EARLY,
 } return_code_t;
 
 #endif  // INCLUDE_RETURN_CODES_H_

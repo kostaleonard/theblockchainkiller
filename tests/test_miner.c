@@ -11,8 +11,6 @@
 #define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 2
 
 void test_mine_blocks_exits_when_should_stop_is_set() {
-    // TODO timeout of 1 second
-
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_create(
         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
@@ -61,7 +59,6 @@ void test_mine_blocks_exits_when_should_stop_is_set() {
     // One second timeout.
     // TODO this timeout code should probably be in a helper function
     ts.tv_sec += 1;
-    // TODO the pthread functions can all fail--need error handling
     pthread_mutex_lock(&args.exit_ready_mutex);
     while (!*args.exit_ready) {
         int result = pthread_cond_timedwait(

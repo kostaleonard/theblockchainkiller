@@ -116,12 +116,17 @@ return_code_t blockchain_is_valid_block_hash(
  * @param blockchain The blockchain.
  * @param block The block for which to calculate a proof of work.
  * @param print_progress If true, display progress on the screen.
+ * @param should_stop This should initially be false. Setting this flag while
+ * the function is running requests that the function terminate gracefully.
+ * Users should expect the function to terminate in a timely manner (on the
+ * order of seconds), but not necessarily immediately.
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t blockchain_mine_block(
     blockchain_t *blockchain,
     block_t *block,
-    bool print_progress
+    bool print_progress,
+    atomic_bool *should_stop
 );
 
 /**

@@ -143,10 +143,20 @@ int main(int argc, char **argv) {
     args.print_progress = true;
     args.outfile = "blockchain.bin";
     args.should_stop = &should_stop;
+    bool exit_ready = false;
+    args.exit_ready = &exit_ready;
+    return_code = pthread_cond_init(&args.exit_ready_cond, NULL);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    return_code = pthread_mutex_init(&args.exit_ready_mutex, NULL);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
     return_code_t *return_code_ptr = mine_blocks(&args);
     return_code = *return_code_ptr;
     free(return_code_ptr);
     synchronized_blockchain_destroy(sync);
 end:
-    exit(return_code);
+    return return_code;
 }

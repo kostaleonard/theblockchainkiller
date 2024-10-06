@@ -128,10 +128,11 @@ end:
 return_code_t blockchain_mine_block(
     blockchain_t *blockchain,
     block_t *block,
-    bool print_progress
+    bool print_progress,
+    atomic_bool *should_stop
 ) {
     return_code_t return_code = SUCCESS;
-    if (NULL == blockchain || NULL == block) {
+    if (NULL == blockchain || NULL == block || NULL == should_stop) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
@@ -140,6 +141,10 @@ return_code_t blockchain_mine_block(
     sha_256_t hash = {0};
     bool is_valid_block_hash = false;
     for (uint64_t new_proof = 0; new_proof < UINT64_MAX; new_proof++) {
+        if (*should_stop) {
+            return_code = FAILURE_STOPPED_EARLY;
+            goto end;
+        }
         block->proof_of_work = new_proof;
         return_code = block_hash(block, &hash);
         if (SUCCESS != return_code) {

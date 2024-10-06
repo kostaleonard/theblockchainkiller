@@ -260,7 +260,9 @@ void test_blockchain_mine_block_produces_block_with_valid_hash() {
         previous_block_hash);
     // Manually set created_at to get a consistent hash.
     block1->created_at = 0;
-    return_code = blockchain_mine_block(blockchain, block1, false);
+    atomic_bool should_stop = false;
+    return_code = blockchain_mine_block(
+        blockchain, block1, false, &should_stop);
     assert_true(SUCCESS == return_code);
     assert_true(0 != block1->proof_of_work);
     assert_true(EXPERIMENTALLY_FOUND_PROOF_OF_WORK == block1->proof_of_work);
@@ -291,9 +293,12 @@ void test_blockchain_mine_block_fails_on_invalid_input() {
         transaction_list1,
         0,
         previous_block_hash);
-    return_code = blockchain_mine_block(NULL, block1, false);
+    atomic_bool should_stop = false;
+    return_code = blockchain_mine_block(NULL, block1, false, &should_stop);
     assert_true(FAILURE_INVALID_INPUT == return_code);
-    return_code = blockchain_mine_block(blockchain, NULL, false);
+    return_code = blockchain_mine_block(blockchain, NULL, false, &should_stop);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = blockchain_mine_block(blockchain, block1, false, NULL);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     block_destroy(block1);
     blockchain_destroy(blockchain);
