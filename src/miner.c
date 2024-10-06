@@ -116,3 +116,9 @@ end:
     *return_code_ptr = return_code;
     return return_code_ptr;
 }
+
+void *mine_blocks_pthread_wrapper(void *args) {
+    mine_blocks_args_t *mine_blocks_args = (mine_blocks_args_t *)args;
+    return_code_t *return_code_ptr = mine_blocks(mine_blocks_args);
+    return (void *)return_code_ptr;
+}

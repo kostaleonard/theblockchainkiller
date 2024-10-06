@@ -140,9 +140,9 @@ int main(int argc, char **argv) {
     args.sync = sync;
     args.miner_public_key = &miner_public_key;
     args.miner_private_key = &miner_private_key;
-    args.should_stop = &should_stop;
     args.print_progress = true;
     args.outfile = "blockchain.bin";
+    args.should_stop = &should_stop;
     return_code_t *return_code_ptr = mine_blocks(&args);
     return_code = *return_code_ptr;
     free(return_code_ptr);

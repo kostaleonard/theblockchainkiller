@@ -1,5 +1,8 @@
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "include/base64.h"
 #include "include/blockchain.h"
 #include "include/miner.h"
 #include "tests/test_cryptography.h"
@@ -31,28 +34,51 @@ void test_mine_blocks_exits_when_should_stop_is_set() {
     args.sync = sync;
     char *ssh_public_key_contents_base64 = getenv(
         TEST_PUBLIC_KEY_ENVIRONMENT_VARIABLE);
-    return_code_t return_code = base64_decode(
+    return_code = base64_decode(
         ssh_public_key_contents_base64,
         strlen(ssh_public_key_contents_base64),
         miner_public_key.bytes);
     char *ssh_private_key_contents_base64 = getenv(
         TEST_PRIVATE_KEY_ENVIRONMENT_VARIABLE);
-    ssh_key_t sender_private_key = {0};
     return_code = base64_decode(
         ssh_private_key_contents_base64,
         strlen(ssh_private_key_contents_base64),
         miner_private_key.bytes);
+    bool exit_ready = false;
+    pthread_cond_init(&args.exit_ready_cond, NULL);
+    pthread_mutex_init(&args.exit_ready_mutex, NULL);
     args.miner_public_key = &miner_public_key;
     args.miner_private_key = &miner_private_key;
-    args.should_stop = &should_stop;
     args.print_progress = false;
     args.outfile = NULL;
+    args.should_stop = &should_stop;
+    args.exit_ready = &exit_ready;
     pthread_t thread;
-    // TODO how do I get the return value again?
-    pthread_create(&thread, NULL, mine_blocks, &args);
-    // TODO pthread_join with timeout.
+    pthread_create(&thread, NULL, mine_blocks_pthread_wrapper, &args);
+    *args.should_stop = true;
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    // One second timeout.
+    // TODO this timeout code should probably be in a helper function
+    ts.tv_sec += 1;
+    // TODO the pthread functions can all fail--need error handling
+    pthread_mutex_lock(&args.exit_ready_mutex);
+    while (!*args.exit_ready) {
+        int result = pthread_cond_timedwait(
+            &args.exit_ready_cond, &args.exit_ready_mutex, &ts);
+        if (ETIMEDOUT == result) {
+            assert_true(false);
+        }
+    }
+    pthread_mutex_unlock(&args.exit_ready_mutex);
+    void *retval = NULL;
+    pthread_join(thread, &retval);
+    return_code_t *return_code_ptr = (return_code_t *)retval;
+    assert_true(NULL != return_code_ptr);
     return_code = *return_code_ptr;
+    assert_true(SUCCESS == return_code);
     free(return_code_ptr);
+    pthread_cond_destroy(&args.exit_ready_cond);
+    pthread_mutex_destroy(&args.exit_ready_mutex);
     synchronized_blockchain_destroy(sync);
-    assert_true(false);
 }
