@@ -202,6 +202,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_betoh64_correctly_decodes_data),
         // test_miner.h
         cmocka_unit_test(test_mine_blocks_exits_when_should_stop_is_set),
+        cmocka_unit_test(
+            test_mine_blocks_mines_new_blockchain_when_version_incremented),
     };
     return_code = cmocka_run_group_tests(tests, NULL, NULL);
 end:

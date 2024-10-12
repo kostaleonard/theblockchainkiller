@@ -50,6 +50,9 @@ typedef struct mine_blocks_args_t {
     bool *exit_ready;
     pthread_cond_t exit_ready_cond;
     pthread_mutex_t exit_ready_mutex;
+    size_t *sync_version_currently_mined;
+    pthread_cond_t sync_version_currently_mined_cond;
+    pthread_mutex_t sync_version_currently_mined_mutex;
 } mine_blocks_args_t;
 
 /**

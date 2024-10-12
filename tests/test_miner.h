@@ -11,4 +11,6 @@
 
 void test_mine_blocks_exits_when_should_stop_is_set();
 
+void test_mine_blocks_mines_new_blockchain_when_version_incremented();
+
 #endif  // TESTS_TEST_MINER_H_
