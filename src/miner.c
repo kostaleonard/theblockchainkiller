@@ -9,6 +9,7 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
+    // TODO I kind of don't like creating all these locals from args. Makes it look like they're different values.
     synchronized_blockchain_t *sync = args->sync;
     ssh_key_t *miner_public_key = args->miner_public_key;
     ssh_key_t *miner_private_key = args->miner_private_key;
@@ -29,6 +30,32 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
         goto end;
     }
     while (!*should_stop) {
+        if (atomic_load(args->sync_version_currently_mined) !=
+            atomic_load(&sync->version)) {
+            if (0 != pthread_mutex_lock(&sync->mutex)) {
+                return_code = FAILURE_PTHREAD_FUNCTION;
+                goto end;
+            }
+            blockchain = sync->blockchain;
+            if (0 != pthread_mutex_unlock(&sync->mutex)) {
+                return_code = FAILURE_PTHREAD_FUNCTION;
+                goto end;
+            }
+            atomic_store(
+                args->sync_version_currently_mined,
+                atomic_load(&sync->version));
+            if (0 != pthread_mutex_lock(
+                &args->sync_version_currently_mined_mutex)) {
+                return_code = FAILURE_PTHREAD_FUNCTION;
+                goto end;
+            }
+            pthread_cond_signal(&args->sync_version_currently_mined_cond);
+            if (0 != pthread_mutex_unlock(
+                &args->sync_version_currently_mined_mutex)) {
+                return_code = FAILURE_PTHREAD_FUNCTION;
+                goto end;
+            }
+        }
         bool is_valid_blockchain = false;
         block_t *first_invalid_block = NULL;
         return_code = blockchain_verify(
@@ -89,15 +116,30 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
             linked_list_destroy(transaction_list);
             goto end;
         }
-        // TODO synchronized_blockchain_mine_block?
-        return_code = blockchain_mine_block(
-            blockchain, next_block, print_progress, should_stop);
+        return_code = synchronized_blockchain_mine_block(
+            sync,
+            next_block,
+            print_progress,
+            should_stop,
+            args->sync_version_currently_mined);
         if (SUCCESS != return_code) {
             block_destroy(next_block);
             if (FAILURE_COULD_NOT_FIND_VALID_PROOF_OF_WORK == return_code) {
-                printf("\nCouldn't find valid proof of work for block; "
-                       "generating new block\n");
-            } else if (FAILURE_STOPPED_EARLY != return_code) {
+                if (print_progress) {
+                    printf("\nCouldn't find valid proof of work for block; "
+                           "generating new block\n");
+                }
+            } else if (FAILURE_LONGER_BLOCKCHAIN_DETECTED == return_code) {
+                if (print_progress) {
+                    printf("Longer chain detected; switching to new chain\n");
+                }
+                return_code = SUCCESS;
+            } else if (FAILURE_STOPPED_EARLY == return_code) {
+                if (print_progress) {
+                    printf("Stopping miner\n");
+                }
+                return_code = SUCCESS;
+            } else {
                 goto end;
             }
         } else {

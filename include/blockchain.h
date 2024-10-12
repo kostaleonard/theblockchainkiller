@@ -129,6 +129,15 @@ return_code_t blockchain_mine_block(
     atomic_bool *should_stop
 );
 
+// TODO docstring
+return_code_t synchronized_blockchain_mine_block(
+    synchronized_blockchain_t *sync,
+    block_t *block,
+    bool print_progress,
+    atomic_bool *should_stop,
+    atomic_size_t *sync_version_currently_mined
+);
+
 /**
  * @brief Prints the blockchain.
  */

@@ -153,9 +153,25 @@ int main(int argc, char **argv) {
     if (SUCCESS != return_code) {
         goto end;
     }
+    atomic_size_t sync_version_currently_mined = atomic_load(&sync->version);
+    args.sync_version_currently_mined = &sync_version_currently_mined;
+    return_code = pthread_cond_init(
+        &args.sync_version_currently_mined_cond, NULL);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    return_code = pthread_mutex_init(
+        &args.sync_version_currently_mined_mutex, NULL);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
     return_code_t *return_code_ptr = mine_blocks(&args);
     return_code = *return_code_ptr;
     free(return_code_ptr);
+    pthread_cond_destroy(&args.exit_ready_cond);
+    pthread_mutex_destroy(&args.exit_ready_mutex);
+    pthread_cond_destroy(&args.sync_version_currently_mined_cond);
+    pthread_mutex_destroy(&args.sync_version_currently_mined_mutex);
     synchronized_blockchain_destroy(sync);
 end:
     return return_code;

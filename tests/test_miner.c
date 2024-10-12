@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "include/base64.h"
 #include "include/blockchain.h"
 #include "include/miner.h"
@@ -41,7 +42,7 @@ void test_mine_blocks_exits_when_should_stop_is_set() {
         strlen(ssh_private_key_contents_base64),
         miner_private_key.bytes);
     bool exit_ready = false;
-    size_t sync_version_currently_mined = atomic_load(&sync->version);
+    atomic_size_t sync_version_currently_mined = atomic_load(&sync->version);
     pthread_cond_init(&args.exit_ready_cond, NULL);
     pthread_mutex_init(&args.exit_ready_mutex, NULL);
     pthread_cond_init(&args.sync_version_currently_mined_cond, NULL);
@@ -55,6 +56,8 @@ void test_mine_blocks_exits_when_should_stop_is_set() {
     args.sync_version_currently_mined = &sync_version_currently_mined;
     pthread_t thread;
     pthread_create(&thread, NULL, mine_blocks_pthread_wrapper, &args);
+    // Pause for a short period to allow the miner to start.
+    usleep(100000);
     *args.should_stop = true;
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -115,7 +118,7 @@ void test_mine_blocks_mines_new_blockchain_when_version_incremented() {
         strlen(ssh_private_key_contents_base64),
         miner_private_key.bytes);
     bool exit_ready = false;
-    size_t sync_version_currently_mined = atomic_load(&sync->version);
+    atomic_size_t sync_version_currently_mined = atomic_load(&sync->version);
     pthread_cond_init(&args.exit_ready_cond, NULL);
     pthread_mutex_init(&args.exit_ready_mutex, NULL);
     pthread_cond_init(&args.sync_version_currently_mined_cond, NULL);
@@ -129,6 +132,8 @@ void test_mine_blocks_mines_new_blockchain_when_version_incremented() {
     args.sync_version_currently_mined = &sync_version_currently_mined;
     pthread_t thread;
     pthread_create(&thread, NULL, mine_blocks_pthread_wrapper, &args);
+    // Pause for a short period to allow the miner to start.
+    usleep(100000);
     blockchain_t *new_blockchain = NULL;
     return_code = blockchain_create(
         &new_blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
@@ -142,15 +147,15 @@ void test_mine_blocks_mines_new_blockchain_when_version_incremented() {
     sync->blockchain = new_blockchain;
     pthread_mutex_unlock(&sync->mutex);
     atomic_fetch_add(&sync->version, 1);
-    // TODO sleep briefly
-    // TODO add pthread_cond_t that signals when the thread switches to a new blockchain--this should probably be in mine_blocks. synchronized_blockchain_mine_block can just return an error code that it detected a new version and stopped mining.
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     // One second timeout.
     // TODO this timeout code should probably be in a helper function
     ts.tv_sec += 1;
     pthread_mutex_lock(&args.sync_version_currently_mined_mutex);
-    while (*args.sync_version_currently_mined != atomic_load(&sync->version)) {
+    while (
+        atomic_load(args.sync_version_currently_mined) !=
+        atomic_load(&sync->version)) {
         int result = pthread_cond_timedwait(
             &args.sync_version_currently_mined_cond,
             &args.sync_version_currently_mined_mutex,

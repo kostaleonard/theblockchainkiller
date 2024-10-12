@@ -47,10 +47,10 @@ typedef struct mine_blocks_args_t {
     bool print_progress;
     char *outfile;
     atomic_bool *should_stop;
-    bool *exit_ready;
+    bool *exit_ready; // TODO why is this a pointer?
     pthread_cond_t exit_ready_cond;
     pthread_mutex_t exit_ready_mutex;
-    size_t *sync_version_currently_mined;
+    atomic_size_t *sync_version_currently_mined; // TODO why is this a pointer?
     pthread_cond_t sync_version_currently_mined_cond;
     pthread_mutex_t sync_version_currently_mined_mutex;
 } mine_blocks_args_t;
