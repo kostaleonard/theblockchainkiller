@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include "include/base64.h"
 #include "include/blockchain.h"
@@ -10,6 +11,13 @@
 #include "tests/test_miner.h"
 
 #define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 2
+
+void sleep_microseconds(uint64_t microseconds) {
+    struct timespec ts;
+    ts.tv_sec = microseconds / 1000000;
+    ts.tv_nsec = (microseconds % 1000000) * 1000;
+    nanosleep(&ts, NULL);
+}
 
 void test_mine_blocks_exits_when_should_stop_is_set() {
     blockchain_t *blockchain = NULL;
@@ -57,7 +65,7 @@ void test_mine_blocks_exits_when_should_stop_is_set() {
     pthread_t thread;
     pthread_create(&thread, NULL, mine_blocks_pthread_wrapper, &args);
     // Pause for a short period to allow the miner to start.
-    usleep(100000);
+    sleep_microseconds(100000);
     *args.should_stop = true;
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -132,7 +140,7 @@ void test_mine_blocks_mines_new_blockchain_when_version_incremented() {
     pthread_t thread;
     pthread_create(&thread, NULL, mine_blocks_pthread_wrapper, &args);
     // Pause for a short period to allow the miner to start.
-    usleep(100000);
+    sleep_microseconds(100000);
     blockchain_t *new_blockchain = NULL;
     return_code = blockchain_create(
         &new_blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
