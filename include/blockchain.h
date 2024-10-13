@@ -10,6 +10,8 @@
 
 #include <stdint.h>
 #include <sys/time.h>
+#include <stdatomic.h>
+#include <pthread.h>
 #include "include/block.h"
 #include "include/return_codes.h"
 
@@ -22,6 +24,23 @@ typedef struct blockchain_t {
     linked_list_t *block_list;
     size_t num_leading_zero_bytes_required_in_block_hash;
 } blockchain_t;
+
+/**
+ * @brief A synchronized blockchain.
+ * 
+ * @param blockchain The blockchain.
+ * @param version A number indicating how many times the blockchain pointer has
+ * been changed. It is initially zero. Writer threads can lock, update the
+ * blockchain pointer, increment this number to signal an update, and unlock.
+ * Reader threads can check this value without locking to know whether they need
+ * to lock and read the value of blockchain.
+ * @param mutex The mutex protecting access to this data structure's fields.
+ */
+typedef struct synchronized_blockchain_t {
+    blockchain_t *blockchain;
+    atomic_size_t version;
+    pthread_mutex_t mutex;
+} synchronized_blockchain_t;
 
 /**
  * @brief Fills blockchain with a pointer to the newly allocated blockchain.
@@ -43,6 +62,27 @@ return_code_t blockchain_create(
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t blockchain_destroy(blockchain_t *blockchain);
+
+/**
+ * @brief Fills sync with a newly allocated synchronized blockchain.
+ * 
+ * @param sync A pointer to fill with the synchronized blockchain's address.
+ * @param initial_blockchain A pointer to the initial blockchain that should be
+ * put into the data structure.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t synchronized_blockchain_create(
+    synchronized_blockchain_t **sync,
+    blockchain_t *initial_blockchain
+);
+
+/**
+ * @brief Frees all memory associated with a synchronized blockchain.
+ * 
+ * @param sync The synchronized blockchain to destroy.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t synchronized_blockchain_destroy(synchronized_blockchain_t *sync);
 
 /**
  * @brief Appends a block to the blockchain.
@@ -76,12 +116,41 @@ return_code_t blockchain_is_valid_block_hash(
  * @param blockchain The blockchain.
  * @param block The block for which to calculate a proof of work.
  * @param print_progress If true, display progress on the screen.
+ * @param should_stop This should initially be false. Setting this flag while
+ * the function is running requests that the function terminate gracefully.
+ * Users should expect the function to terminate in a timely manner (on the
+ * order of seconds), but not necessarily immediately.
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t blockchain_mine_block(
     blockchain_t *blockchain,
     block_t *block,
-    bool print_progress
+    bool print_progress,
+    atomic_bool *should_stop
+);
+
+/**
+ * @brief Fills block's proof_of_work with a number that produces a valid hash.
+ * 
+ * @param sync The synchronized blockchain.
+ * @param block The block for which to calculate a proof of work.
+ * @param print_progress If true, display progress on the screen.
+ * @param should_stop This should initially be false. Setting this flag while
+ * the function is running requests that the function terminate gracefully.
+ * Users should expect the function to terminate in a timely manner (on the
+ * order of seconds), but not necessarily immediately.
+ * @param sync_version_currently_mined Contains the version number of the
+ * synchronized blockchain that this function is currently mining. When the user
+ * updates this number (from another thread), this function stops and returns
+ * FAILURE_LONGER_BLOCKCHAIN_DETECTED.
+ * @return return_code_t A return code indicating success or failure.
+ */
+return_code_t synchronized_blockchain_mine_block(
+    synchronized_blockchain_t *sync,
+    block_t *block,
+    bool print_progress,
+    atomic_bool *should_stop,
+    atomic_size_t *sync_version_currently_mined
 );
 
 /**
@@ -101,9 +170,9 @@ void blockchain_print(blockchain_t *blockchain);
  * first block.
  * 2. Every block must have a correct previous block hash. For the genesis
  * block, the previous block hash must be zero.
- * 3. Every block except the genesis block must have a minting transaction. The
- * minting transaction has an amount of 1 and has both sender and recipient
- * keys set to the miner.
+ * 3. Every block except the genesis block must have a minting transaction as
+ * its first transaction. The minting transaction has an amount of 1 and has
+ * both sender and recipient keys set to the miner.
  * 4. Every transaction in every block must have a valid digital signature.
  * 
  * @param blockchain The blockchain.

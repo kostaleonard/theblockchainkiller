@@ -50,6 +50,50 @@ void test_blockchain_destroy_fails_on_invalid_input() {
     assert_true(FAILURE_INVALID_INPUT == return_code);
 }
 
+void test_synchronized_blockchain_create_gives_blockchain() {
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    synchronized_blockchain_t *sync = NULL;
+    return_code = synchronized_blockchain_create(&sync, blockchain);
+    assert_true(SUCCESS == return_code);
+    assert_true(NULL != sync);
+    assert_true(sync->blockchain == blockchain);
+    assert_true(sync->version == 0);
+    synchronized_blockchain_destroy(sync);
+}
+
+void test_synchronized_blockchain_create_fails_on_invalid_input() {
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    synchronized_blockchain_t *sync = NULL;
+    return_code = synchronized_blockchain_create(NULL, blockchain);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = synchronized_blockchain_create(&sync, NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    blockchain_destroy(blockchain);
+}
+
+void test_synchronized_blockchain_destroy_returns_success() {
+    blockchain_t *blockchain = NULL;
+    return_code_t return_code = blockchain_create(
+        &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
+    assert_true(SUCCESS == return_code);
+    synchronized_blockchain_t *sync = NULL;
+    return_code = synchronized_blockchain_create(&sync, blockchain);
+    assert_true(SUCCESS == return_code);
+    return_code = synchronized_blockchain_destroy(sync);
+    assert_true(SUCCESS == return_code);
+}
+
+void test_synchronized_blockchain_destroy_fails_on_invalid_input() {
+    return_code_t return_code = synchronized_blockchain_destroy(NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+}
+
 void test_blockchain_add_block_appends_block() {
     blockchain_t *blockchain = NULL;
     return_code_t return_code = blockchain_create(
@@ -216,7 +260,9 @@ void test_blockchain_mine_block_produces_block_with_valid_hash() {
         previous_block_hash);
     // Manually set created_at to get a consistent hash.
     block1->created_at = 0;
-    return_code = blockchain_mine_block(blockchain, block1, false);
+    atomic_bool should_stop = false;
+    return_code = blockchain_mine_block(
+        blockchain, block1, false, &should_stop);
     assert_true(SUCCESS == return_code);
     assert_true(0 != block1->proof_of_work);
     assert_true(EXPERIMENTALLY_FOUND_PROOF_OF_WORK == block1->proof_of_work);
@@ -247,9 +293,12 @@ void test_blockchain_mine_block_fails_on_invalid_input() {
         transaction_list1,
         0,
         previous_block_hash);
-    return_code = blockchain_mine_block(NULL, block1, false);
+    atomic_bool should_stop = false;
+    return_code = blockchain_mine_block(NULL, block1, false, &should_stop);
     assert_true(FAILURE_INVALID_INPUT == return_code);
-    return_code = blockchain_mine_block(blockchain, NULL, false);
+    return_code = blockchain_mine_block(blockchain, NULL, false, &should_stop);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = blockchain_mine_block(blockchain, block1, false, NULL);
     assert_true(FAILURE_INVALID_INPUT == return_code);
     block_destroy(block1);
     blockchain_destroy(blockchain);

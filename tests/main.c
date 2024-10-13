@@ -20,6 +20,7 @@
 #include "tests/test_transaction.h"
 #include "tests/test_base64.h"
 #include "tests/test_endian.h"
+#include "tests/test_miner.h"
 
 int _unlink_callback(
     const char *fpath,
@@ -141,6 +142,12 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_blockchain_create_fails_on_invalid_input),
         cmocka_unit_test(test_blockchain_destroy_returns_success),
         cmocka_unit_test(test_blockchain_destroy_fails_on_invalid_input),
+        cmocka_unit_test(test_synchronized_blockchain_create_gives_blockchain),
+        cmocka_unit_test(
+            test_synchronized_blockchain_create_fails_on_invalid_input),
+        cmocka_unit_test(test_synchronized_blockchain_destroy_returns_success),
+        cmocka_unit_test(
+            test_synchronized_blockchain_destroy_fails_on_invalid_input),
         cmocka_unit_test(test_blockchain_add_block_appends_block),
         cmocka_unit_test(test_blockchain_add_block_fails_on_invalid_input),
         cmocka_unit_test(
@@ -193,6 +200,14 @@ int main(int argc, char **argv) {
         // test_endian.h
         cmocka_unit_test(test_htobe64_correctly_encodes_data),
         cmocka_unit_test(test_betoh64_correctly_decodes_data),
+        // test_miner.h
+        // These multithreaded tests are incredibly slow in valgrind.
+        // They run very fast outside of valgrind.
+        # ifdef RUN_SLOWTESTS
+            cmocka_unit_test(test_mine_blocks_exits_when_should_stop_is_set),
+            cmocka_unit_test(
+                test_mine_blocks_mines_new_blockchain_when_version_incremented),
+        # endif
     };
     return_code = cmocka_run_group_tests(tests, NULL, NULL);
 end:

@@ -11,109 +11,12 @@
 #include "include/base64.h"
 #include "include/blockchain.h"
 #include "include/block.h"
+#include "include/miner.h"
 #include "include/transaction.h"
 
 #define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3
 #define PRIVATE_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_PRIVATE_KEY"
 #define PUBLIC_KEY_ENVIRONMENT_VARIABLE "THEBLOCKCHAINKILLER_PUBLIC_KEY"
-
-return_code_t mine_blocks(
-    blockchain_t *blockchain,
-    ssh_key_t *miner_public_key,
-    ssh_key_t *miner_private_key,
-    char *outfile) {
-    return_code_t return_code = SUCCESS;
-    if (NULL == blockchain ||
-        NULL == miner_public_key ||
-        NULL == miner_private_key) {
-        return_code = FAILURE_INVALID_INPUT;
-        goto end;
-    }
-    while (true) {
-        bool is_valid_blockchain = false;
-        block_t *first_invalid_block = NULL;
-        return_code = blockchain_verify(
-            blockchain, &is_valid_blockchain, &first_invalid_block);
-        if (SUCCESS != return_code) {
-            goto end;
-        }
-        if (!is_valid_blockchain) {
-            printf(
-                "Invalid blockchain detected. First invalid block follows.\n");
-            printf("Created at: %"PRIu64"\n", first_invalid_block->created_at);
-            printf(
-                "Proof of work: %"PRIu64"\n",
-                first_invalid_block->proof_of_work);
-            printf("Block hash: ");
-            hash_print(&first_invalid_block->previous_block_hash);
-            return_code = FAILURE_INVALID_BLOCKCHAIN;
-            goto end;
-        }
-        node_t *node = NULL;
-        return_code = linked_list_get_last(blockchain->block_list, &node);
-        if (SUCCESS != return_code) {
-            goto end;
-        }
-        block_t *previous_block = (block_t *)node->data;
-        sha_256_t previous_block_hash = {0};
-        return_code = block_hash(previous_block, &previous_block_hash);
-        if (SUCCESS != return_code) {
-            goto end;
-        }
-        linked_list_t *transaction_list = NULL;
-        return_code = linked_list_create(&transaction_list, free, NULL);
-        if (SUCCESS != return_code) {
-            goto end;
-        }
-        transaction_t *mint_coin_transaction = NULL;
-        return_code = transaction_create(
-            &mint_coin_transaction,
-            miner_public_key,
-            miner_public_key,
-            AMOUNT_GENERATED_DURING_MINTING,
-            miner_private_key);
-        if (SUCCESS != return_code) {
-            linked_list_destroy(transaction_list);
-            goto end;
-        }
-        return_code = linked_list_prepend(
-            transaction_list, mint_coin_transaction);
-        if (SUCCESS != return_code) {
-            transaction_destroy(mint_coin_transaction);
-            linked_list_destroy(transaction_list);
-            goto end;
-        }
-        block_t *next_block = NULL;
-        return_code = block_create(
-            &next_block, transaction_list, 0, previous_block_hash);
-        if (SUCCESS != return_code) {
-            linked_list_destroy(transaction_list);
-            goto end;
-        }
-        return_code = blockchain_mine_block(blockchain, next_block, true);
-        if (SUCCESS != return_code) {
-            block_destroy(next_block);
-            if (FAILURE_COULD_NOT_FIND_VALID_PROOF_OF_WORK == return_code) {
-                printf("\nCouldn't find valid proof of work for block; "
-                       "generating new block\n");
-            } else {
-                goto end;
-            }
-        } else {
-            return_code = blockchain_add_block(blockchain, next_block);
-            if (SUCCESS != return_code) {
-                block_destroy(next_block);
-                goto end;
-            }
-            blockchain_print(blockchain);
-            if (NULL != outfile) {
-                blockchain_write_to_file(blockchain, outfile);
-            }
-        }
-    }
-end:
-    return return_code;
-}
 
 void print_usage_statement(char *program_name) {
     if (NULL == program_name) {
@@ -152,7 +55,7 @@ int main(int argc, char **argv) {
                 break;
             default:
                 print_usage_statement(argv[0]);
-                return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+                return_code = FAILURE_INVALID_COMMAND_LINE_ARGS;
                 goto end;
         }
     }
@@ -173,7 +76,7 @@ int main(int argc, char **argv) {
     if (NULL == ssh_private_key_contents_base64 ||
         NULL == ssh_public_key_contents_base64) {
         print_usage_statement(argv[0]);
-        return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+        return_code = FAILURE_INVALID_COMMAND_LINE_ARGS;
         goto end;
     }
     ssh_key_t miner_public_key = {0};
@@ -181,7 +84,7 @@ int main(int argc, char **argv) {
         (size_t)ceil(strlen(ssh_public_key_contents_base64) * 3 / 4) + 1;
     if (public_key_decoded_length > sizeof(miner_public_key.bytes)) {
         printf("Public key is too long\n");
-        return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+        return_code = FAILURE_INVALID_COMMAND_LINE_ARGS;
         goto end;
     }
     return_code = base64_decode(
@@ -196,7 +99,7 @@ int main(int argc, char **argv) {
         (size_t)ceil(strlen(ssh_private_key_contents_base64) * 3 / 4) + 1;
     if (private_key_decoded_length > sizeof(miner_private_key.bytes)) {
         printf("Private key is too long\n");
-        return_code = FAILRE_INVALID_COMMAND_LINE_ARGS;
+        return_code = FAILURE_INVALID_COMMAND_LINE_ARGS;
         goto end;
     }
     return_code = base64_decode(
@@ -214,17 +117,60 @@ int main(int argc, char **argv) {
     }
     return_code = block_create_genesis_block(&genesis_block);
     if (SUCCESS != return_code) {
+        blockchain_destroy(blockchain);
         goto end;
     }
     return_code = blockchain_add_block(blockchain, genesis_block);
     if (SUCCESS != return_code) {
         block_destroy(genesis_block);
+        blockchain_destroy(blockchain);
         goto end;
     }
     blockchain_print(blockchain);
-    return_code = mine_blocks(
-        blockchain, &miner_public_key, &miner_private_key, "blockchain");
+    synchronized_blockchain_t *sync = NULL;
+    return_code = synchronized_blockchain_create(&sync, blockchain);
+    if (SUCCESS != return_code) {
+        blockchain_destroy(blockchain);
+        goto end;
+    }
+    atomic_bool should_stop = false;
+    mine_blocks_args_t args = {0};
+    args.sync = sync;
+    args.miner_public_key = &miner_public_key;
+    args.miner_private_key = &miner_private_key;
+    args.print_progress = true;
+    args.outfile = "blockchain.bin";
+    args.should_stop = &should_stop;
+    bool exit_ready = false;
+    args.exit_ready = &exit_ready;
+    return_code = pthread_cond_init(&args.exit_ready_cond, NULL);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    return_code = pthread_mutex_init(&args.exit_ready_mutex, NULL);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    atomic_size_t sync_version_currently_mined = atomic_load(&sync->version);
+    args.sync_version_currently_mined = &sync_version_currently_mined;
+    return_code = pthread_cond_init(
+        &args.sync_version_currently_mined_cond, NULL);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    return_code = pthread_mutex_init(
+        &args.sync_version_currently_mined_mutex, NULL);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    return_code_t *return_code_ptr = mine_blocks(&args);
+    return_code = *return_code_ptr;
+    free(return_code_ptr);
+    pthread_cond_destroy(&args.exit_ready_cond);
+    pthread_mutex_destroy(&args.exit_ready_mutex);
+    pthread_cond_destroy(&args.sync_version_currently_mined_cond);
+    pthread_mutex_destroy(&args.sync_version_currently_mined_mutex);
+    synchronized_blockchain_destroy(sync);
 end:
-    blockchain_destroy(blockchain);
-    exit(return_code);
+    return return_code;
 }

@@ -1,3 +1,4 @@
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,7 @@
 #include "include/transaction.h"
 
 #define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_LIGHT_BLUE "\x1b[94m"
 #define ANSI_COLOR_RESET "\x1b[0m"
 
 return_code_t blockchain_create(
@@ -55,6 +57,41 @@ end:
     return return_code;
 }
 
+return_code_t synchronized_blockchain_create(
+    synchronized_blockchain_t **sync,
+    blockchain_t *initial_blockchain
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == sync || NULL == initial_blockchain) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto done;
+    }
+    synchronized_blockchain_t *new_sync = malloc(sizeof(
+        synchronized_blockchain_t));
+    new_sync->blockchain = initial_blockchain;
+    atomic_init(&new_sync->version, 0);
+    pthread_mutex_init(&new_sync->mutex, NULL);
+    *sync = new_sync;
+done:
+    return return_code;
+}
+
+return_code_t synchronized_blockchain_destroy(synchronized_blockchain_t *sync) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == sync) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto done;
+    }
+    return_code = blockchain_destroy(sync->blockchain);
+    if (SUCCESS != return_code) {
+        goto done;
+    }
+    pthread_mutex_destroy(&sync->mutex);
+    free(sync);
+done:
+    return return_code;
+}
+
 return_code_t blockchain_add_block(blockchain_t *blockchain, block_t *block) {
     return_code_t return_code = SUCCESS;
     if (NULL == blockchain || NULL == block) {
@@ -93,10 +130,11 @@ end:
 return_code_t blockchain_mine_block(
     blockchain_t *blockchain,
     block_t *block,
-    bool print_progress
+    bool print_progress,
+    atomic_bool *should_stop
 ) {
     return_code_t return_code = SUCCESS;
-    if (NULL == blockchain || NULL == block) {
+    if (NULL == blockchain || NULL == block || NULL == should_stop) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
@@ -105,6 +143,130 @@ return_code_t blockchain_mine_block(
     sha_256_t hash = {0};
     bool is_valid_block_hash = false;
     for (uint64_t new_proof = 0; new_proof < UINT64_MAX; new_proof++) {
+        if (*should_stop) {
+            return_code = FAILURE_STOPPED_EARLY;
+            goto end;
+        }
+        block->proof_of_work = new_proof;
+        return_code = block_hash(block, &hash);
+        if (SUCCESS != return_code) {
+            goto end;
+        }
+        if (print_progress) {
+            size_t num_zeroes = 0;
+            for (size_t idx = 0; idx < sizeof(hash.digest); idx++) {
+                unsigned char upper_nybble = hash.digest[idx] >> 4;
+                if (upper_nybble != 0) {
+                    break;
+                }
+                num_zeroes++;
+                if (hash.digest[idx] != 0) {
+                    break;
+                }
+                num_zeroes++;
+            }
+            bool print_this_iteration = new_proof % print_frequency == 0;
+            if (num_zeroes > best_leading_zeroes) {
+                best_leading_zeroes = num_zeroes;
+                print_this_iteration = true;
+            }
+            if (print_this_iteration) {
+                // Remove the previous block hash from output.
+                printf("\rMining LeoCoin block: ");
+                // Print the best number of leading zeroes.
+                for (size_t idx = 0; idx < best_leading_zeroes; idx++) {
+                    printf("0");
+                }
+                // Add the part of the new hash following the best number of
+                // leading zeroes. It's not the accurate hash, but it does give
+                // an idea of progress.
+                for (size_t idx = best_leading_zeroes;
+                    idx < 2 * sizeof(hash.digest);
+                    idx++) {
+                    size_t hash_idx = idx / 2;
+                    unsigned char nybble = 0;
+                    if (idx % 2 == 0) {
+                        nybble = hash.digest[hash_idx] >> 4;
+                    } else {
+                        nybble = hash.digest[hash_idx] & 0x0f;
+                    }
+                    // To give a better sense of progress, don't allow a
+                    // non-leading zero to follow the best number of leading
+                    // zeroes.
+                    if (idx == best_leading_zeroes && 0 == nybble) {
+                        nybble += 1;
+                    }
+                    printf("%01x", nybble);
+                }
+                fflush(stdout);
+            }
+        }
+        return_code = blockchain_is_valid_block_hash(
+            blockchain, hash, &is_valid_block_hash);
+        if (SUCCESS != return_code) {
+            goto end;
+        }
+        if (is_valid_block_hash) {
+            if (print_progress) {
+                printf("\rMining LeoCoin block: %s", ANSI_COLOR_GREEN);
+                for (size_t idx = 0; idx < sizeof(hash.digest); idx++) {
+                    printf("%02x", hash.digest[idx]);
+                }
+                printf("%s\n", ANSI_COLOR_RESET);
+            }
+            goto end;
+        }
+    }
+    return_code = FAILURE_COULD_NOT_FIND_VALID_PROOF_OF_WORK;
+end:
+    return return_code;
+}
+
+return_code_t synchronized_blockchain_mine_block(
+    synchronized_blockchain_t *sync,
+    block_t *block,
+    bool print_progress,
+    atomic_bool *should_stop,
+    atomic_size_t *sync_version_currently_mined
+) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == sync ||
+        NULL == block ||
+        NULL == should_stop ||
+        NULL == sync_version_currently_mined) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    if (0 != pthread_mutex_lock(&sync->mutex)) {
+        return_code = FAILURE_PTHREAD_FUNCTION;
+        goto end;
+    }
+    blockchain_t *blockchain = sync->blockchain;
+    if (0 != pthread_mutex_unlock(&sync->mutex)) {
+        return_code = FAILURE_PTHREAD_FUNCTION;
+        goto end;
+    }
+    size_t best_leading_zeroes = 0;
+    size_t print_frequency = 20000;
+    sha_256_t hash = {0};
+    bool is_valid_block_hash = false;
+    for (uint64_t new_proof = 0; new_proof < UINT64_MAX; new_proof++) {
+        if (*should_stop) {
+            return_code = FAILURE_STOPPED_EARLY;
+            goto end;
+        }
+        if (atomic_load(sync_version_currently_mined) !=
+            atomic_load(&sync->version)) {
+            if (print_progress) {
+                printf("\rMining LeoCoin block: %s", ANSI_COLOR_LIGHT_BLUE);
+                for (size_t idx = 0; idx < sizeof(hash.digest); idx++) {
+                    printf("%02x", hash.digest[idx]);
+                }
+                printf("%s\n", ANSI_COLOR_RESET);
+            }
+            return_code = FAILURE_LONGER_BLOCKCHAIN_DETECTED;
+            goto end;
+        }
         block->proof_of_work = new_proof;
         return_code = block_hash(block, &hash);
         if (SUCCESS != return_code) {
