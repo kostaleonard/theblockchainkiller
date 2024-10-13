@@ -201,9 +201,13 @@ int main(int argc, char **argv) {
         cmocka_unit_test(test_htobe64_correctly_encodes_data),
         cmocka_unit_test(test_betoh64_correctly_decodes_data),
         // test_miner.h
-        cmocka_unit_test(test_mine_blocks_exits_when_should_stop_is_set),
-        cmocka_unit_test(
-            test_mine_blocks_mines_new_blockchain_when_version_incremented),
+        // These multithreaded tests are incredibly slow in valgrind.
+        // They run very fast outside of valgrind.
+        # ifdef RUN_SLOWTESTS
+            cmocka_unit_test(test_mine_blocks_exits_when_should_stop_is_set),
+            cmocka_unit_test(
+                test_mine_blocks_mines_new_blockchain_when_version_incremented),
+        # endif
     };
     return_code = cmocka_run_group_tests(tests, NULL, NULL);
 end:
