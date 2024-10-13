@@ -22,6 +22,7 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
     while (!*args->should_stop) {
         if (atomic_load(args->sync_version_currently_mined) !=
             atomic_load(&sync->version)) {
+            blockchain_t *old_blockchain = blockchain;
             if (0 != pthread_mutex_lock(&sync->mutex)) {
                 return_code = FAILURE_PTHREAD_FUNCTION;
                 goto end;
@@ -29,6 +30,10 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
             blockchain = sync->blockchain;
             if (0 != pthread_mutex_unlock(&sync->mutex)) {
                 return_code = FAILURE_PTHREAD_FUNCTION;
+                goto end;
+            }
+            return_code = blockchain_destroy(old_blockchain);
+            if (SUCCESS != return_code) {
                 goto end;
             }
             atomic_store(
