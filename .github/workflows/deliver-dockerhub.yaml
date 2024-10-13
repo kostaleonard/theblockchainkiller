@@ -90,10 +90,12 @@ jobs:
         with:
           name: theblockchainkiller-image
           path: .
+      - name: Display downloaded files
+        run: ls -R
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          input: '/github/workspace/theblockchainkiller.tar'
+          input: '$GITHUB_WORKSPACE/theblockchainkiller.tar'
           format: 'table'
           exit-code: '0'
           ignore-unfixed: true
