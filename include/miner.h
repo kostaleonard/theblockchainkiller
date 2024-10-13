@@ -9,8 +9,6 @@
 #include "include/blockchain.h"
 #include "include/cryptography.h"
 
-// TODO update docstring once we get these fields right.
-// TODO may want create and destroy functions to make this less painful.
 /**
  * @brief Contains the arguments to the mine_blocks function.
  * 
@@ -36,9 +34,28 @@
  * the function is running requests that the function terminate gracefully.
  * Users should expect the function to terminate in a timely manner (on the
  * order of seconds), but not necessarily immediately.
- * @param exit_ready If not NULL, this should initially be false and mine_blocks
- * will set this shared flag when it is about to exit. This flag allows users to
- * wait for mine_blocks with a timeout.
+ * @param exit_ready This should initially be false. mine_blocks will set this
+ * shared flag when it is about to exit. This flag allows users to wait for
+ * mine_blocks with a timeout.
+ * @param exit_ready_cond mine_blocks will monitor should_stop and attempt to
+ * gracefully shutdown when it is set. Just before the function returns, it sets
+ * exit_ready and signals this condition variable. Callers can use
+ * pthread_cond_timedwait on the condition variable to attempt to join the miner
+ * thread with a timeout. So, if the function does not signal the condition
+ * variable in a timely manner, callers can assume that something has gone wrong
+ * and the miner thread will not join.
+ * @param exit_ready_mutex Protects exit_ready and exit_ready_cond.
+ * @param sync_version_currently_mined Contains the version number of the
+ * synchronized blockchain that mine_blocks is currently mining. When the user
+ * updates the version number in the sync parameter, mine_blocks knows to update
+ * the blockchain that it is currently mining. When it makes the switch, it
+ * updates this number and signals the condition variable.
+ * @param sync_version_currently_mined_cond mine_blocks signals this condition
+ * variable when it switches the blockchain that it is mining. Callers can use
+ * pthread_cond_timedwait on the condition variable to ensure that the switch
+ * has occurred in a timely manner.
+ * @param sync_version_currently_mined_mutex Protects
+ * sync_version_currently_mined and sync_version_currently_mined_cond.
  */
 typedef struct mine_blocks_args_t {
     synchronized_blockchain_t *sync;
@@ -47,10 +64,10 @@ typedef struct mine_blocks_args_t {
     bool print_progress;
     char *outfile;
     atomic_bool *should_stop;
-    bool *exit_ready; // TODO why is this a pointer?
+    bool *exit_ready;
     pthread_cond_t exit_ready_cond;
     pthread_mutex_t exit_ready_mutex;
-    atomic_size_t *sync_version_currently_mined; // TODO why is this a pointer?
+    atomic_size_t *sync_version_currently_mined;
     pthread_cond_t sync_version_currently_mined_cond;
     pthread_mutex_t sync_version_currently_mined_mutex;
 } mine_blocks_args_t;

@@ -62,7 +62,6 @@ void test_mine_blocks_exits_when_should_stop_is_set() {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     // One second timeout.
-    // TODO this timeout code should probably be in a helper function
     ts.tv_sec += 1;
     pthread_mutex_lock(&args.exit_ready_mutex);
     while (!*args.exit_ready) {
@@ -150,7 +149,6 @@ void test_mine_blocks_mines_new_blockchain_when_version_incremented() {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     // One second timeout.
-    // TODO this timeout code should probably be in a helper function
     ts.tv_sec += 1;
     pthread_mutex_lock(&args.sync_version_currently_mined_mutex);
     while (
@@ -168,7 +166,6 @@ void test_mine_blocks_mines_new_blockchain_when_version_incremented() {
     *args.should_stop = true;
     clock_gettime(CLOCK_REALTIME, &ts);
     // One second timeout.
-    // TODO this timeout code should probably be in a helper function
     ts.tv_sec += 1;
     pthread_mutex_lock(&args.exit_ready_mutex);
     while (!*args.exit_ready) {

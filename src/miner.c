@@ -9,17 +9,7 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    // TODO I kind of don't like creating all these locals from args. Makes it look like they're different values.
     synchronized_blockchain_t *sync = args->sync;
-    ssh_key_t *miner_public_key = args->miner_public_key;
-    ssh_key_t *miner_private_key = args->miner_private_key;
-    bool print_progress = args->print_progress;
-    char *outfile = args->outfile;
-    atomic_bool *should_stop = args->should_stop;
-    bool *exit_ready = args->exit_ready;
-    pthread_cond_t *exit_ready_cond = &args->exit_ready_cond;
-    pthread_mutex_t *exit_ready_mutex = &args->exit_ready_mutex;
-    // TODO add logic for replacing the blockchain when it's been changed
     if (0 != pthread_mutex_lock(&sync->mutex)) {
         return_code = FAILURE_PTHREAD_FUNCTION;
         goto end;
@@ -29,7 +19,7 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
         return_code = FAILURE_PTHREAD_FUNCTION;
         goto end;
     }
-    while (!*should_stop) {
+    while (!*args->should_stop) {
         if (atomic_load(args->sync_version_currently_mined) !=
             atomic_load(&sync->version)) {
             if (0 != pthread_mutex_lock(&sync->mutex)) {
@@ -94,10 +84,10 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
         transaction_t *mint_coin_transaction = NULL;
         return_code = transaction_create(
             &mint_coin_transaction,
-            miner_public_key,
-            miner_public_key,
+            args->miner_public_key,
+            args->miner_public_key,
             AMOUNT_GENERATED_DURING_MINTING,
-            miner_private_key);
+            args->miner_private_key);
         if (SUCCESS != return_code) {
             linked_list_destroy(transaction_list);
             goto end;
@@ -119,23 +109,23 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
         return_code = synchronized_blockchain_mine_block(
             sync,
             next_block,
-            print_progress,
-            should_stop,
+            args->print_progress,
+            args->should_stop,
             args->sync_version_currently_mined);
         if (SUCCESS != return_code) {
             block_destroy(next_block);
             if (FAILURE_COULD_NOT_FIND_VALID_PROOF_OF_WORK == return_code) {
-                if (print_progress) {
+                if (args->print_progress) {
                     printf("\nCouldn't find valid proof of work for block; "
                            "generating new block\n");
                 }
             } else if (FAILURE_LONGER_BLOCKCHAIN_DETECTED == return_code) {
-                if (print_progress) {
+                if (args->print_progress) {
                     printf("Longer chain detected; switching to new chain\n");
                 }
                 return_code = SUCCESS;
             } else if (FAILURE_STOPPED_EARLY == return_code) {
-                if (print_progress) {
+                if (args->print_progress) {
                     printf("Stopping miner\n");
                 }
                 return_code = SUCCESS;
@@ -148,18 +138,18 @@ return_code_t *mine_blocks(mine_blocks_args_t *args) {
                 block_destroy(next_block);
                 goto end;
             }
-            if (print_progress) {
+            if (args->print_progress) {
                 blockchain_print(blockchain);
             }
-            if (NULL != outfile) {
-                blockchain_write_to_file(blockchain, outfile);
+            if (NULL != args->outfile) {
+                blockchain_write_to_file(blockchain, args->outfile);
             }
         }
     }
-    pthread_mutex_lock(exit_ready_mutex);
-    *exit_ready = true;
-    pthread_cond_signal(exit_ready_cond);
-    pthread_mutex_unlock(exit_ready_mutex);
+    pthread_mutex_lock(&args->exit_ready_mutex);
+    *args->exit_ready = true;
+    pthread_cond_signal(&args->exit_ready_cond);
+    pthread_mutex_unlock(&args->exit_ready_mutex);
 end:
     return_code_t *return_code_ptr = malloc(sizeof(return_code_t));
     *return_code_ptr = return_code;

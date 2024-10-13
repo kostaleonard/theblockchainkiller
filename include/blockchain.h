@@ -129,7 +129,22 @@ return_code_t blockchain_mine_block(
     atomic_bool *should_stop
 );
 
-// TODO docstring
+/**
+ * @brief Fills block's proof_of_work with a number that produces a valid hash.
+ * 
+ * @param sync The synchronized blockchain.
+ * @param block The block for which to calculate a proof of work.
+ * @param print_progress If true, display progress on the screen.
+ * @param should_stop This should initially be false. Setting this flag while
+ * the function is running requests that the function terminate gracefully.
+ * Users should expect the function to terminate in a timely manner (on the
+ * order of seconds), but not necessarily immediately.
+ * @param sync_version_currently_mined Contains the version number of the
+ * synchronized blockchain that this function is currently mining. When the user
+ * updates this number (from another thread), this function stops and returns
+ * FAILURE_LONGER_BLOCKCHAIN_DETECTED.
+ * @return return_code_t A return code indicating success or failure.
+ */
 return_code_t synchronized_blockchain_mine_block(
     synchronized_blockchain_t *sync,
     block_t *block,

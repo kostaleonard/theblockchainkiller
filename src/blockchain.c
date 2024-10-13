@@ -222,7 +222,6 @@ end:
     return return_code;
 }
 
-// TODO repeated code
 return_code_t synchronized_blockchain_mine_block(
     synchronized_blockchain_t *sync,
     block_t *block,

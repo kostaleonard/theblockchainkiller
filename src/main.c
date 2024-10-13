@@ -43,7 +43,6 @@ int main(int argc, char **argv) {
     char *ssh_private_key_contents_base64 = NULL;
     char *ssh_public_key_contents_base64 = NULL;
     int opt;
-    // TODO add a command line argument to load a blockchain from a file as starting point.
     while ((opt = getopt(argc, argv, "p:k:")) != -1) {
         switch (opt) {
             case 'p':
@@ -111,7 +110,6 @@ int main(int argc, char **argv) {
         goto end;
     }
     printf("Using public key: %s\n", miner_public_key.bytes);
-    // TODO check peers for latest blockchain
     return_code = blockchain_create(
         &blockchain, NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH);
     if (SUCCESS != return_code) {
