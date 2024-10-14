@@ -11,7 +11,7 @@
 #include "include/base64.h"
 #include "include/blockchain.h"
 #include "include/block.h"
-#include "include/miner.h"
+#include "include/mining_thread.h"
 #include "include/transaction.h"
 
 #define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 3

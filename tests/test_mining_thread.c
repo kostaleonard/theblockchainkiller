@@ -7,9 +7,9 @@
 #include <unistd.h>
 #include "include/base64.h"
 #include "include/blockchain.h"
-#include "include/miner.h"
+#include "include/mining_thread.h"
 #include "tests/test_cryptography.h"
-#include "tests/test_miner.h"
+#include "tests/test_mining_thread.h"
 
 #define NUM_LEADING_ZERO_BYTES_IN_BLOCK_HASH 2
 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "include/transaction.h"
-#include "include/miner.h"
+#include "include/mining_thread.h"
 
 return_code_t *mine_blocks(mine_blocks_args_t *args) {
     return_code_t return_code = SUCCESS;
