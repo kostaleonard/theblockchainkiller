@@ -13,7 +13,7 @@
 
 typedef struct run_consensus_peer_args_t {
     synchronized_blockchain_t *sync;
-    struct sockaddr_in6 peer_discovery_node_addr;
+    struct sockaddr_in6 peer_discovery_server_addr;
     atomic_bool *should_stop;
     bool *exit_ready;
     pthread_cond_t exit_ready_cond;
