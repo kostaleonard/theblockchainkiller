@@ -20,7 +20,7 @@
 #include "tests/test_transaction.h"
 #include "tests/test_base64.h"
 #include "tests/test_endian.h"
-#include "tests/test_miner.h"
+#include "tests/test_mining_thread.h"
 
 int _unlink_callback(
     const char *fpath,
@@ -200,14 +200,15 @@ int main(int argc, char **argv) {
         // test_endian.h
         cmocka_unit_test(test_htobe64_correctly_encodes_data),
         cmocka_unit_test(test_betoh64_correctly_decodes_data),
-        // test_miner.h
+        // test_mining_thread.h
         // These multithreaded tests are incredibly slow in valgrind.
         // They run very fast outside of valgrind.
-        # ifdef RUN_SLOWTESTS
+        // TODO disable tests for CI
+        //# ifdef RUN_SLOWTESTS
             cmocka_unit_test(test_mine_blocks_exits_when_should_stop_is_set),
             cmocka_unit_test(
                 test_mine_blocks_mines_new_blockchain_when_version_incremented),
-        # endif
+        //# endif
     };
     return_code = cmocka_run_group_tests(tests, NULL, NULL);
 end:
