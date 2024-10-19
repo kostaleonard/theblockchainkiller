@@ -35,6 +35,9 @@ target_link_libraries(mining_thread pthread)
 target_link_libraries(miner mining_thread)
 # Peer discovery server
 add_executable(peer_discovery_server src/peer_discovery_server.c)
+if(WIN32)
+    target_link_libraries(peer_discovery_server ws2_32)
+endif()
 # Tests
 add_executable(tests tests/main.c)
 add_library(test_file_paths tests/file_paths.c)
