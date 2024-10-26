@@ -1,5 +1,5 @@
 /**
- * @brief Runs the peer discovery server.
+ * @brief Runs the peer discovery bootstrap server.
  */
 
 #include <stdbool.h>
