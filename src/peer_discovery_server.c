@@ -41,9 +41,9 @@ int main(int argc, char **argv) {
             goto end;
         }
     #endif
-    struct sockaddr_in server_addr = {0};
-    struct sockaddr_in client_addr = {0};
-    int listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in6 server_addr = {0};
+    struct sockaddr_in6 client_addr = {0};
+    int listen_fd = socket(AF_INET6, SOCK_STREAM, 0);
     if (listen_fd < 0) {
         return_code = FAILURE_NETWORK_FUNCTION;
         goto end;
@@ -54,13 +54,23 @@ int main(int argc, char **argv) {
         SOL_SOCKET,
         SO_REUSEADDR,
         (const void *)&optval,
-        sizeof(int))) {
+        sizeof(optval))) {
         return_code = FAILURE_NETWORK_FUNCTION;
         goto end;
     }
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_addr.sin_port = htons((unsigned short)port);
+    int ipv6_v6only = 1;
+    if (0 != setsockopt(
+        listen_fd,
+        IPPROTO_IPV6,
+        IPV6_V6ONLY,
+        (const void *)&ipv6_v6only,
+        sizeof(ipv6_v6only))) {
+        return_code = FAILURE_NETWORK_FUNCTION;
+        goto end;
+    }
+    server_addr.sin6_family = AF_INET6;
+    server_addr.sin6_addr = in6addr_any;
+    server_addr.sin6_port = htons((unsigned short)port);
     if (bind(
         listen_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
         return_code = FAILURE_NETWORK_FUNCTION;
@@ -87,8 +97,8 @@ int main(int argc, char **argv) {
             return_code = FAILURE_NETWORK_FUNCTION;
             goto end;
         }
-        char client_addr_str[INET_ADDRSTRLEN] = {0};
-        if (NULL == inet_ntop(AF_INET, &client_addr.sin_addr, client_addr_str, INET_ADDRSTRLEN)) {
+        char client_addr_str[INET6_ADDRSTRLEN] = {0};
+        if (NULL == inet_ntop(AF_INET6, &client_addr.sin6_addr, client_addr_str, INET6_ADDRSTRLEN)) {
             return_code = FAILURE_NETWORK_FUNCTION;
             goto end;
         }
