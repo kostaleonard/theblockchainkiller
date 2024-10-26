@@ -12,10 +12,11 @@
     #include <winsock2.h>
     #include <ws2tcpip.h>
 #else
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
     #include <arpa/inet.h>
+    #include <netdb.h>
+    #include <netinet/in.h>
+    #include <sys/socket.h>
+    #include <sys/types.h>
     #include <unistd.h>
 #endif
 #include "include/return_codes.h"
@@ -82,7 +83,7 @@ int main(int argc, char **argv) {
     }    
     while (true) {
         // TODO may need to multi-thread this loop? But probably for our small application, using the main thread is fine.
-        int client_len = sizeof(client_addr);
+        socklen_t client_len = sizeof(client_addr);
         int conn_fd = accept(listen_fd, (struct sockaddr *)&client_addr, &client_len);
         if (conn_fd < 0) {
             return_code = FAILURE_NETWORK_FUNCTION;
