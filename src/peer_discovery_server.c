@@ -4,6 +4,8 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 //#include <unistd.h> // TODO is this available on Windows in general?
 // TODO the only reason I support cross-platform builds is to be able to test locally without using a container. Is there a less messy way to do that?
 #ifdef _WIN32
@@ -46,9 +48,7 @@ int main(int argc, char **argv) {
     struct sockaddr_in client_addr = {0};
     // TODO gethostbyname is deprecated: https://man7.org/linux/man-pages/man3/gethostbyaddr.3.html
     struct hostent *hostp = {0}; /* client host info */
-    char buf[BUFSIZ];
     char *hostaddrp; /* dotted decimal host addr string */
-    int n; /* message byte size */
 
     
     
@@ -103,26 +103,26 @@ int main(int argc, char **argv) {
             return_code = FAILURE_NETWORK_FUNCTION;
             goto end;
         }
-        printf("server established connection with %s (%s)\n", 
-        hostp->h_name, hostaddrp);
+        printf("server established connection with %s (%s)\n", hostp->h_name, hostaddrp);
         
-        memset(buf, 0, BUFSIZ);
-        n = recv(connfd, buf, BUFSIZ, 0); // TODO not sure the return code can be negative
-        if (n < 0) {
+        char buf[BUFSIZ] = {0};
+        int message_len = recv(connfd, buf, BUFSIZ, 0); // TODO not sure the return code can be negative
+        if (message_len < 0) {
             return_code = FAILURE_NETWORK_FUNCTION;
             goto end;
         }
-        printf("server received %d bytes: %s", n, buf);
+        printf("server received %d bytes: %s", message_len, buf);
         
-        n = send(connfd, buf, strlen(buf), 0); // TODO not sure the return code can be negative
-        if (n < 0) {
+        message_len = send(connfd, buf, strlen(buf), 0); // TODO not sure the return code can be negative
+        if (message_len < 0) {
             return_code = FAILURE_NETWORK_FUNCTION;
             goto end;
         }
-
-        // TODO conditional compile (closesocket is Windows)
-        //close(connfd);
-        closesocket(connfd);
+        # ifdef _WIN32
+            closesocket(connfd);
+        # else
+            close(connfd);
+        # endif
     }
 end:
 #ifdef _WIN32
