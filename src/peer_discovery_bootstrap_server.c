@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <unistd.h> // TODO is this available on Windows in general?
-// TODO the only reason I support cross-platform builds is to be able to test locally without using a container. Is there a less messy way to do that?
 #ifdef _WIN32
     #include <winsock2.h>
     #include <ws2tcpip.h>
@@ -82,7 +80,6 @@ int main(int argc, char **argv) {
         goto end;
     }    
     while (true) {
-        // TODO may need to multi-thread this loop? But probably for our small application, using the main thread is fine.
         socklen_t client_len = sizeof(client_addr);
         int conn_fd = accept(listen_fd, (struct sockaddr *)&client_addr, &client_len);
         if (conn_fd < 0) {
@@ -105,15 +102,15 @@ int main(int argc, char **argv) {
         }
         printf("Server established connection with %s (%s)\n", client_hostname, client_addr_str);
         char buf[BUFSIZ] = {0};
-        // TODO handle partial read/write
-        int message_len = recv(conn_fd, buf, BUFSIZ, 0); // TODO not sure the return code can be negative
+        // TODO handle partial read/write?
+        int message_len = recv(conn_fd, buf, BUFSIZ, 0);
         if (message_len < 0) {
             return_code = FAILURE_NETWORK_FUNCTION;
             goto end;
         }
         printf("Server received %d bytes: %s", message_len, buf);
-        // TODO handle partial read/write
-        message_len = send(conn_fd, buf, strlen(buf), 0); // TODO not sure the return code can be negative
+        // TODO handle partial read/write?
+        message_len = send(conn_fd, buf, strlen(buf), 0);
         if (message_len < 0) {
             return_code = FAILURE_NETWORK_FUNCTION;
             goto end;
