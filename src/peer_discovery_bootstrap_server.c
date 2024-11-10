@@ -17,9 +17,21 @@
     #include <sys/types.h>
     #include <unistd.h>
 #endif
+#include "include/linked_list.h"
+#include "include/networking.h"
+#include "include/peer_discovery_bootstrap_server.h"
 #include "include/return_codes.h"
 
 #define LISTEN_BACKLOG 5
+
+int compare_peer_info_t(peer_info_t *peer1, peer_info_t *peer2) {
+    // TODO test
+    // TODO check for null pointers?
+    return memcmp(
+        &peer1->listen_addr,
+        &peer2->listen_addr,
+        sizeof(struct sockaddr_in6));
+}
 
 int main(int argc, char **argv) {
     return_code_t return_code = SUCCESS;
@@ -30,6 +42,11 @@ int main(int argc, char **argv) {
     if (2 != argc) {
         fprintf(stderr, "Usage: %s <port>\n", argv[0]);
         return_code = FAILURE_INVALID_COMMAND_LINE_ARGS;
+        goto end;
+    }
+    linked_list_t *peer_list = NULL;
+    return_code = linked_list_create(&peer_list, free, compare_peer_info_t);
+    if (SUCCESS != return_code) {
         goto end;
     }
     int port = strtol(argv[1], NULL, 10);
@@ -101,17 +118,45 @@ int main(int argc, char **argv) {
             goto end;
         }
         printf("Server established connection with %s (%s)\n", client_hostname, client_addr_str);
-        char buf[BUFSIZ] = {0};
+        char recv_buf[BUFSIZ] = {0};
         // TODO handle partial read/write?
-        int message_len = recv(conn_fd, buf, BUFSIZ, 0);
-        if (message_len < 0) {
+        // TODO need timeout or new thread to prevent resources getting taken up
+        int bytes_received = recv(conn_fd, recv_buf, BUFSIZ, 0);
+        if (bytes_received < 0) {
             return_code = FAILURE_NETWORK_FUNCTION;
             goto end;
         }
-        printf("Server received %d bytes: %s", message_len, buf);
+        printf("Server received %d bytes: %s\n", bytes_received, recv_buf);
+        // TODO malloc/realloc as the message gets filled in to handle messages longer than BUFSIZ
+        char send_buf[BUFSIZ] = {0};
+        size_t send_message_len = 0;
+        size_t command_prefix_len = strlen(COMMAND_PREFIX);
+        send_message_len += command_prefix_len;
+        strncpy(send_buf, COMMAND_PREFIX, command_prefix_len);
+        if (0 != strncmp(recv_buf, COMMAND_PREFIX, command_prefix_len)) {
+            printf("Invalid command prefix\n");
+            send_buf[send_message_len] = COMMAND_ERROR;
+            send_message_len++;
+        } else {
+            size_t recv_buf_idx = command_prefix_len;
+            uint16_t command = ntohs(*(uint16_t *)(recv_buf + recv_buf_idx));
+            if (COMMAND_REGISTER_PEER != command) {
+                printf("Received command %d, but expected command %d\n", command, COMMAND_REGISTER_PEER);
+                send_buf[send_message_len] = COMMAND_ERROR;
+                send_message_len++;
+            } else {
+                peer_info_t *peer_info = malloc(sizeof(peer_info_t));
+                if (NULL == peer_info) {
+                    return_code = FAILURE_COULD_NOT_MALLOC;
+                    goto end;
+                }
+
+            }
+        }
+        
         // TODO handle partial read/write?
-        message_len = send(conn_fd, buf, strlen(buf), 0);
-        if (message_len < 0) {
+        int bytes_sent = send(conn_fd, recv_buf, strlen(recv_buf), 0);
+        if (bytes_sent < 0) {
             return_code = FAILURE_NETWORK_FUNCTION;
             goto end;
         }
