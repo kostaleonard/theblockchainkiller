@@ -127,6 +127,10 @@ int main(int argc, char **argv) {
             goto end;
         }
         printf("Server received %d bytes: %s\n", bytes_received, recv_buf);
+        // TODO call deserialize_command_register_peer
+        // TODO send back peer list or error message
+
+
         // TODO malloc/realloc as the message gets filled in to handle messages longer than BUFSIZ
         char send_buf[BUFSIZ] = {0};
         size_t send_message_len = 0;
