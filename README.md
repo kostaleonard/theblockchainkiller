@@ -1,4 +1,4 @@
-# The Blockchain Killer
+# LeoCoin
 
 This app allows you to mine LeoCoin, the hottest new cryptocurrency.
 
@@ -22,8 +22,8 @@ However, the OpenSSL key format does contain newline characters.
 base64 encode the key contents to remove newlines and store the result in environment variables or files.
 
 ```sh
-export THEBLOCKCHAINKILLER_PRIVATE_KEY=$(base64 -w 0 private_key.pem)
-export THEBLOCKCHAINKILLER_PUBLIC_KEY=$(base64 -w 0 public_key.pem)
+export LEOCOIN_PRIVATE_KEY=$(base64 -w 0 private_key.pem)
+export LEOCOIN_PUBLIC_KEY=$(base64 -w 0 public_key.pem)
 ```
 
 Now run the container with the following arguments.
@@ -33,7 +33,7 @@ Now run the container with the following arguments.
 * `--env`: Required. Passes the keys to the app.
 
 ```sh
-docker run --init --rm --env THEBLOCKCHAINKILLER_PRIVATE_KEY=$THEBLOCKCHAINKILLER_PRIVATE_KEY --env THEBLOCKCHAINKILLER_PUBLIC_KEY=$THEBLOCKCHAINKILLER_PUBLIC_KEY kostaleonard/theblockchainkiller
+docker run --init --rm --env LEOCOIN_PRIVATE_KEY=$LEOCOIN_PRIVATE_KEY --env LEOCOIN_PUBLIC_KEY=$LEOCOIN_PUBLIC_KEY kostaleonard/leocoin
 ```
 
-![LeoCoin mining](media/theblockchainkiller_mining.gif)
+![LeoCoin mining](media/leocoin_mining.gif)

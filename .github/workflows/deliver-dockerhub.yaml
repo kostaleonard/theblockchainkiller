@@ -28,11 +28,11 @@ jobs:
       - id: get_version
         name: Get version
         run: |
-          echo "THEBLOCKCHAINKILLER_BUILD_VERSION=$(python get_app_version.py)" >> $GITHUB_OUTPUT
+          echo "LEOCOIN_BUILD_VERSION=$(python get_app_version.py)" >> $GITHUB_OUTPUT
       - name: Check version
         run: |
-          echo THEBLOCKCHAINKILLER_BUILD_VERSION
-          echo ${{ steps.get_version.outputs.THEBLOCKCHAINKILLER_BUILD_VERSION }}
+          echo LEOCOIN_BUILD_VERSION
+          echo ${{ steps.get_version.outputs.LEOCOIN_BUILD_VERSION }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -40,17 +40,17 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v3
         with:
-          tags: kostaleonard/theblockchainkiller:latest,kostaleonard/theblockchainkiller:${{ steps.get_version.outputs.THEBLOCKCHAINKILLER_BUILD_VERSION }}
-          outputs: type=docker,dest=/tmp/theblockchainkiller.tar
+          tags: kostaleonard/leocoin:latest,kostaleonard/leocoin:${{ steps.get_version.outputs.LEOCOIN_BUILD_VERSION }}
+          outputs: type=docker,dest=/tmp/leocoin.tar
           cache-from: type=gha
           cache-to: type=gha
       - name: Upload Docker image artifact
         uses: actions/upload-artifact@v4
         with:
-          name: theblockchainkiller-image
-          path: /tmp/theblockchainkiller.tar
+          name: leocoin-image
+          path: /tmp/leocoin.tar
     outputs:
-      THEBLOCKCHAINKILLER_BUILD_VERSION: ${{ steps.get_version.outputs.THEBLOCKCHAINKILLER_BUILD_VERSION }}
+      LEOCOIN_BUILD_VERSION: ${{ steps.get_version.outputs.LEOCOIN_BUILD_VERSION }}
   test:
     needs: [build]
     runs-on: ubuntu-latest
@@ -58,14 +58,14 @@ jobs:
       - name: Download Docker image artifact
         uses: actions/download-artifact@v4
         with:
-          name: theblockchainkiller-image
+          name: leocoin-image
           path: .
       - name: Load Docker image
         run: |
-          docker load -i theblockchainkiller.tar
+          docker load -i leocoin.tar
       - name: Run tests
         run: |
-          docker run -e THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY=${{ secrets.THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY }} -e THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY=${{ secrets.THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY }} --rm kostaleonard/theblockchainkiller:latest ./build/tests
+          docker run -e LEOCOIN_TEST_PUBLIC_KEY=${{ secrets.LEOCOIN_TEST_PUBLIC_KEY }} -e LEOCOIN_TEST_PRIVATE_KEY=${{ secrets.LEOCOIN_TEST_PRIVATE_KEY }} --rm kostaleonard/leocoin:latest ./build/tests
   valgrind:
     needs: [build]
     runs-on: ubuntu-latest
@@ -73,14 +73,14 @@ jobs:
       - name: Download Docker image artifact
         uses: actions/download-artifact@v4
         with:
-          name: theblockchainkiller-image
+          name: leocoin-image
           path: .
       - name: Load Docker image
         run: |
-          docker load -i theblockchainkiller.tar
+          docker load -i leocoin.tar
       - name: Run valgrind on tests
         run: |
-          docker run -e THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY=${{ secrets.THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY }} -e THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY=${{ secrets.THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY }} --rm kostaleonard/theblockchainkiller:latest valgrind --leak-check=full --error-exitcode=1 ./build/tests
+          docker run -e LEOCOIN_TEST_PUBLIC_KEY=${{ secrets.LEOCOIN_TEST_PUBLIC_KEY }} -e LEOCOIN_TEST_PRIVATE_KEY=${{ secrets.LEOCOIN_TEST_PRIVATE_KEY }} --rm kostaleonard/leocoin:latest valgrind --leak-check=full --error-exitcode=1 ./build/tests
   trivy-scan:
     needs: [build]
     runs-on: ubuntu-latest
@@ -88,14 +88,14 @@ jobs:
       - name: Download Docker image artifact
         uses: actions/download-artifact@v4
         with:
-          name: theblockchainkiller-image
+          name: leocoin-image
           path: .
       - name: Display downloaded files
         run: ls -R
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          input: '$GITHUB_WORKSPACE/theblockchainkiller.tar'
+          input: '$GITHUB_WORKSPACE/leocoin.tar'
           format: 'table'
           exit-code: '0'
           ignore-unfixed: true
@@ -121,6 +121,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: kostaleonard/theblockchainkiller:latest,kostaleonard/theblockchainkiller:${{ needs.build.outputs.THEBLOCKCHAINKILLER_BUILD_VERSION }}
+          tags: kostaleonard/leocoin:latest,kostaleonard/leocoin:${{ needs.build.outputs.LEOCOIN_BUILD_VERSION }}
           cache-from: type=gha
           cache-to: type=gha
