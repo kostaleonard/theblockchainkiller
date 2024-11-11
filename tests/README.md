@@ -26,7 +26,7 @@ base64 -w 0 public_key.pem
 base64 -w 0 private_key.pem
 ```
 
-Store these values in the `THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY` and `THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY` environment variables.
+Store these values in the `LEOCOIN_TEST_PUBLIC_KEY` and `LEOCOIN_TEST_PRIVATE_KEY` environment variables.
 On Windows, you may need to use `regedit` to set the environment variables because the Control Panel sets an artificially low character limit on environment variables.
 
 ## Remote (GitHub) configuration
@@ -36,5 +36,5 @@ However, you may need to make adjustments.
 The CI/CD pipeline has an identical configuration to local, but you provide the environment variables through CI Variables.
 
 Follow the steps in [Local configuration](#local-configuration) to generate a public/private key pair and base64 encode them.
-Then save the base64 strings to CI Variables with the names `THEBLOCKCHAINKILLER_TEST_PUBLIC_KEY` and `THEBLOCKCHAINKILLER_TEST_PRIVATE_KEY`.
+Then save the base64 strings to CI Variables with the names `LEOCOIN_TEST_PUBLIC_KEY` and `LEOCOIN_TEST_PRIVATE_KEY`.
 CI runners will have these environment variables.
