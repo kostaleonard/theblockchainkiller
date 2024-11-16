@@ -33,7 +33,19 @@ typedef struct peer_info_t {
     time_t last_connected;
 } peer_info_t;
 
-// TODO this function may go to networking.h
+// TODO this function may go to networking.h or peer_info.h
 int compare_peer_info_t(void *peer1, void *peer2);
+
+return_code_t peer_info_list_serialize(
+    linked_list_t *peer_info_list,
+    unsigned char **buffer,
+    uint64_t *buffer_size
+);
+
+return_code_t peer_info_list_deserialize(
+    linked_list_t **peer_info_list,
+    unsigned char *buffer,
+    uint64_t buffer_size
+);
 
 #endif  // INCLUDE_PEER_DISCOVERY_BOOTSTRAP_SERVER_H_

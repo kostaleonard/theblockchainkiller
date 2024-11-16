@@ -190,6 +190,7 @@ int main(int argc, char **argv) {
         command_send_peer_list_t command_send_peer_list = {0};
         strncpy(command_send_peer_list.header.command_prefix, COMMAND_PREFIX, COMMAND_PREFIX_LEN);
         command_send_peer_list.header.command = COMMAND_SEND_PEER_LIST;
+        // TODO serialize peer list
         // TODO send the peer list
 
 

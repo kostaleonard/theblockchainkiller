@@ -19,7 +19,7 @@ typedef enum command_t {
 typedef struct command_header_t {
     char command_prefix[COMMAND_PREFIX_LEN];
     uint16_t command;
-    uint32_t command_len; // TODO this does not include the header length.
+    uint64_t command_len; // TODO this does not include the header length.
 } command_header_t;
 
 typedef struct command_ok_t {
@@ -42,8 +42,8 @@ typedef struct command_register_peer_t {
 
 typedef struct command_send_peer_list_t {
     command_header_t header;
-    uint32_t peer_list_str_len;
-    unsigned char *peer_list_str;
+    uint64_t peer_list_data_len;
+    unsigned char *peer_list_data;
 } command_send_peer_list_t;
 
 // TODO order these functions based on the command_t enum.
