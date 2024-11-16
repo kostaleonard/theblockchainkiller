@@ -24,12 +24,14 @@
 
 #define LISTEN_BACKLOG 5
 
-int compare_peer_info_t(peer_info_t *peer1, peer_info_t *peer2) {
+int compare_peer_info_t(void *peer1, void *peer2) {
     // TODO test
     // TODO check for null pointers?
+    peer_info_t *p1 = (peer_info_t *)peer1;
+    peer_info_t *p2 = (peer_info_t *)peer2;
     return memcmp(
-        &peer1->listen_addr,
-        &peer2->listen_addr,
+        &p1->listen_addr,
+        &p2->listen_addr,
         sizeof(struct sockaddr_in6));
 }
 

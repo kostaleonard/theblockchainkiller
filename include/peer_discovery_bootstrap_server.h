@@ -34,6 +34,6 @@ typedef struct peer_info_t {
 } peer_info_t;
 
 // TODO this function may go to networking.h
-int compare_peer_info_t(peer_info_t *peer1, peer_info_t *peer2);
+int compare_peer_info_t(void *peer1, void *peer2);
 
 #endif  // INCLUDE_PEER_DISCOVERY_BOOTSTRAP_SERVER_H_
