@@ -65,16 +65,16 @@ return_code_t command_header_deserialize(
 return_code_t command_register_peer_deserialize(
     command_register_peer_t *command_register_peer,
     unsigned char *buf,
-    size_t len);
+    uint64_t len);
 
 return_code_t command_send_peer_list_serialize(
     command_send_peer_list_t *command_send_peer_list,
     unsigned char **buf,
-    size_t *len);
+    uint64_t *len);
 
 return_code_t command_error_serialize(
     command_error_t *command_error,
     unsigned char **buf,
-    size_t *len);
+    uint64_t *len);
 
 #endif  // INCLUDE_NETWORKING_H_

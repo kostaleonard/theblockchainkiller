@@ -120,8 +120,9 @@ int main(int argc, char **argv) {
             goto end;
         }
         printf("Server established connection with %s (%s)\n", client_hostname, client_addr_str);
-        unsigned char recv_buf[BUFSIZ] = {0};
-        unsigned char send_buf[BUFSIZ] = {0};
+        char recv_buf[BUFSIZ] = {0};
+        // TODO use send_buf or remove
+        //char send_buf[BUFSIZ] = {0};
         // TODO need timeout or new thread to prevent resources getting taken up
         int bytes_received = recv(conn_fd, recv_buf, sizeof(command_header_t), 0);
         if (bytes_received < 0) {
@@ -131,9 +132,10 @@ int main(int argc, char **argv) {
         printf("Server received %d bytes: %s\n", bytes_received, recv_buf);
         command_header_t command_header = {0};
         command_register_peer_t command_register_peer = {0};
-        command_error_t command_error = {0};
+        // TODO use error command to send info back to client
+        //command_error_t command_error = {0};
         return_code = command_header_deserialize(
-            &command_header, recv_buf, bytes_received);
+            &command_header, (unsigned char *)recv_buf, bytes_received);
         if (SUCCESS != return_code) {
             // TODO send error command based on return code--probably just FAILURE_INVALID_COMMAND_PREFIX
             printf("Header deserialization error\n");
@@ -152,7 +154,7 @@ int main(int argc, char **argv) {
         printf("Server received %d bytes: %s\n", bytes_received, recv_buf);
         return_code = command_register_peer_deserialize(
             &command_register_peer,
-            recv_buf,
+            (unsigned char *)recv_buf,
             bytes_received);
         // TODO send back peer list or error message
         if (SUCCESS != return_code) {
@@ -188,44 +190,30 @@ int main(int argc, char **argv) {
         }
         // TODO filter peer list for last_connected > 60 seconds old
         command_send_peer_list_t command_send_peer_list = {0};
-        strncpy(command_send_peer_list.header.command_prefix, COMMAND_PREFIX, COMMAND_PREFIX_LEN);
+        memcpy(command_send_peer_list.header.command_prefix, COMMAND_PREFIX, COMMAND_PREFIX_LEN);
         command_send_peer_list.header.command = COMMAND_SEND_PEER_LIST;
-        // TODO serialize peer list
-        // TODO send the peer list
-
-
-        
-        size_t send_message_len = 0;
-        size_t command_prefix_len = strlen(COMMAND_PREFIX);
-        send_message_len += command_prefix_len;
-        strncpy(send_buf, COMMAND_PREFIX, command_prefix_len);
-        if (0 != strncmp(recv_buf, COMMAND_PREFIX, command_prefix_len)) {
-            printf("Invalid command prefix\n");
-            send_buf[send_message_len] = COMMAND_ERROR;
-            send_message_len++;
-        } else {
-            size_t recv_buf_idx = command_prefix_len;
-            uint16_t command = ntohs(*(uint16_t *)(recv_buf + recv_buf_idx));
-            if (COMMAND_REGISTER_PEER != command) {
-                printf("Received command %d, but expected command %d\n", command, COMMAND_REGISTER_PEER);
-                send_buf[send_message_len] = COMMAND_ERROR;
-                send_message_len++;
-            } else {
-                peer_info_t *peer_info = malloc(sizeof(peer_info_t));
-                if (NULL == peer_info) {
-                    return_code = FAILURE_COULD_NOT_MALLOC;
-                    goto end;
-                }
-
-            }
+        return_code = peer_info_list_serialize(peer_list, &command_send_peer_list.peer_list_data, &command_send_peer_list.peer_list_data_len);
+        if (SUCCESS != return_code) {
+            // TODO
+            printf("peer_info_list_serialize error\n");
+            goto end;
         }
-        
-        // TODO handle partial read/write?
-        int bytes_sent = send(conn_fd, recv_buf, strlen(recv_buf), 0);
+        unsigned char *command_send_peer_list_buffer = NULL;
+        uint64_t command_send_peer_list_buffer_len = 0;
+        return_code = command_send_peer_list_serialize(&command_send_peer_list, &command_send_peer_list_buffer, &command_send_peer_list_buffer_len);
+        if (SUCCESS != return_code) {
+            // TODO
+            printf("command_send_peer_list_serialize error\n");
+            goto end;
+        }
+        // TODO handle partial read/write
+        int bytes_sent = send(conn_fd, (char *)command_send_peer_list_buffer, command_send_peer_list_buffer_len, 0);
         if (bytes_sent < 0) {
             return_code = FAILURE_NETWORK_FUNCTION;
             goto end;
         }
+        free(command_send_peer_list.peer_list_data);
+        free(command_send_peer_list_buffer);
         # ifdef _WIN32
             closesocket(conn_fd);
         # else
