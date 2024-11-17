@@ -5,8 +5,6 @@
 #include "include/peer_discovery.h"
 
 int compare_peer_info_t(void *peer1, void *peer2) {
-    // TODO test
-    // TODO check for null pointers?
     if (NULL == peer1 || NULL == peer2) {
         return 0;
     }
