@@ -213,6 +213,7 @@ int main(int argc, char **argv) {
         //# endif
         // test_peer_discovery.h
         cmocka_unit_test(test_compare_peer_info_t_compares_ip_addresses),
+        cmocka_unit_test(test_peer_info_list_serialize_fails_on_invalid_inputs),
         // test_networking.h
         cmocka_unit_test(
             test_command_header_deserialize_fails_on_invalid_input),

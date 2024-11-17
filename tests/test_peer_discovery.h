@@ -11,4 +11,6 @@
 
 void test_compare_peer_info_t_compares_ip_addresses();
 
+void test_peer_info_list_serialize_fails_on_invalid_inputs();
+
 #endif  // TESTS_TEST_PEER_DISCOVERY_H_

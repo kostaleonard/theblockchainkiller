@@ -21,5 +21,12 @@ return_code_t peer_info_list_serialize(
     unsigned char **buffer,
     uint64_t *buffer_size
 ) {
-    return FAILURE_INVALID_INPUT;
+    return_code_t return_code = SUCCESS;
+    if (NULL == peer_info_list || NULL == buffer || NULL == buffer_size) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    // TODO
+end:
+    return return_code;
 }

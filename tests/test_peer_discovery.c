@@ -26,3 +26,50 @@ void test_compare_peer_info_t_compares_ip_addresses() {
     ((unsigned char *)(&peer2.listen_addr.sin6_addr))[1] = 0x80;
     assert_true(0 != compare_peer_info_t(&peer1, &peer2));
 }
+
+void test_peer_info_list_serialize_fails_on_invalid_inputs() {
+    linked_list_t *peer_info_list = NULL;
+    return_code_t return_code = linked_list_create(
+        &peer_info_list, free, compare_peer_info_t);
+    assert_true(SUCCESS == return_code);
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code = peer_info_list_serialize(NULL, &buffer, &buffer_size);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = peer_info_list_serialize(peer_info_list, NULL, &buffer_size);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = peer_info_list_serialize(peer_info_list, &buffer, NULL);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    linked_list_destroy(peer_info_list);
+}
+
+void test_peer_info_list_serialize_creates_nonempty_buffer() {
+    linked_list_t *peer_info_list = NULL;
+    return_code_t return_code = linked_list_create(
+        &peer_info_list, free, compare_peer_info_t);
+    assert_true(SUCCESS == return_code);
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code = peer_info_list_serialize(
+        peer_info_list, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    assert_true(NULL != buffer);
+    assert_true(0 != buffer_size);
+    unsigned char *empty_buffer = calloc(buffer_size, 1);
+    assert_true(0 != memcmp(buffer, empty_buffer, buffer_size));
+    free(buffer);
+    free(empty_buffer);
+    linked_list_destroy(peer_info_list);
+}
+
+void test_peer_info_list_deserialize_reconstructs_list() {
+    // TODO
+}
+
+void test_peer_info_list_deserialize_fails_on_attempted_read_past_buffer() {
+    // TODO
+}
+
+void test_peer_info_list_deserialize_fails_on_invalid_input() {
+    // TODO
+}
