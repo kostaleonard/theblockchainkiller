@@ -9,6 +9,6 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-void test_compare_peer_info_t_compares_ip_addresses();
+void test_command_header_deserialize_fails_on_invalid_input();
 
 #endif  // TESTS_TEST_NETWORKING_H_

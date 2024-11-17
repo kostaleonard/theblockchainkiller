@@ -1,9 +1,9 @@
 /**
- * @brief Contains functions for the peer discovery bootstrap server.
+ * @brief Contains functions for peer discovery.
  */
 
-#ifndef INCLUDE_PEER_DISCOVERY_BOOTSTRAP_SERVER_H_
-#define INCLUDE_PEER_DISCOVERY_BOOTSTRAP_SERVER_H_
+#ifndef INCLUDE_PEER_DISCOVERY_H_
+#define INCLUDE_PEER_DISCOVERY_H_
 
 #include <time.h>
 #ifdef _WIN32
@@ -51,4 +51,4 @@ return_code_t peer_info_list_deserialize(
 );
 */
 
-#endif  // INCLUDE_PEER_DISCOVERY_BOOTSTRAP_SERVER_H_
+#endif  // INCLUDE_PEER_DISCOVERY_H_

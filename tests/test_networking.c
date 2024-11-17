@@ -2,6 +2,6 @@
 #include <stdbool.h>
 #include "tests/test_networking.h"
 
-void test_compare_peer_info_t_compares_ip_addresses() {
+void test_command_header_deserialize_fails_on_invalid_input() {
     assert_true(false);
 }

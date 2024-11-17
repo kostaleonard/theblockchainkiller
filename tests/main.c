@@ -21,6 +21,7 @@
 #include "tests/test_base64.h"
 #include "tests/test_endian.h"
 #include "tests/test_mining_thread.h"
+#include "tests/test_peer_discovery.h"
 #include "tests/test_networking.h"
 
 int _unlink_callback(
@@ -210,8 +211,11 @@ int main(int argc, char **argv) {
             cmocka_unit_test(
                 test_mine_blocks_mines_new_blockchain_when_version_incremented),
         //# endif
-        // test_networking.h
+        // test_peer_discovery.h
         cmocka_unit_test(test_compare_peer_info_t_compares_ip_addresses),
+        // test_networking.h
+        cmocka_unit_test(
+            test_command_header_deserialize_fails_on_invalid_input),
     };
     return_code = cmocka_run_group_tests(tests, NULL, NULL);
 end:
