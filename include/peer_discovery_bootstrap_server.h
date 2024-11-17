@@ -42,10 +42,13 @@ return_code_t peer_info_list_serialize(
     uint64_t *buffer_size
 );
 
+// TODO not needed yet
+/*
 return_code_t peer_info_list_deserialize(
     linked_list_t **peer_info_list,
     unsigned char *buffer,
     uint64_t buffer_size
 );
+*/
 
 #endif  // INCLUDE_PEER_DISCOVERY_BOOTSTRAP_SERVER_H_

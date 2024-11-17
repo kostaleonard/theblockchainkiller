@@ -21,6 +21,7 @@
 #include "tests/test_base64.h"
 #include "tests/test_endian.h"
 #include "tests/test_mining_thread.h"
+#include "tests/test_networking.h"
 
 int _unlink_callback(
     const char *fpath,
@@ -209,6 +210,8 @@ int main(int argc, char **argv) {
             cmocka_unit_test(
                 test_mine_blocks_mines_new_blockchain_when_version_incremented),
         //# endif
+        // test_networking.h
+        cmocka_unit_test(test_compare_peer_info_t_compares_ip_addresses),
     };
     return_code = cmocka_run_group_tests(tests, NULL, NULL);
 end:
