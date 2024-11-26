@@ -30,3 +30,11 @@ return_code_t peer_info_list_serialize(
 end:
     return return_code;
 }
+
+return_code_t peer_info_list_deserialize(
+    linked_list_t **peer_info_list,
+    unsigned char *buffer,
+    uint64_t buffer_size
+) {
+    return FAILURE_INVALID_INPUT;
+}

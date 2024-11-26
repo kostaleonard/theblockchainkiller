@@ -214,6 +214,12 @@ int main(int argc, char **argv) {
         // test_peer_discovery.h
         cmocka_unit_test(test_compare_peer_info_t_compares_ip_addresses),
         cmocka_unit_test(test_peer_info_list_serialize_fails_on_invalid_inputs),
+        cmocka_unit_test(test_peer_info_list_serialize_creates_nonempty_buffer),
+        cmocka_unit_test(test_peer_info_list_deserialize_reconstructs_list),
+        cmocka_unit_test(
+            test_peer_info_list_deserialize_fails_on_read_past_buffer),
+        cmocka_unit_test(
+            test_peer_info_list_deserialize_fails_on_invalid_input),
         // test_networking.h
         cmocka_unit_test(
             test_command_header_deserialize_fails_on_invalid_input),
