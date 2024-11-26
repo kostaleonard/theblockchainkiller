@@ -3,6 +3,7 @@
  */
 
 #include "include/peer_discovery.h"
+#include "include/endian.h"
 
 int compare_peer_info_t(void *peer1, void *peer2) {
     if (NULL == peer1 || NULL == peer2) {
@@ -26,7 +27,54 @@ return_code_t peer_info_list_serialize(
         return_code = FAILURE_INVALID_INPUT;
         goto end;
     }
-    // TODO
+    uint64_t num_peers = 0;
+    return_code = linked_list_length(peer_info_list, &num_peers);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    uint64_t size = sizeof(num_peers);
+    unsigned char *serialization_buffer = calloc(1, size);
+    if (NULL == serialization_buffer) {
+        return_code = FAILURE_COULD_NOT_MALLOC;
+        goto end;
+    }
+    unsigned char *next_spot_in_buffer = serialization_buffer;
+    *(uint64_t *)next_spot_in_buffer = htobe64(num_peers);
+    next_spot_in_buffer += sizeof(num_peers);
+    for (node_t *node = peer_info_list->head; NULL != node; node = node->next) {
+        peer_info_t *peer = (peer_info_t *)node->data;
+        uint64_t next_spot_in_buffer_offset = size;
+        size += sizeof(peer->listen_addr.sin6_family);
+        size += sizeof(peer->listen_addr.sin6_port);
+        size += sizeof(peer->listen_addr.sin6_flowinfo);
+        size += sizeof(peer->listen_addr.sin6_addr);
+        size += sizeof(peer->listen_addr.sin6_scope_id);
+        size += sizeof(peer->last_connected);
+        serialization_buffer = realloc(serialization_buffer, size);
+        if (NULL == serialization_buffer) {
+            return_code = FAILURE_COULD_NOT_MALLOC;
+            goto end;
+        }
+        next_spot_in_buffer = serialization_buffer + next_spot_in_buffer_offset;
+        *(uint16_t *)next_spot_in_buffer = htons(peer->listen_addr.sin6_family);
+        next_spot_in_buffer += sizeof(peer->listen_addr.sin6_family);
+        *(uint16_t *)next_spot_in_buffer = htons(peer->listen_addr.sin6_port);
+        next_spot_in_buffer += sizeof(peer->listen_addr.sin6_port);
+        *(uint32_t *)next_spot_in_buffer = htonl(
+            peer->listen_addr.sin6_flowinfo);
+        next_spot_in_buffer += sizeof(peer->listen_addr.sin6_flowinfo);
+        for (size_t idx = 0; idx < sizeof(IN6_ADDR); idx++) {
+            *next_spot_in_buffer = ((unsigned char *)(&peer->listen_addr.sin6_addr))[idx];
+            next_spot_in_buffer++;
+        }
+        *(uint32_t *)next_spot_in_buffer = htonl(
+            peer->listen_addr.sin6_scope_id);
+        next_spot_in_buffer += sizeof(peer->listen_addr.sin6_scope_id);
+        *(uint64_t *)next_spot_in_buffer = htobe64(peer->last_connected);
+        next_spot_in_buffer += sizeof(peer->last_connected);
+    }
+    *buffer = serialization_buffer;
+    *buffer_size = size;
 end:
     return return_code;
 }
@@ -36,5 +84,12 @@ return_code_t peer_info_list_deserialize(
     unsigned char *buffer,
     uint64_t buffer_size
 ) {
-    return FAILURE_INVALID_INPUT;
+    return_code_t return_code = SUCCESS;
+    if (NULL == peer_info_list || NULL == buffer) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    // TODO
+end:
+    return return_code;
 }

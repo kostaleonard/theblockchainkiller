@@ -44,6 +44,7 @@ void test_peer_info_list_serialize_fails_on_invalid_inputs() {
 }
 
 void test_peer_info_list_serialize_creates_nonempty_buffer() {
+    // TODO need to actually put something in the peer list, or be okay with all zero buffer
     linked_list_t *peer_info_list = NULL;
     return_code_t return_code = linked_list_create(
         &peer_info_list, free, compare_peer_info_t);
