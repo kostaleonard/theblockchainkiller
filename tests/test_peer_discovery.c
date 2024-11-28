@@ -44,10 +44,19 @@ void test_peer_info_list_serialize_fails_on_invalid_inputs() {
 }
 
 void test_peer_info_list_serialize_creates_nonempty_buffer() {
-    // TODO need to actually put something in the peer list, or be okay with all zero buffer
     linked_list_t *peer_info_list = NULL;
     return_code_t return_code = linked_list_create(
         &peer_info_list, free, compare_peer_info_t);
+    assert_true(SUCCESS == return_code);
+    peer_info_t *peer1 = calloc(1, sizeof(peer_info_t));
+    peer1->listen_addr.sin6_family = AF_INET6;
+    peer1->listen_addr.sin6_port = 12345;
+    peer1->listen_addr.sin6_flowinfo = 0;
+    ((unsigned char *)(&peer1->listen_addr.sin6_addr))[
+        sizeof(IN6_ADDR) - 1] = 1;
+    peer1->listen_addr.sin6_scope_id = 0;
+    peer1->last_connected = 100;
+    return_code = linked_list_prepend(peer_info_list, peer1);
     assert_true(SUCCESS == return_code);
     unsigned char *buffer = NULL;
     uint64_t buffer_size = 0;
