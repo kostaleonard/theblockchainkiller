@@ -21,6 +21,7 @@
 #define COMMAND_PREFIX "LEO:"
 #define COMMAND_PREFIX_LEN 4
 #define COMMAND_ERROR_MESSAGE_LEN 256
+#define COMMAND_HEADER_INITIALIZER {{'L', 'E', 'O', ':'}, 0, 0}
 
 typedef enum command_t {
     COMMAND_OK,
@@ -33,7 +34,7 @@ typedef enum command_t {
 
 typedef struct command_header_t {
     char command_prefix[COMMAND_PREFIX_LEN];
-    uint16_t command;
+    uint32_t command;
     uint64_t command_len; // TODO this does not include the header length.
 } command_header_t;
 
@@ -64,6 +65,13 @@ typedef struct command_send_peer_list_t {
 // TODO order these functions based on the command_t enum.
 // TODO check return_codes.h for which error codes are needed to communicate what went wrong
 // TODO send_all and recv_all functions for handling partial reads/writes
+// TODO fix/add docstrings
+
+
+return_code_t command_header_serialize(
+    command_header_t *command_header,
+    unsigned char **buffer,
+    uint64_t *buffer_size);
 
 /**
  * @brief Deserializes a command header from the buffer.

@@ -24,6 +24,9 @@
 #include "tests/test_peer_discovery.h"
 #include "tests/test_networking.h"
 
+// TODO disable tests for CI
+#define RUN_SLOWTESTS
+
 int _unlink_callback(
     const char *fpath,
     const struct stat *sb,
@@ -205,12 +208,11 @@ int main(int argc, char **argv) {
         // test_mining_thread.h
         // These multithreaded tests are incredibly slow in valgrind.
         // They run very fast outside of valgrind.
-        // TODO disable tests for CI
-        //# ifdef RUN_SLOWTESTS
+        # ifdef RUN_SLOWTESTS
             cmocka_unit_test(test_mine_blocks_exits_when_should_stop_is_set),
             cmocka_unit_test(
                 test_mine_blocks_mines_new_blockchain_when_version_incremented),
-        //# endif
+        # endif
         // test_peer_discovery.h
         cmocka_unit_test(test_compare_peer_info_t_compares_ip_addresses),
         cmocka_unit_test(test_peer_info_list_serialize_fails_on_invalid_inputs),
@@ -221,6 +223,11 @@ int main(int argc, char **argv) {
         cmocka_unit_test(
             test_peer_info_list_deserialize_fails_on_invalid_input),
         // test_networking.h
+        cmocka_unit_test(test_command_header_serialize_fails_on_invalid_inputs),
+        cmocka_unit_test(test_command_header_serialize_creates_nonempty_buffer),
+        cmocka_unit_test(test_command_header_deserialize_reconstructs_list),
+        cmocka_unit_test(
+            test_command_header_deserialize_fails_on_read_past_buffer),
         cmocka_unit_test(
             test_command_header_deserialize_fails_on_invalid_input),
     };

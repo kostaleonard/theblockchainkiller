@@ -9,6 +9,14 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+void test_command_header_serialize_fails_on_invalid_inputs();
+
+void test_command_header_serialize_creates_nonempty_buffer();
+
+void test_command_header_deserialize_reconstructs_list();
+
+void test_command_header_deserialize_fails_on_read_past_buffer();
+
 void test_command_header_deserialize_fails_on_invalid_input();
 
 #endif  // TESTS_TEST_NETWORKING_H_
