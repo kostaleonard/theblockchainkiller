@@ -225,7 +225,7 @@ int main(int argc, char **argv) {
         // test_networking.h
         cmocka_unit_test(test_command_header_serialize_fails_on_invalid_inputs),
         cmocka_unit_test(test_command_header_serialize_creates_nonempty_buffer),
-        cmocka_unit_test(test_command_header_deserialize_reconstructs_list),
+        cmocka_unit_test(test_command_header_deserialize_reconstructs_command),
         cmocka_unit_test(
             test_command_header_deserialize_fails_on_read_past_buffer),
         cmocka_unit_test(

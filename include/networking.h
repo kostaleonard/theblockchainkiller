@@ -79,12 +79,12 @@ return_code_t command_header_serialize(
  * @param command_header A pointer to fill with the deserialized command header.
  * If the buffer contains a valid command header, this pointer will be filled
  * with data and the function will return SUCCESS.
- * @param buf The buffer. The data in the buffer is in network byte order.
- * @param len The length of the buffer.
+ * @param buffer The buffer. The data in the buffer is in network byte order.
+ * @param buffer_size The length of the buffer.
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t command_header_deserialize(
-    command_header_t *command_header, unsigned char *buf, uint64_t len);
+    command_header_t *command_header, unsigned char *buffer, uint64_t buffer_size);
 
 /**
  * @brief Deserializes a register peer command from the buffer.
@@ -92,35 +92,35 @@ return_code_t command_header_deserialize(
  * @param command_register_peer A pointer to fill with the deserialized register
  * peer command data. If the buffer contains a valid register peer command, this
  * pointer will be filled with data and the function will return SUCCESS.
- * @param buf The buffer. The data in the buffer is in network byte order.
- * @param len The length of the buffer.
+ * @param buffer The buffer. The data in the buffer is in network byte order.
+ * @param buffer_size The length of the buffer.
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t command_register_peer_deserialize(
     command_register_peer_t *command_register_peer,
-    unsigned char *buf,
-    uint64_t len);
+    unsigned char *buffer,
+    uint64_t buffer_size);
 
 /**
  * @brief Serializes the send peer list command into a newly allocated buffer.
  * 
  * @param command_send_peer_list The send peer list command to serialize.
- * @param buf A pointer to fill with a buffer that this function will allocate.
+ * @param buffer A pointer to fill with a buffer that this function will allocate.
  * The buffer will contain the serialized command.
- * @param len A pointer to fill with the length of the allocated buffer.
+ * @param buffer_size A pointer to fill with the length of the allocated buffer.
  * @return return_code_t A return code indicating success or failure.
  */
 return_code_t command_send_peer_list_serialize(
     command_send_peer_list_t *command_send_peer_list,
-    unsigned char **buf,
-    uint64_t *len);
+    unsigned char **buffer,
+    uint64_t *buffer_size);
 
 // TODO not used yet
 /*
 return_code_t command_error_serialize(
     command_error_t *command_error,
-    unsigned char **buf,
-    uint64_t *len);
+    unsigned char **buffer,
+    uint64_t *buffer_size);
 */
 
 #endif  // INCLUDE_NETWORKING_H_

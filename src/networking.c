@@ -36,20 +36,54 @@ end:
 }
 
 return_code_t command_header_deserialize(
-    command_header_t *command_header, unsigned char *buf, uint64_t len) {
-    return FAILURE_INVALID_INPUT;
+    command_header_t *command_header,
+    unsigned char *buffer,
+    uint64_t buffer_size) {
+    return_code_t return_code = SUCCESS;
+    if (NULL == command_header || NULL == buffer) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    command_header_t deserialized_command_header = {0};
+    unsigned char *next_spot_in_buffer = buffer;
+    ptrdiff_t total_read_size = next_spot_in_buffer + COMMAND_PREFIX_LEN - buffer;
+    if (total_read_size > buffer_size) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+        goto end;
+    }
+    for (size_t idx = 0; idx < COMMAND_PREFIX_LEN; idx++) {
+        deserialized_command_header.command_prefix[idx] = *next_spot_in_buffer;
+        next_spot_in_buffer++;
+    }
+    total_read_size = next_spot_in_buffer + sizeof(uint32_t) - buffer;
+    if (total_read_size > buffer_size) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+        goto end;
+    }
+    deserialized_command_header.command = ntohl(*(uint32_t *)next_spot_in_buffer);
+    next_spot_in_buffer += sizeof(uint32_t);
+    total_read_size = next_spot_in_buffer + sizeof(uint64_t) - buffer;
+    if (total_read_size > buffer_size) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+        goto end;
+    }
+    deserialized_command_header.command_len = betoh64(*(uint64_t *)next_spot_in_buffer);
+    next_spot_in_buffer += sizeof(uint64_t);
+    memcpy(command_header, &deserialized_command_header, sizeof(command_header_t));
+end:
+    return return_code;
 }
 
 return_code_t command_register_peer_deserialize(
     command_register_peer_t *command_register_peer,
-    unsigned char *buf,
-    uint64_t len) {
+    unsigned char *buffer,
+    uint64_t buffer_size) {
     return FAILURE_INVALID_INPUT;
 }
 
 return_code_t command_send_peer_list_serialize(
     command_send_peer_list_t *command_send_peer_list,
-    unsigned char **buf,
-    uint64_t *len) {
+    unsigned char **buffer,
+    uint64_t *buffer_size) {
     return FAILURE_INVALID_INPUT;
 }

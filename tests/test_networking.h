@@ -13,7 +13,7 @@ void test_command_header_serialize_fails_on_invalid_inputs();
 
 void test_command_header_serialize_creates_nonempty_buffer();
 
-void test_command_header_deserialize_reconstructs_list();
+void test_command_header_deserialize_reconstructs_command();
 
 void test_command_header_deserialize_fails_on_read_past_buffer();
 
