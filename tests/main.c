@@ -215,7 +215,7 @@ int main(int argc, char **argv) {
         # endif
         // test_peer_discovery.h
         cmocka_unit_test(test_compare_peer_info_t_compares_ip_addresses),
-        cmocka_unit_test(test_peer_info_list_serialize_fails_on_invalid_inputs),
+        cmocka_unit_test(test_peer_info_list_serialize_fails_on_invalid_input),
         cmocka_unit_test(test_peer_info_list_serialize_creates_nonempty_buffer),
         cmocka_unit_test(test_peer_info_list_deserialize_reconstructs_list),
         cmocka_unit_test(
@@ -223,7 +223,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(
             test_peer_info_list_deserialize_fails_on_invalid_input),
         // test_networking.h
-        cmocka_unit_test(test_command_header_serialize_fails_on_invalid_inputs),
+        cmocka_unit_test(test_command_header_serialize_fails_on_invalid_input),
+        cmocka_unit_test(test_command_header_serialize_fails_on_invalid_prefix),
         cmocka_unit_test(test_command_header_serialize_creates_nonempty_buffer),
         cmocka_unit_test(test_command_header_deserialize_reconstructs_command),
         cmocka_unit_test(

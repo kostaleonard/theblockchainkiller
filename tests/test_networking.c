@@ -3,7 +3,7 @@
 #include "include/networking.h"
 #include "tests/test_networking.h"
 
-void test_command_header_serialize_fails_on_invalid_inputs() {
+void test_command_header_serialize_fails_on_invalid_input() {
     command_header_t command_header = COMMAND_HEADER_INITIALIZER;
     command_header.command = COMMAND_REGISTER_PEER;
     command_header.command_len = 17;
@@ -18,6 +18,18 @@ void test_command_header_serialize_fails_on_invalid_inputs() {
     return_code = command_header_serialize(
         &command_header, &buffer, NULL);
     assert_true(FAILURE_INVALID_INPUT == return_code);
+}
+
+void test_command_header_serialize_fails_on_invalid_prefix() {
+    command_header_t command_header = COMMAND_HEADER_INITIALIZER;
+    command_header.command_prefix[2] = 'A';
+    command_header.command = COMMAND_REGISTER_PEER;
+    command_header.command_len = 17;
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code_t return_code = command_header_serialize(
+        &command_header, &buffer, &buffer_size);
+    assert_true(FAILURE_INVALID_COMMAND_PREFIX == return_code);
 }
 
 void test_command_header_serialize_creates_nonempty_buffer() {

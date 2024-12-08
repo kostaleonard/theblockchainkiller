@@ -11,7 +11,7 @@
 
 void test_compare_peer_info_t_compares_ip_addresses();
 
-void test_peer_info_list_serialize_fails_on_invalid_inputs();
+void test_peer_info_list_serialize_fails_on_invalid_input();
 
 void test_peer_info_list_serialize_creates_nonempty_buffer();
 

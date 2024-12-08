@@ -9,7 +9,9 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-void test_command_header_serialize_fails_on_invalid_inputs();
+void test_command_header_serialize_fails_on_invalid_input();
+
+void test_command_header_serialize_fails_on_invalid_prefix();
 
 void test_command_header_serialize_creates_nonempty_buffer();
 

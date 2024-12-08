@@ -27,7 +27,7 @@ void test_compare_peer_info_t_compares_ip_addresses() {
     assert_true(0 != compare_peer_info_t(&peer1, &peer2));
 }
 
-void test_peer_info_list_serialize_fails_on_invalid_inputs() {
+void test_peer_info_list_serialize_fails_on_invalid_input() {
     linked_list_t *peer_info_list = NULL;
     return_code_t return_code = linked_list_create(
         &peer_info_list, free, compare_peer_info_t);
