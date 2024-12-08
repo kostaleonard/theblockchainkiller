@@ -2,6 +2,7 @@
  * @brief Contains networking functions.
  */
 
+#include <stdio.h>
 #include "include/endian.h"
 #include "include/networking.h"
 
@@ -86,7 +87,66 @@ return_code_t command_register_peer_serialize(
     command_register_peer_t *command_register_peer,
     unsigned char **buffer,
     uint64_t *buffer_size) {
-    return FAILURE_INVALID_INPUT;
+    return_code_t return_code = SUCCESS;
+    if (NULL == command_register_peer ||
+        NULL == buffer ||
+        NULL == buffer_size) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    if (COMMAND_REGISTER_PEER != command_register_peer->header.command) {
+        return_code = FAILURE_INVALID_COMMAND;
+        goto end;
+    }
+    uint64_t register_peer_size = 
+        sizeof(command_register_peer_t) - sizeof(command_header_t);
+    unsigned char *register_peer_buffer = calloc(1, register_peer_size);
+    if (NULL == register_peer_buffer) {
+        return_code = FAILURE_COULD_NOT_MALLOC;
+        goto end;
+    }
+    unsigned char *next_spot_in_buffer = register_peer_buffer;
+    *(uint16_t *)next_spot_in_buffer = htons(
+        command_register_peer->sin6_family);
+    next_spot_in_buffer += sizeof(uint16_t);
+    *(uint16_t *)next_spot_in_buffer = htons(command_register_peer->sin6_port);
+    next_spot_in_buffer += sizeof(uint16_t);
+    *(uint32_t *)next_spot_in_buffer = htonl(
+        command_register_peer->sin6_flowinfo);
+    next_spot_in_buffer += sizeof(uint32_t);
+    for (size_t idx = 0; idx < sizeof(IN6_ADDR); idx++) {
+        *next_spot_in_buffer = command_register_peer->addr[idx];
+        next_spot_in_buffer++;
+    }
+    *(uint32_t *)next_spot_in_buffer = htonl(
+        command_register_peer->sin6_scope_id);
+    next_spot_in_buffer += sizeof(uint32_t);
+    command_register_peer->header.command_len = register_peer_size;
+    unsigned char *header_buffer = NULL;
+    uint64_t header_size = 0;
+    return_code = command_header_serialize(
+        &command_register_peer->header, &header_buffer, &header_size);
+    if (SUCCESS != return_code) {
+        free(register_peer_buffer);
+        goto end;
+    }
+    uint64_t total_size = header_size + register_peer_size;
+    unsigned char *total_buffer = calloc(1, total_size);
+    if (NULL == total_buffer) {
+        free(header_buffer);
+        free(register_peer_buffer);
+        return_code = FAILURE_COULD_NOT_MALLOC;
+        goto end;
+    }
+    memcpy(total_buffer, header_buffer, header_size);
+    memcpy(
+        total_buffer + header_size, register_peer_buffer, register_peer_size);
+    free(header_buffer);
+    free(register_peer_buffer);
+    *buffer = total_buffer;
+    *buffer_size = total_size;
+end:
+    return return_code;
 }
 
 return_code_t command_register_peer_deserialize(
