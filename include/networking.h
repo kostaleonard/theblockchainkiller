@@ -22,6 +22,7 @@
 #define COMMAND_PREFIX_LEN 4
 #define COMMAND_ERROR_MESSAGE_LEN 256
 #define COMMAND_HEADER_INITIALIZER {{'L', 'E', 'O', ':'}, 0, 0}
+#define COMMAND_REGISTER_PEER_LEN (sizeof(command_register_peer_t) - sizeof(command_header_t))
 
 typedef enum command_t {
     COMMAND_OK,
@@ -67,7 +68,7 @@ typedef struct command_send_peer_list_t {
 // TODO send_all and recv_all functions for handling partial reads/writes
 // TODO fix/add docstrings
 
-
+// TODO docstring
 return_code_t command_header_serialize(
     command_header_t *command_header,
     unsigned char **buffer,
@@ -85,6 +86,12 @@ return_code_t command_header_serialize(
  */
 return_code_t command_header_deserialize(
     command_header_t *command_header, unsigned char *buffer, uint64_t buffer_size);
+
+// TODO docstring
+return_code_t command_register_peer_serialize(
+    command_register_peer_t *command_register_peer,
+    unsigned char **buffer,
+    uint64_t *buffer_size);
 
 /**
  * @brief Deserializes a register peer command from the buffer.

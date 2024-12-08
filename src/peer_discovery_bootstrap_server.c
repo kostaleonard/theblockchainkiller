@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
         }
         // TODO handle partial read/write based on length of command
         // TODO malloc/realloc as the message gets filled in to handle messages longer than BUFSIZ?
-        // TODO be careful of buffer overflow on this line
+        // TODO be careful of buffer overflow on this line because the user could specify a command_len greater than BUFSIZ--just malloc for size of command_len plus header, memcpy the header from recv_buf, or alloc/realloc for recv_buf and free at end
         bytes_received = recv(conn_fd, recv_buf + sizeof(command_header_t), command_header.command_len, 0);
         if (bytes_received < 0) {
             return_code = FAILURE_NETWORK_FUNCTION;

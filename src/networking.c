@@ -82,6 +82,13 @@ end:
     return return_code;
 }
 
+return_code_t command_register_peer_serialize(
+    command_register_peer_t *command_register_peer,
+    unsigned char **buffer,
+    uint64_t *buffer_size) {
+    return FAILURE_INVALID_INPUT;
+}
+
 return_code_t command_register_peer_deserialize(
     command_register_peer_t *command_register_peer,
     unsigned char *buffer,
