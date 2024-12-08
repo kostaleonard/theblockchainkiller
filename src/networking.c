@@ -56,7 +56,10 @@ return_code_t command_header_deserialize(
         goto end;
     }
     for (size_t idx = 0; idx < COMMAND_PREFIX_LEN; idx++) {
-        // TODO check if command prefix is correct. If not, fail
+        if (*next_spot_in_buffer != COMMAND_PREFIX[idx]) {
+            return_code = FAILURE_INVALID_COMMAND_PREFIX;
+            goto end;
+        }
         deserialized_command_header.command_prefix[idx] = *next_spot_in_buffer;
         next_spot_in_buffer++;
     }

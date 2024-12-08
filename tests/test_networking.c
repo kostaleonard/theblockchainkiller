@@ -85,6 +85,23 @@ void test_command_header_deserialize_fails_on_read_past_buffer() {
     free(buffer);
 }
 
+void test_command_header_deserialize_fails_on_invalid_prefix() {
+    command_header_t command_header = COMMAND_HEADER_INITIALIZER;
+    command_header.command = COMMAND_REGISTER_PEER;
+    command_header.command_len = 17;
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code_t return_code = command_header_serialize(
+        &command_header, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    buffer[2] = 'A';
+    command_header_t deserialized_command_header = {0};
+    return_code = command_header_deserialize(
+        &deserialized_command_header, buffer, buffer_size);
+    assert_true(FAILURE_INVALID_COMMAND_PREFIX == return_code);
+    free(buffer);
+}
+
 void test_command_header_deserialize_fails_on_invalid_input() {
     command_header_t command_header = COMMAND_HEADER_INITIALIZER;
     command_header.command = COMMAND_REGISTER_PEER;

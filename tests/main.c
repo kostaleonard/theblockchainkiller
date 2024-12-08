@@ -230,6 +230,8 @@ int main(int argc, char **argv) {
         cmocka_unit_test(
             test_command_header_deserialize_fails_on_read_past_buffer),
         cmocka_unit_test(
+            test_command_header_deserialize_fails_on_invalid_prefix),
+        cmocka_unit_test(
             test_command_header_deserialize_fails_on_invalid_input),
     };
     return_code = cmocka_run_group_tests(tests, NULL, NULL);
