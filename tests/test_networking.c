@@ -207,21 +207,101 @@ void test_command_register_peer_serialize_creates_nonempty_buffer() {
 }
 
 void test_command_register_peer_deserialize_reconstructs_command() {
-    // TODO
-    assert_true(false);
+    command_header_t command_header = COMMAND_HEADER_INITIALIZER;
+    command_header.command = COMMAND_REGISTER_PEER;
+    command_header.command_len = COMMAND_REGISTER_PEER_LEN;
+    command_register_peer_t command_register_peer = {0};
+    command_register_peer.header = command_header;
+    command_register_peer.sin6_family = AF_INET6;
+    command_register_peer.sin6_port = 12345;
+    command_register_peer.sin6_flowinfo = 0;
+    command_register_peer.addr[sizeof(IN6_ADDR) - 1] = 1;
+    command_register_peer.sin6_scope_id = 0;
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code_t return_code = command_register_peer_serialize(
+        &command_register_peer, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    command_register_peer_t deserialized_command_register_peer = {0};
+    return_code = command_register_peer_deserialize(
+        &deserialized_command_register_peer, buffer, buffer_size);
+    assert_true(SUCCESS == return_code);
+    assert_true(0 == memcmp(
+        &command_register_peer,
+        &deserialized_command_register_peer,
+        sizeof(command_register_peer_t)));
+    free(buffer);
 }
 
 void test_command_register_peer_deserialize_fails_on_read_past_buffer() {
-    // TODO
-    assert_true(false);
+    command_header_t command_header = COMMAND_HEADER_INITIALIZER;
+    command_header.command = COMMAND_REGISTER_PEER;
+    command_header.command_len = COMMAND_REGISTER_PEER_LEN;
+    command_register_peer_t command_register_peer = {0};
+    command_register_peer.header = command_header;
+    command_register_peer.sin6_family = AF_INET6;
+    command_register_peer.sin6_port = 12345;
+    command_register_peer.sin6_flowinfo = 0;
+    command_register_peer.addr[sizeof(IN6_ADDR) - 1] = 1;
+    command_register_peer.sin6_scope_id = 0;
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code_t return_code = command_register_peer_serialize(
+        &command_register_peer, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    command_register_peer_t deserialized_command_register_peer = {0};
+    return_code = command_register_peer_deserialize(
+        &deserialized_command_register_peer, buffer, buffer_size - 5);
+    assert_true(FAILURE_BUFFER_TOO_SMALL == return_code);
+    free(buffer);
 }
 
 void test_command_register_peer_deserialize_fails_on_invalid_prefix() {
-    // TODO
-    assert_true(false);
+    command_header_t command_header = COMMAND_HEADER_INITIALIZER;
+    command_header.command = COMMAND_REGISTER_PEER;
+    command_header.command_len = COMMAND_REGISTER_PEER_LEN;
+    command_register_peer_t command_register_peer = {0};
+    command_register_peer.header = command_header;
+    command_register_peer.sin6_family = AF_INET6;
+    command_register_peer.sin6_port = 12345;
+    command_register_peer.sin6_flowinfo = 0;
+    command_register_peer.addr[sizeof(IN6_ADDR) - 1] = 1;
+    command_register_peer.sin6_scope_id = 0;
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code_t return_code = command_register_peer_serialize(
+        &command_register_peer, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    buffer[2] = 'A';
+    command_register_peer_t deserialized_command_register_peer = {0};
+    return_code = command_register_peer_deserialize(
+        &deserialized_command_register_peer, buffer, buffer_size);
+    assert_true(FAILURE_INVALID_COMMAND_PREFIX == return_code);
+    free(buffer);
 }
 
 void test_command_register_peer_deserialize_fails_on_invalid_input() {
-    // TODO
-    assert_true(false);
+    command_header_t command_header = COMMAND_HEADER_INITIALIZER;
+    command_header.command = COMMAND_REGISTER_PEER;
+    command_header.command_len = COMMAND_REGISTER_PEER_LEN;
+    command_register_peer_t command_register_peer = {0};
+    command_register_peer.header = command_header;
+    command_register_peer.sin6_family = AF_INET6;
+    command_register_peer.sin6_port = 12345;
+    command_register_peer.sin6_flowinfo = 0;
+    command_register_peer.addr[sizeof(IN6_ADDR) - 1] = 1;
+    command_register_peer.sin6_scope_id = 0;
+    unsigned char *buffer = NULL;
+    uint64_t buffer_size = 0;
+    return_code_t return_code = command_register_peer_serialize(
+        &command_register_peer, &buffer, &buffer_size);
+    assert_true(SUCCESS == return_code);
+    command_register_peer_t deserialized_command_register_peer = {0};
+    return_code = command_register_peer_deserialize(
+        NULL, buffer, buffer_size);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    return_code = command_register_peer_deserialize(
+        &deserialized_command_register_peer, NULL, buffer_size);
+    assert_true(FAILURE_INVALID_INPUT == return_code);
+    free(buffer);
 }

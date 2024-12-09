@@ -162,3 +162,10 @@ return_code_t command_send_peer_list_serialize(
     uint64_t *buffer_size) {
     return FAILURE_INVALID_INPUT;
 }
+
+return_code_t command_send_peer_list_deserialize(
+    command_send_peer_list_t *command_send_peer_list,
+    unsigned char *buffer,
+    uint64_t buffer_size) {
+    return FAILURE_INVALID_INPUT;
+}

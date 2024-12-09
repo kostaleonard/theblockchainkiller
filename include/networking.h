@@ -22,6 +22,7 @@
 #define COMMAND_PREFIX_LEN 4
 #define COMMAND_ERROR_MESSAGE_LEN 256
 #define COMMAND_HEADER_INITIALIZER {{'L', 'E', 'O', ':'}, 0, 0}
+// TODO remove COMMAND_REGISTER_PEER_LEN? We can't tell the length for all of the commands in advance, so this could cause confusion
 #define COMMAND_REGISTER_PEER_LEN (sizeof(command_register_peer_t) - sizeof(command_header_t))
 
 typedef enum command_t {
@@ -88,6 +89,7 @@ return_code_t command_header_deserialize(
     command_header_t *command_header, unsigned char *buffer, uint64_t buffer_size);
 
 // TODO docstring
+// TODO note that these serialization functions will set the command_len field in the struct because it may not be known in advance
 return_code_t command_register_peer_serialize(
     command_register_peer_t *command_register_peer,
     unsigned char **buffer,
@@ -121,6 +123,12 @@ return_code_t command_send_peer_list_serialize(
     command_send_peer_list_t *command_send_peer_list,
     unsigned char **buffer,
     uint64_t *buffer_size);
+
+// TODO docstring
+return_code_t command_send_peer_list_deserialize(
+    command_send_peer_list_t *command_send_peer_list,
+    unsigned char *buffer,
+    uint64_t buffer_size);
 
 // TODO not used yet
 /*
