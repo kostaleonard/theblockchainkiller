@@ -153,7 +153,65 @@ return_code_t command_register_peer_deserialize(
     command_register_peer_t *command_register_peer,
     unsigned char *buffer,
     uint64_t buffer_size) {
-    return FAILURE_INVALID_INPUT;
+    return_code_t return_code = SUCCESS;
+    if (NULL == command_register_peer || NULL == buffer) {
+        return_code = FAILURE_INVALID_INPUT;
+        goto end;
+    }
+    command_register_peer_t deserialized_command_register_peer = {0};
+    return_code = command_header_deserialize(
+        &deserialized_command_register_peer.header, buffer, buffer_size);
+    if (SUCCESS != return_code) {
+        goto end;
+    }
+    unsigned char *next_spot_in_buffer = buffer + sizeof(command_header_t);
+    ptrdiff_t total_read_size = next_spot_in_buffer + sizeof(uint16_t) - buffer;
+    if (total_read_size > buffer_size) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+        goto end;
+    }
+    deserialized_command_register_peer.sin6_family = ntohs(
+        *(uint16_t *)next_spot_in_buffer);
+    next_spot_in_buffer += sizeof(uint16_t);
+    total_read_size = next_spot_in_buffer + sizeof(uint16_t) - buffer;
+    if (total_read_size > buffer_size) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+        goto end;
+    }
+    deserialized_command_register_peer.sin6_port = ntohs(
+        *(uint16_t *)next_spot_in_buffer);
+    next_spot_in_buffer += sizeof(uint16_t);
+    total_read_size = next_spot_in_buffer + sizeof(uint32_t) - buffer;
+    if (total_read_size > buffer_size) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+        goto end;
+    }
+    deserialized_command_register_peer.sin6_flowinfo = ntohl(
+        *(uint32_t *)next_spot_in_buffer);
+    next_spot_in_buffer += sizeof(uint32_t);
+    total_read_size = next_spot_in_buffer + sizeof(IN6_ADDR) - buffer;
+    if (total_read_size > buffer_size) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+        goto end;
+    }
+    for (size_t idx = 0; idx < sizeof(IN6_ADDR); idx++) {
+        deserialized_command_register_peer.addr[idx] = *next_spot_in_buffer;
+        next_spot_in_buffer++;
+    }
+    total_read_size = next_spot_in_buffer + sizeof(uint32_t) - buffer;
+    if (total_read_size > buffer_size) {
+        return_code = FAILURE_BUFFER_TOO_SMALL;
+        goto end;
+    }
+    deserialized_command_register_peer.sin6_scope_id = ntohl(
+        *(uint32_t *)next_spot_in_buffer);
+    next_spot_in_buffer += sizeof(uint32_t);
+    memcpy(
+        command_register_peer,
+        &deserialized_command_register_peer,
+        sizeof(command_register_peer_t));
+end:
+    return return_code;
 }
 
 return_code_t command_send_peer_list_serialize(
